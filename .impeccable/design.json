@@ -1,0 +1,280 @@
+{
+	"schemaVersion": 2,
+	"generatedAt": "2026-05-18T00:00:00Z",
+	"title": "Design System: Funnnit",
+	"extensions": {
+		"colorMeta": {
+			"surface": {
+				"role": "neutral",
+				"displayName": "Warm Paper",
+				"canonical": "oklch(0.97 0.008 80)",
+				"tonalRamp": [
+					"oklch(0.15 0.008 80)",
+					"oklch(0.25 0.008 80)",
+					"oklch(0.38 0.008 80)",
+					"oklch(0.52 0.008 80)",
+					"oklch(0.65 0.008 80)",
+					"oklch(0.78 0.006 80)",
+					"oklch(0.88 0.008 80)",
+					"oklch(0.97 0.008 80)"
+				]
+			},
+			"surface-tint": {
+				"role": "secondary",
+				"displayName": "Terracotta Whisper",
+				"canonical": "oklch(0.94 0.025 55)",
+				"tonalRamp": [
+					"oklch(0.20 0.10 55)",
+					"oklch(0.32 0.12 55)",
+					"oklch(0.44 0.13 55)",
+					"oklch(0.55 0.13 55)",
+					"oklch(0.65 0.12 55)",
+					"oklch(0.76 0.09 55)",
+					"oklch(0.86 0.05 55)",
+					"oklch(0.94 0.025 55)"
+				]
+			},
+			"ink": {
+				"role": "neutral",
+				"displayName": "Warm Ink",
+				"canonical": "oklch(0.15 0.008 60)",
+				"tonalRamp": [
+					"oklch(0.15 0.008 60)",
+					"oklch(0.25 0.008 60)",
+					"oklch(0.38 0.010 60)",
+					"oklch(0.50 0.010 60)",
+					"oklch(0.63 0.008 60)",
+					"oklch(0.76 0.006 60)",
+					"oklch(0.88 0.006 60)",
+					"oklch(0.97 0.006 60)"
+				]
+			},
+			"terracotta": {
+				"role": "primary",
+				"displayName": "Burnt Terracotta",
+				"canonical": "oklch(0.62 0.14 47)",
+				"tonalRamp": [
+					"oklch(0.18 0.06 47)",
+					"oklch(0.28 0.09 47)",
+					"oklch(0.38 0.12 47)",
+					"oklch(0.48 0.14 47)",
+					"oklch(0.58 0.14 47)",
+					"oklch(0.68 0.12 47)",
+					"oklch(0.80 0.08 47)",
+					"oklch(0.94 0.025 47)"
+				]
+			},
+			"border": {
+				"role": "neutral",
+				"displayName": "Warm Rule",
+				"canonical": "oklch(0.88 0.008 80)",
+				"tonalRamp": [
+					"oklch(0.20 0.008 80)",
+					"oklch(0.35 0.008 80)",
+					"oklch(0.50 0.008 80)",
+					"oklch(0.62 0.008 80)",
+					"oklch(0.74 0.008 80)",
+					"oklch(0.83 0.008 80)",
+					"oklch(0.88 0.008 80)",
+					"oklch(0.94 0.006 80)"
+				]
+			},
+			"destructive": {
+				"role": "destructive",
+				"displayName": "Error Red",
+				"canonical": "oklch(0.577 0.245 27.325)",
+				"tonalRamp": [
+					"oklch(0.20 0.10 27)",
+					"oklch(0.30 0.15 27)",
+					"oklch(0.40 0.20 27)",
+					"oklch(0.50 0.23 27)",
+					"oklch(0.577 0.245 27)",
+					"oklch(0.68 0.20 27)",
+					"oklch(0.80 0.12 27)",
+					"oklch(0.93 0.04 27)"
+				]
+			}
+		},
+		"typographyMeta": {
+			"display": {
+				"displayName": "Display",
+				"purpose": "Landing hero headline and section heroes only. One instance per page maximum."
+			},
+			"headline": {
+				"displayName": "Headline",
+				"purpose": "Post titles in feed, page section titles, creator dashboard headings."
+			},
+			"title": {
+				"displayName": "Title",
+				"purpose": "Card headings, dialog titles, sub-section labels within a post."
+			},
+			"body": {
+				"displayName": "Body",
+				"purpose": "All post body copy. Max 68ch container width."
+			},
+			"label": {
+				"displayName": "Label",
+				"purpose": "Tags, badges, meta dates, nav items, table column headers."
+			}
+		},
+		"shadows": [
+			{
+				"name": "float",
+				"value": "0 4px 20px oklch(0.15 0.008 60 / 0.12)",
+				"purpose": "Floating UI only: dropdowns, popovers, tooltips, mobile sidebar sheet. Never applied to cards or sections at rest."
+			},
+			{
+				"name": "lift",
+				"value": "0 2px 8px oklch(0.62 0.14 47 / 0.15)",
+				"purpose": "Reserved for the primary CTA button on landing hero, hover state only. The terracotta glow. Use once."
+			}
+		],
+		"motion": [
+			{
+				"name": "ease-out-quart",
+				"value": "cubic-bezier(0.25, 1, 0.5, 1)",
+				"purpose": "Default easing for all transitions. Fast in, exponential out. No bounce, no elastic."
+			},
+			{
+				"name": "duration-fast",
+				"value": "120ms",
+				"purpose": "Button hover fills, badge state changes, link underlines."
+			},
+			{
+				"name": "duration-medium",
+				"value": "220ms",
+				"purpose": "Card hover transitions, shadow appearance, blur change on locked post card."
+			},
+			{
+				"name": "duration-enter",
+				"value": "320ms",
+				"purpose": "Page section entrances, staggered content reveals (Framer Motion). Not used for button or form states."
+			}
+		],
+		"breakpoints": [
+			{ "name": "sm", "value": "640px" },
+			{ "name": "md", "value": "768px" },
+			{ "name": "lg", "value": "1024px" },
+			{ "name": "xl", "value": "1280px" }
+		]
+	},
+	"components": [
+		{
+			"name": "Button Primary",
+			"kind": "button",
+			"refersTo": "button-primary",
+			"description": "Primary CTA. Terracotta background, Surface text. Near-square corners. Used for 'Get Access', 'Publish', 'Save Draft'.",
+			"html": "<button class=\"ds-btn-primary\">Get Access</button>",
+			"css": ".ds-btn-primary { display: inline-flex; align-items: center; justify-content: center; gap: 6px; background: oklch(0.62 0.14 47); color: oklch(0.97 0.008 80); font-family: 'Instrument Sans Variable', system-ui, sans-serif; font-size: 0.6875rem; font-weight: 500; letter-spacing: 0.01em; padding: 10px 20px; border: none; border-radius: 0.375rem; cursor: pointer; transition: background 120ms cubic-bezier(0.25, 1, 0.5, 1), box-shadow 220ms cubic-bezier(0.25, 1, 0.5, 1), transform 120ms cubic-bezier(0.25, 1, 0.5, 1); white-space: nowrap; } .ds-btn-primary:hover { background: oklch(0.52 0.14 47); box-shadow: 0 2px 8px oklch(0.62 0.14 47 / 0.15); } .ds-btn-primary:active { transform: translateY(1px); box-shadow: none; } .ds-btn-primary:focus-visible { outline: none; box-shadow: 0 0 0 2px oklch(0.97 0.008 80), 0 0 0 4px oklch(0.62 0.14 47); }"
+		},
+		{
+			"name": "Button Outline",
+			"kind": "button",
+			"refersTo": "button-outline",
+			"description": "Secondary action. Transparent bg, warm ink text, 1px border. Used for 'Back to feed', 'Cancel', navigation-level actions.",
+			"html": "<button class=\"ds-btn-outline\">Back to feed</button>",
+			"css": ".ds-btn-outline { display: inline-flex; align-items: center; justify-content: center; gap: 6px; background: transparent; color: oklch(0.15 0.008 60); font-family: 'Instrument Sans Variable', system-ui, sans-serif; font-size: 0.6875rem; font-weight: 500; letter-spacing: 0.01em; padding: 10px 20px; border: 1px solid oklch(0.88 0.008 80); border-radius: 0.375rem; cursor: pointer; transition: background 120ms cubic-bezier(0.25, 1, 0.5, 1), border-color 120ms cubic-bezier(0.25, 1, 0.5, 1); white-space: nowrap; } .ds-btn-outline:hover { background: oklch(0.92 0.006 80); border-color: oklch(0.78 0.008 80); } .ds-btn-outline:active { transform: translateY(1px); } .ds-btn-outline:focus-visible { outline: none; box-shadow: 0 0 0 2px oklch(0.97 0.008 80), 0 0 0 4px oklch(0.62 0.14 47); }"
+		},
+		{
+			"name": "Badge Tag",
+			"kind": "chip",
+			"refersTo": "badge-default",
+			"description": "Post category tag. Terracotta whisper background, Terracotta Deep text. Used on post cards, post page header, feed filter bar.",
+			"html": "<span class=\"ds-badge\">ai-tools</span>",
+			"css": ".ds-badge { display: inline-flex; align-items: center; height: 20px; padding: 0 8px; background: oklch(0.94 0.025 55); color: oklch(0.52 0.14 47); font-family: 'Instrument Sans Variable', system-ui, sans-serif; font-size: 0.6875rem; font-weight: 500; letter-spacing: 0.01em; border-radius: 0.25rem; white-space: nowrap; }"
+		},
+		{
+			"name": "Badge Outline",
+			"kind": "chip",
+			"refersTo": "badge-outline",
+			"description": "Neutral metadata badge for dates, reading time, post count. Ink Secondary text, 1px border.",
+			"html": "<span class=\"ds-badge-outline\">12 min read</span>",
+			"css": ".ds-badge-outline { display: inline-flex; align-items: center; height: 20px; padding: 0 8px; background: transparent; color: oklch(0.50 0.010 60); border: 1px solid oklch(0.88 0.008 80); font-family: 'Instrument Sans Variable', system-ui, sans-serif; font-size: 0.6875rem; font-weight: 500; letter-spacing: 0.01em; border-radius: 0.25rem; white-space: nowrap; }"
+		},
+		{
+			"name": "Input Field",
+			"kind": "input",
+			"refersTo": "input",
+			"description": "Text input for license key activation, post title, tag entry. Flat at rest, terracotta focus ring.",
+			"html": "<div class=\"ds-field\"><label class=\"ds-field-label\" for=\"ds-input-1\">License Key</label><input class=\"ds-input\" id=\"ds-input-1\" type=\"text\" placeholder=\"FUNNN-XXXX-XXXX\" /></div>",
+			"css": ".ds-field { display: flex; flex-direction: column; gap: 6px; } .ds-field-label { font-family: 'Instrument Sans Variable', system-ui, sans-serif; font-size: 0.6875rem; font-weight: 500; letter-spacing: 0.01em; color: oklch(0.15 0.008 60); } .ds-input { background: oklch(0.97 0.008 80); color: oklch(0.15 0.008 60); font-family: 'Instrument Sans Variable', system-ui, sans-serif; font-size: 1rem; font-weight: 400; padding: 8px 12px; border: 1px solid oklch(0.88 0.008 80); border-radius: 0.375rem; outline: none; transition: border-color 120ms cubic-bezier(0.25, 1, 0.5, 1), box-shadow 120ms cubic-bezier(0.25, 1, 0.5, 1); width: 100%; } .ds-input::placeholder { color: oklch(0.65 0.008 80); } .ds-input:focus { border-color: oklch(0.62 0.14 47); box-shadow: 0 0 0 2px oklch(0.62 0.14 47 / 0.20); } .ds-input[aria-invalid='true'] { border-color: oklch(0.577 0.245 27.325); box-shadow: 0 0 0 2px oklch(0.577 0.245 27.325 / 0.20); }"
+		},
+		{
+			"name": "Post Card (Unlocked)",
+			"kind": "card",
+			"refersTo": "card",
+			"description": "Member content feed card. Cover image top, title + tags + date below. No shadow. Used in the member feed grid.",
+			"html": "<article class=\"ds-post-card\"><div class=\"ds-post-card-cover\"><img src=\"https://picsum.photos/seed/funnnit1/600/338\" alt=\"\" /></div><div class=\"ds-post-card-body\"><h3 class=\"ds-post-card-title\">Control Net + IP Adapter: The Actual Way</h3><div class=\"ds-post-card-meta\"><span class=\"ds-badge\">control-net</span><span class=\"ds-badge-outline\">8 min read</span></div></div></article>",
+			"css": ".ds-post-card { background: oklch(0.97 0.008 80); border: 1px solid oklch(0.88 0.008 80); border-radius: 0.375rem; overflow: hidden; transition: border-color 220ms cubic-bezier(0.25, 1, 0.5, 1); cursor: pointer; } .ds-post-card:hover { border-color: oklch(0.78 0.008 80); } .ds-post-card-cover { aspect-ratio: 16/9; overflow: hidden; } .ds-post-card-cover img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform 320ms cubic-bezier(0.25, 1, 0.5, 1); } .ds-post-card:hover .ds-post-card-cover img { transform: scale(1.03); } .ds-post-card-body { padding: 16px; display: flex; flex-direction: column; gap: 10px; } .ds-post-card-title { font-family: 'Space Grotesk Variable', system-ui, sans-serif; font-size: 1rem; font-weight: 600; line-height: 1.25; letter-spacing: -0.01em; color: oklch(0.15 0.008 60); margin: 0; } .ds-post-card-meta { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; } .ds-badge { display: inline-flex; align-items: center; height: 20px; padding: 0 8px; background: oklch(0.94 0.025 55); color: oklch(0.52 0.14 47); font-family: 'Instrument Sans Variable', system-ui, sans-serif; font-size: 0.6875rem; font-weight: 500; letter-spacing: 0.01em; border-radius: 0.25rem; white-space: nowrap; } .ds-badge-outline { display: inline-flex; align-items: center; height: 20px; padding: 0 8px; background: transparent; color: oklch(0.50 0.010 60); border: 1px solid oklch(0.88 0.008 80); font-family: 'Instrument Sans Variable', system-ui, sans-serif; font-size: 0.6875rem; font-weight: 500; letter-spacing: 0.01em; border-radius: 0.25rem; white-space: nowrap; }"
+		},
+		{
+			"name": "Post Card (Locked)",
+			"kind": "custom",
+			"description": "Teaser card on landing page. Blurred cover image, lock icon overlay, title and tags unblurred. Signature component.",
+			"html": "<article class=\"ds-post-card ds-post-card--locked\"><div class=\"ds-post-card-cover\"><img src=\"https://picsum.photos/seed/funnnit2/600/338\" alt=\"\" /><div class=\"ds-lock-indicator\"><svg width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><rect x=\"3\" y=\"11\" width=\"18\" height=\"11\" rx=\"2\" ry=\"2\"></rect><path d=\"M7 11V7a5 5 0 0 1 10 0v4\"></path></svg></div></div><div class=\"ds-post-card-body\"><h3 class=\"ds-post-card-title\">The Prompt Structure Nobody Talks About</h3><div class=\"ds-post-card-meta\"><span class=\"ds-badge\">prompting</span><span class=\"ds-badge-outline\">Members only</span></div></div></article>",
+			"css": ".ds-post-card { background: oklch(0.97 0.008 80); border: 1px solid oklch(0.88 0.008 80); border-radius: 0.375rem; overflow: hidden; cursor: pointer; } .ds-post-card--locked .ds-post-card-cover { position: relative; aspect-ratio: 16/9; overflow: hidden; } .ds-post-card--locked .ds-post-card-cover img { width: 100%; height: 100%; object-fit: cover; display: block; filter: blur(12px) brightness(0.8); transform: scale(1.08); transition: filter 220ms cubic-bezier(0.25, 1, 0.5, 1); } .ds-post-card--locked:hover .ds-post-card-cover img { filter: blur(8px) brightness(0.75); } .ds-lock-indicator { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 40px; height: 40px; background: oklch(0.94 0.025 55); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: oklch(0.50 0.010 60); } .ds-post-card-body { padding: 16px; display: flex; flex-direction: column; gap: 10px; } .ds-post-card-title { font-family: 'Space Grotesk Variable', system-ui, sans-serif; font-size: 1rem; font-weight: 600; line-height: 1.25; letter-spacing: -0.01em; color: oklch(0.15 0.008 60); margin: 0; } .ds-post-card-meta { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; } .ds-badge { display: inline-flex; align-items: center; height: 20px; padding: 0 8px; background: oklch(0.94 0.025 55); color: oklch(0.52 0.14 47); font-family: 'Instrument Sans Variable', system-ui, sans-serif; font-size: 0.6875rem; font-weight: 500; letter-spacing: 0.01em; border-radius: 0.25rem; white-space: nowrap; } .ds-badge-outline { display: inline-flex; align-items: center; height: 20px; padding: 0 8px; background: transparent; color: oklch(0.50 0.010 60); border: 1px solid oklch(0.88 0.008 80); font-family: 'Instrument Sans Variable', system-ui, sans-serif; font-size: 0.6875rem; font-weight: 500; letter-spacing: 0.01em; border-radius: 0.25rem; white-space: nowrap; }"
+		}
+	],
+	"narrative": {
+		"northStar": "The Quiet Punch",
+		"overview": "Funnnit is a platform where restraint does the heavy lifting. Every screen is composed, almost dull, and then something lands: a proportion that's slightly off in a way that makes you pause, a color moment that doesn't need to announce itself, a heading weight that breaks the rhythm exactly once. The joke, when it exists, is quiet. The technique is always legible.\n\nThe visual system is built on warm aged-paper tones with a single terracotta accent used with deliberate scarcity. Space Grotesk brings character at display scale without performing. Instrument Sans carries the body copy with warmth and no fuss. Surfaces are almost flat. Shadows appear only when elevation is structurally required.\n\nThis system explicitly rejects: hype streetwear aggression, dark AI portal aesthetics, generic SaaS warmth, and newsletter minimalism.",
+		"keyCharacteristics": [
+			"Warm paper base, not sterile white",
+			"One accent color, used sparingly (terracotta earns its appearance)",
+			"Space Grotesk display with tight tracking; Instrument Sans body with generous leading",
+			"Borderless where possible, 1px border where structure is needed, no ambient shadows",
+			"Near-flat radius (0.375rem) on interactive elements"
+		],
+		"rules": [
+			{
+				"name": "The One Punch Rule",
+				"body": "Terracotta appears on at most one primary element per screen. Its rarity is the source of its punch. When it shows up everywhere, it becomes wallpaper.",
+				"section": "colors"
+			},
+			{
+				"name": "The Tinted Neutral Doctrine",
+				"body": "Surface and Ink are never pure white or pure black. Every neutral carries H=60-80 at C=0.006-0.010.",
+				"section": "colors"
+			},
+			{
+				"name": "The Compression Rule",
+				"body": "Display and Headline always have negative tracking. Any Space Grotesk heading above 1.25rem without letter-spacing: -0.02em or tighter has not been set; it has been pasted.",
+				"section": "typography"
+			},
+			{
+				"name": "The Single Family Rule",
+				"body": "Space Grotesk is the heading font. Instrument Sans is the body font. No third typeface is introduced, including monospace.",
+				"section": "typography"
+			},
+			{
+				"name": "The No Ambient Shadow Rule",
+				"body": "Cards, sections, containers, and panels are never shadowed at rest. If a surface needs to look elevated, use a 1px border-border instead.",
+				"section": "elevation"
+			}
+		],
+		"dos": [
+			"Do use oklch for all color values in globals.css",
+			"Do tint every neutral. Surface is oklch(0.97 0.008 80), Ink is oklch(0.15 0.008 60)",
+			"Do use Space Grotesk at negative tracking for any heading above 1.125rem",
+			"Do enforce max line length in post body copy: max-width 68ch",
+			"Do use 1px border-border as the primary depth signal on cards",
+			"Do keep the terracotta accent scarce: one primary element per screen",
+			"Do use Surface Tint for hover fills, tag backgrounds, and active row states",
+			"Do use min-h-[100dvh] instead of h-screen for full-height hero sections",
+			"Do use asymmetric layouts on the landing page"
+		],
+		"donts": [
+			"Don't use hype streetwear energy: no aggressive red, no drop-culture type treatment",
+			"Don't use dark AI portal aesthetics: no neon on black, no glowing orbs",
+			"Don't use generic SaaS patterns: no cream bg with purple accent, no rounded card grids, no hero metrics",
+			"Don't use newsletter minimalism: pure white + Georgia serif is not this platform's personality",
+			"Don't use border-left or border-right greater than 1px as a colored accent stripe",
+			"Don't apply background-clip: text with a gradient",
+			"Don't add ambient shadows to cards or sections at rest",
+			"Don't use more than one typeface family",
+			"Don't use oklch(1 0 0) or oklch(0 0 0) without a hue tilt",
+			"Don't animate top, left, width, or height — animate transform and opacity only",
+			"Don't use pill-shaped buttons (border-radius: 9999px)"
+		]
+	}
+}

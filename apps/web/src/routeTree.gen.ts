@@ -17,11 +17,16 @@ import { Route as appHomeIndexRouteImport } from './routes/(app)/_home/index'
 import { Route as appHomeUpgradeRouteImport } from './routes/(app)/_home/upgrade'
 import { Route as appHomeContactRouteImport } from './routes/(app)/_home/contact'
 import { Route as appAuthLoginRouteImport } from './routes/(app)/_auth/login'
+import { Route as appAppActivateRouteImport } from './routes/(app)/_app/activate'
 import { Route as appAppAccountRouteRouteImport } from './routes/(app)/_app/account/route'
 import { Route as appAppOverviewIndexRouteImport } from './routes/(app)/_app/overview/index'
+import { Route as appAppFeedIndexRouteImport } from './routes/(app)/_app/feed/index'
+import { Route as appAppCreatorIndexRouteImport } from './routes/(app)/_app/creator/index'
 import { Route as appAppChatIndexRouteImport } from './routes/(app)/_app/chat/index'
 import { Route as appHomeLegalsTermsRouteImport } from './routes/(app)/_home/legals/terms'
 import { Route as appHomeLegalsPrivacyPolicyRouteImport } from './routes/(app)/_home/legals/privacy-policy'
+import { Route as appAppFeedSlugRouteImport } from './routes/(app)/_app/feed/$slug'
+import { Route as appAppCreatorIdRouteImport } from './routes/(app)/_app/creator/$id'
 import { Route as appAppAccountSecurityIndexRouteImport } from './routes/(app)/_app/account/security/index'
 import { Route as appAppAccountProfileIndexRouteImport } from './routes/(app)/_app/account/profile/index'
 import { Route as appAppAccountBillingIndexRouteImport } from './routes/(app)/_app/account/billing/index'
@@ -66,6 +71,11 @@ const appAuthLoginRoute = appAuthLoginRouteImport.update({
   path: '/login',
   getParentRoute: () => appAuthRouteRoute,
 } as any)
+const appAppActivateRoute = appAppActivateRouteImport.update({
+  id: '/activate',
+  path: '/activate',
+  getParentRoute: () => appAppRouteRoute,
+} as any)
 const appAppAccountRouteRoute = appAppAccountRouteRouteImport.update({
   id: '/account',
   path: '/account',
@@ -74,6 +84,16 @@ const appAppAccountRouteRoute = appAppAccountRouteRouteImport.update({
 const appAppOverviewIndexRoute = appAppOverviewIndexRouteImport.update({
   id: '/overview/',
   path: '/overview/',
+  getParentRoute: () => appAppRouteRoute,
+} as any)
+const appAppFeedIndexRoute = appAppFeedIndexRouteImport.update({
+  id: '/feed/',
+  path: '/feed/',
+  getParentRoute: () => appAppRouteRoute,
+} as any)
+const appAppCreatorIndexRoute = appAppCreatorIndexRouteImport.update({
+  id: '/creator/',
+  path: '/creator/',
   getParentRoute: () => appAppRouteRoute,
 } as any)
 const appAppChatIndexRoute = appAppChatIndexRouteImport.update({
@@ -92,6 +112,16 @@ const appHomeLegalsPrivacyPolicyRoute =
     path: '/legals/privacy-policy',
     getParentRoute: () => appRouteRoute,
   } as any)
+const appAppFeedSlugRoute = appAppFeedSlugRouteImport.update({
+  id: '/feed/$slug',
+  path: '/feed/$slug',
+  getParentRoute: () => appAppRouteRoute,
+} as any)
+const appAppCreatorIdRoute = appAppCreatorIdRouteImport.update({
+  id: '/creator/$id',
+  path: '/creator/$id',
+  getParentRoute: () => appAppRouteRoute,
+} as any)
 const appAppAccountSecurityIndexRoute =
   appAppAccountSecurityIndexRouteImport.update({
     id: '/security/',
@@ -134,13 +164,18 @@ const appAdminSEventsIndexRoute = appAdminSEventsIndexRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/account': typeof appAppAccountRouteRouteWithChildren
+  '/activate': typeof appAppActivateRoute
   '/login': typeof appAuthLoginRoute
   '/contact': typeof appHomeContactRoute
   '/upgrade': typeof appHomeUpgradeRoute
   '/': typeof appHomeIndexRoute
+  '/creator/$id': typeof appAppCreatorIdRoute
+  '/feed/$slug': typeof appAppFeedSlugRoute
   '/legals/privacy-policy': typeof appHomeLegalsPrivacyPolicyRoute
   '/legals/terms': typeof appHomeLegalsTermsRoute
   '/chat/': typeof appAppChatIndexRoute
+  '/creator/': typeof appAppCreatorIndexRoute
+  '/feed/': typeof appAppFeedIndexRoute
   '/overview/': typeof appAppOverviewIndexRoute
   '/s/events/': typeof appAdminSEventsIndexRoute
   '/s/overview/': typeof appAdminSOverviewIndexRoute
@@ -152,13 +187,18 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/account': typeof appAppAccountRouteRouteWithChildren
+  '/activate': typeof appAppActivateRoute
   '/login': typeof appAuthLoginRoute
   '/contact': typeof appHomeContactRoute
   '/upgrade': typeof appHomeUpgradeRoute
   '/': typeof appHomeIndexRoute
+  '/creator/$id': typeof appAppCreatorIdRoute
+  '/feed/$slug': typeof appAppFeedSlugRoute
   '/legals/privacy-policy': typeof appHomeLegalsPrivacyPolicyRoute
   '/legals/terms': typeof appHomeLegalsTermsRoute
   '/chat': typeof appAppChatIndexRoute
+  '/creator': typeof appAppCreatorIndexRoute
+  '/feed': typeof appAppFeedIndexRoute
   '/overview': typeof appAppOverviewIndexRoute
   '/s/events': typeof appAdminSEventsIndexRoute
   '/s/overview': typeof appAdminSOverviewIndexRoute
@@ -175,13 +215,18 @@ export interface FileRoutesById {
   '/(app)/_app': typeof appAppRouteRouteWithChildren
   '/(app)/_auth': typeof appAuthRouteRouteWithChildren
   '/(app)/_app/account': typeof appAppAccountRouteRouteWithChildren
+  '/(app)/_app/activate': typeof appAppActivateRoute
   '/(app)/_auth/login': typeof appAuthLoginRoute
   '/(app)/_home/contact': typeof appHomeContactRoute
   '/(app)/_home/upgrade': typeof appHomeUpgradeRoute
   '/(app)/_home/': typeof appHomeIndexRoute
+  '/(app)/_app/creator/$id': typeof appAppCreatorIdRoute
+  '/(app)/_app/feed/$slug': typeof appAppFeedSlugRoute
   '/(app)/_home/legals/privacy-policy': typeof appHomeLegalsPrivacyPolicyRoute
   '/(app)/_home/legals/terms': typeof appHomeLegalsTermsRoute
   '/(app)/_app/chat/': typeof appAppChatIndexRoute
+  '/(app)/_app/creator/': typeof appAppCreatorIndexRoute
+  '/(app)/_app/feed/': typeof appAppFeedIndexRoute
   '/(app)/_app/overview/': typeof appAppOverviewIndexRoute
   '/(app)/_admin/s/events/': typeof appAdminSEventsIndexRoute
   '/(app)/_admin/s/overview/': typeof appAdminSOverviewIndexRoute
@@ -195,13 +240,18 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/account'
+    | '/activate'
     | '/login'
     | '/contact'
     | '/upgrade'
     | '/'
+    | '/creator/$id'
+    | '/feed/$slug'
     | '/legals/privacy-policy'
     | '/legals/terms'
     | '/chat/'
+    | '/creator/'
+    | '/feed/'
     | '/overview/'
     | '/s/events/'
     | '/s/overview/'
@@ -213,13 +263,18 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/account'
+    | '/activate'
     | '/login'
     | '/contact'
     | '/upgrade'
     | '/'
+    | '/creator/$id'
+    | '/feed/$slug'
     | '/legals/privacy-policy'
     | '/legals/terms'
     | '/chat'
+    | '/creator'
+    | '/feed'
     | '/overview'
     | '/s/events'
     | '/s/overview'
@@ -235,13 +290,18 @@ export interface FileRouteTypes {
     | '/(app)/_app'
     | '/(app)/_auth'
     | '/(app)/_app/account'
+    | '/(app)/_app/activate'
     | '/(app)/_auth/login'
     | '/(app)/_home/contact'
     | '/(app)/_home/upgrade'
     | '/(app)/_home/'
+    | '/(app)/_app/creator/$id'
+    | '/(app)/_app/feed/$slug'
     | '/(app)/_home/legals/privacy-policy'
     | '/(app)/_home/legals/terms'
     | '/(app)/_app/chat/'
+    | '/(app)/_app/creator/'
+    | '/(app)/_app/feed/'
     | '/(app)/_app/overview/'
     | '/(app)/_admin/s/events/'
     | '/(app)/_admin/s/overview/'
@@ -314,6 +374,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof appAuthLoginRouteImport
       parentRoute: typeof appAuthRouteRoute
     }
+    '/(app)/_app/activate': {
+      id: '/(app)/_app/activate'
+      path: '/activate'
+      fullPath: '/activate'
+      preLoaderRoute: typeof appAppActivateRouteImport
+      parentRoute: typeof appAppRouteRoute
+    }
     '/(app)/_app/account': {
       id: '/(app)/_app/account'
       path: '/account'
@@ -326,6 +393,20 @@ declare module '@tanstack/react-router' {
       path: '/overview'
       fullPath: '/overview/'
       preLoaderRoute: typeof appAppOverviewIndexRouteImport
+      parentRoute: typeof appAppRouteRoute
+    }
+    '/(app)/_app/feed/': {
+      id: '/(app)/_app/feed/'
+      path: '/feed'
+      fullPath: '/feed/'
+      preLoaderRoute: typeof appAppFeedIndexRouteImport
+      parentRoute: typeof appAppRouteRoute
+    }
+    '/(app)/_app/creator/': {
+      id: '/(app)/_app/creator/'
+      path: '/creator'
+      fullPath: '/creator/'
+      preLoaderRoute: typeof appAppCreatorIndexRouteImport
       parentRoute: typeof appAppRouteRoute
     }
     '/(app)/_app/chat/': {
@@ -348,6 +429,20 @@ declare module '@tanstack/react-router' {
       fullPath: '/legals/privacy-policy'
       preLoaderRoute: typeof appHomeLegalsPrivacyPolicyRouteImport
       parentRoute: typeof appRouteRoute
+    }
+    '/(app)/_app/feed/$slug': {
+      id: '/(app)/_app/feed/$slug'
+      path: '/feed/$slug'
+      fullPath: '/feed/$slug'
+      preLoaderRoute: typeof appAppFeedSlugRouteImport
+      parentRoute: typeof appAppRouteRoute
+    }
+    '/(app)/_app/creator/$id': {
+      id: '/(app)/_app/creator/$id'
+      path: '/creator/$id'
+      fullPath: '/creator/$id'
+      preLoaderRoute: typeof appAppCreatorIdRouteImport
+      parentRoute: typeof appAppRouteRoute
     }
     '/(app)/_app/account/security/': {
       id: '/(app)/_app/account/security/'
@@ -436,13 +531,23 @@ const appAppAccountRouteRouteWithChildren =
 
 interface appAppRouteRouteChildren {
   appAppAccountRouteRoute: typeof appAppAccountRouteRouteWithChildren
+  appAppActivateRoute: typeof appAppActivateRoute
+  appAppCreatorIdRoute: typeof appAppCreatorIdRoute
+  appAppFeedSlugRoute: typeof appAppFeedSlugRoute
   appAppChatIndexRoute: typeof appAppChatIndexRoute
+  appAppCreatorIndexRoute: typeof appAppCreatorIndexRoute
+  appAppFeedIndexRoute: typeof appAppFeedIndexRoute
   appAppOverviewIndexRoute: typeof appAppOverviewIndexRoute
 }
 
 const appAppRouteRouteChildren: appAppRouteRouteChildren = {
   appAppAccountRouteRoute: appAppAccountRouteRouteWithChildren,
+  appAppActivateRoute: appAppActivateRoute,
+  appAppCreatorIdRoute: appAppCreatorIdRoute,
+  appAppFeedSlugRoute: appAppFeedSlugRoute,
   appAppChatIndexRoute: appAppChatIndexRoute,
+  appAppCreatorIndexRoute: appAppCreatorIndexRoute,
+  appAppFeedIndexRoute: appAppFeedIndexRoute,
   appAppOverviewIndexRoute: appAppOverviewIndexRoute,
 }
 

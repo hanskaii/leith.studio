@@ -121,6 +121,10 @@ export const boot = () => {
 		}
 	});
 
+	Gate.after("license.activated" as any, async (ctx: any) => {
+		console.log(`[License] Activated for user ${ctx.userId}`);
+	});
+
 	Gate.after("credit.deducted", async (ctx) => {
 		const { db, payload } = ctx;
 		const dodoCustomerId = payload.data.customer_id;

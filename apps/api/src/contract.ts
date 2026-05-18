@@ -1,8 +1,9 @@
 import { Hono } from "hono";
 import type { HonoEnv } from "./types/hono.types";
 import uploadHandler from "./handlers/upload.handler";
-import { authMiddleware } from "./middleware/auth.middleware";
-import { protect } from "./middleware/protect.middleware";
+import postsHandler from "./handlers/posts.handler";
+import creatorHandler from "./handlers/creator.handler";
+import licenseHandler from "./handlers/license.handler";
 
 /**
  * Typed RPC contract for Hono client (`hc<AppType>`).
@@ -15,19 +16,12 @@ import { protect } from "./middleware/protect.middleware";
  * Routes NOT included here:
  * - better-auth routes (/api/auth/*) — not Hono-defined
  * - agent routes — CF Durable Object specific
- *
- * All contract routes are gated behind authMiddleware + protect("app.use").
- *
- * @example Adding a new typed route:
- * import { uploadHandler } from "./handlers/upload.handler"
- * const contract = new Hono<HonoEnv>()
- *   .use("*", authMiddleware, protect("app.use"))
- *   .route("/api/upload", uploadHandler)
- *   .route("/profile", profileHandler)  // ← add here
  */
 const contract = new Hono<HonoEnv>()
-	.use("*", authMiddleware, protect("app.use"))
-	.route("/api/upload", uploadHandler);
+	.route("/api/upload", uploadHandler)
+	.route("/api/v1/posts", postsHandler)
+	.route("/api/v1/creator", creatorHandler)
+	.route("/api/v1/license", licenseHandler);
 
 export type AppType = typeof contract;
 export { contract };
