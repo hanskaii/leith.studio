@@ -1,0 +1,65 @@
+{
+	"$schema": "https://turbo.build/schema.json",
+	"ui": "tui",
+	"tasks": {
+		"topo": {
+			"dependsOn": ["^topo"]
+		},
+		"build": {
+			"dependsOn": ["^build", "topo"],
+			"inputs": ["$TURBO_DEFAULT$", ".env*"],
+			"outputs": ["dist/**"]
+		},
+		"api#build": {
+			"dependsOn": ["^build"],
+			"inputs": ["$TURBO_DEFAULT$", ".env*"],
+			"outputs": []
+		},
+		"dev": {
+			"cache": false,
+			"persistent": true
+		},
+		"db:push": {
+			"cache": false,
+			"persistent": true
+		},
+		"db:seed": {
+			"cache": false,
+			"persistent": true
+		},
+		"db:drop": {
+			"cache": false,
+			"persistent": true
+		},
+		"db:studio": {
+			"cache": false,
+			"persistent": true
+		},
+		"db:migrate": {
+			"cache": false,
+			"persistent": true
+		},
+		"db:migrate:prod": {
+			"cache": false,
+			"persistent": true
+		},
+		"db:generate": {
+			"cache": false,
+			"persistent": true
+		},
+		"secrets": {
+			"cache": false
+		},
+		"clean": {
+			"cache": false
+		}
+	},
+	"globalDependencies": [
+		"package.json",
+		"pnpm-lock.yaml",
+		"turbo.json",
+		"tsconfig.json",
+		"tooling/lint/oxlint.json",
+		"tooling/lint/.oxfmtrc.json"
+	]
+}

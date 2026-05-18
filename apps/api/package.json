@@ -1,0 +1,38 @@
+{
+	"name": "api",
+	"type": "module",
+	"scripts": {
+		"dev": "wrangler dev --persist-to ../../.wrangler/state",
+		"build": "tsc --noEmit",
+		"deploy": "npm run build && wrangler deploy --minify",
+		"cf-typegen": "wrangler types --env-interface CloudflareBindings",
+		"secrets": "bash ../../tooling/scripts/load-secrets.sh .vars",
+		"coverage": "vitest run --coverage"
+	},
+	"dependencies": {
+		"@better-auth/api-key": "^1.6.5",
+		"@cloudflare/ai-chat": "^0.4.4",
+		"@hono/zod-validator": "^0.7.6",
+		"@workspace/auth": "workspace:*",
+		"@workspace/config": "workspace:*",
+		"@workspace/core": "workspace:*",
+		"@workspace/database": "workspace:*",
+		"agents": "^0.11.2",
+		"ai": "^6.0.159",
+		"better-auth": "^1.6.5",
+		"dodopayments": "^2.28.1",
+		"drizzle-orm": "^0.45.2",
+		"hono": "^4.12.14",
+		"nanoid": "^5.1.9",
+		"resend": "^6.12.0",
+		"workers-ai-provider": "^3.1.11",
+		"zod": "^4.3.6"
+	},
+	"devDependencies": {
+		"@cloudflare/vitest-pool-workers": "^0.12.21",
+		"@cloudflare/workers-types": "^4.20260417.1",
+		"@types/node": "^22.19.17",
+		"vitest": "^3.2.4",
+		"wrangler": "^4.81.1"
+	}
+}

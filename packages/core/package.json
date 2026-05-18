@@ -1,0 +1,12 @@
+{
+	"name": "@workspace/core",
+	"version": "0.0.1",
+	"exports": {
+		".": "./index.ts"
+	},
+	"dependencies": {
+		"@workspace/database": "workspace:*",
+		"dayjs": "^1.11.20",
+		"dodopayments": "latest"
+	}
+}

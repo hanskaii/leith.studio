@@ -1,0 +1,29 @@
+{
+	"name": "@workspace/database",
+	"version": "0.0.1",
+	"exports": {
+		".": "./index.ts",
+		"./schema": "./schema/index.ts",
+		"./utils/d1": "./utils/d1.ts"
+	},
+	"scripts": {
+		"db:generate": "drizzle-kit generate",
+		"db:migrate": "drizzle-kit migrate",
+		"db:migrate:prod": "NODE_ENV=production drizzle-kit migrate",
+		"db:seed": "tsx ./seeder/index.ts",
+		"db:seed:prod": "tsx ./seeder/index.ts --remote",
+		"db:drop": "tsx ./seeder/drop.ts",
+		"db:drop:prod": "tsx ./seeder/drop.ts --remote",
+		"db:push": "drizzle-kit push",
+		"db:studio": "drizzle-kit studio"
+	},
+	"dependencies": {
+		"drizzle-orm": "^0.45.2"
+	},
+	"devDependencies": {
+		"@faker-js/faker": "^9.9.0",
+		"@libsql/client": "^0.17.2",
+		"drizzle-kit": "^0.31.10",
+		"tsx": "^4.21.0"
+	}
+}

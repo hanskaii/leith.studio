@@ -1,0 +1,13 @@
+{
+	"permissions": {
+		"allow": [
+			"Bash(pnpm *)",
+			"Bash(npx wrangler *)",
+			"Bash(npx drizzle-kit *)",
+			"Bash(turbo *)",
+			"Bash(git *)",
+			"Bash(node *)",
+			"Bash(biome *)"
+		]
+	}
+}

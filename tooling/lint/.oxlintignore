@@ -1,0 +1,7 @@
+.claude/
+dist/
+.turbo/
+.wrangler/
+node_modules/
+**/routeTree.gen.ts
+**/worker-configuration.d.ts

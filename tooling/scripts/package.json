@@ -1,0 +1,9 @@
+{
+	"name": "@workspace/tooling-scripts",
+	"version": "0.0.0",
+	"private": true,
+	"description": "Utility scripts for the workspace",
+	"scripts": {
+		"secrets": "bash load-secrets.sh"
+	}
+}

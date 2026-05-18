@@ -1,0 +1,22 @@
+{
+	"$schema": "node_modules/wrangler/config-schema.json",
+	"name": "tanflare-docs",
+	"compatibility_date": "2025-09-02",
+	"compatibility_flags": ["nodejs_compat"],
+	"main": "@tanstack/react-start/server-entry",
+	"placement": {
+		"mode": "smart"
+	},
+	"observability": {
+		"enabled": true
+	},
+	"routes": [
+		{
+			"pattern": "preview.tanship.dev/docs/*",
+			"zone_name": "tanship.dev"
+		}
+	],
+	"vars": {
+		"VITE_URL": "https://preview.tanship.dev"
+	}
+}

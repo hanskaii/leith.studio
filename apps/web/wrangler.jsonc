@@ -1,0 +1,23 @@
+{
+	"$schema": "node_modules/wrangler/config-schema.json",
+	"name": "tanflare-web",
+	"compatibility_date": "2025-09-02",
+	"compatibility_flags": ["nodejs_compat"],
+	"main": "@tanstack/react-start/server-entry",
+	"placement": {
+		"mode": "smart"
+	},
+	"observability": {
+		"enabled": true
+	},
+	"services": [
+		{
+			"binding": "API_SERVICE",
+			"service": "tanflare-api"
+		}
+	],
+	"vars": {
+		"VITE_API_URL": "https://tanflare-api.inurhuda00-526.workers.dev",
+		"VITE_URL": "https://tanflare-web.inurhuda00-526.workers.dev"
+	}
+}

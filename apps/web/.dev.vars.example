@@ -1,0 +1,4 @@
+VITE_API_URL=http://localhost:8787
+VITE_URL=http://localhost:5173
+
+INTERNAL_SECRET=026555f46bd63cff3c5370e1b2bd4df0bc5937c949c4d50d0465788ffb0eca3d

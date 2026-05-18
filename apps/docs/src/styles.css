@@ -1,0 +1,4 @@
+@import "@workspace/ui/globals.css";
+@import "fumadocs-ui/css/neutral.css";
+@import "fumadocs-ui/css/preset.css";
+@source "../../../packages/ui";

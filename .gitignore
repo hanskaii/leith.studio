@@ -1,0 +1,17 @@
+node_modules
+.turbo
+.wrangler
+dist
+build
+.DS_Store
+.claude/worktrees/
+
+# Wrangler local secrets
+.dev.vars
+.vars
+
+# Environment files with secrets
+.env
+.env.local
+.env.production
+.env.development

@@ -1,0 +1,29 @@
+{
+	"$schema": "https://raw.githubusercontent.com/oxc-project/oxc/main/npm/oxlint/configuration_schema.json",
+	"plugins": ["react", "typescript", "jsx-a11y"],
+	"env": {
+		"es2022": true,
+		"browser": true
+	},
+	"rules": {
+		"no-param-reassign": "error",
+		"default-param-last": "error",
+		"no-else-return": "error",
+		"no-useless-concat": "error",
+		"@typescript-eslint/no-explicit-any": "off",
+		"react/no-array-index-key": "off",
+		"jsx-a11y/click-events-have-key-events": "off",
+		"jsx-a11y/role-has-required-aria-props": "off",
+		"jsx-a11y/no-static-element-interactions": "off"
+	},
+	"ignorePatterns": [
+		"./.claude/**",
+		"dist",
+		".turbo",
+		".wrangler",
+		"routeTree.gen.ts",
+		"worker-configuration.d.ts",
+		"node_modules",
+		"**/*.d.ts"
+	]
+}

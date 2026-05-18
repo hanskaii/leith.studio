@@ -1,0 +1,31 @@
+---
+title: API Reference
+description: Public API documentation.
+---
+
+# API Reference
+
+## Account & User
+
+Retrieve user information.
+
+### GET /user
+
+Returns detailed profile information for the authenticated user.
+
+```bash
+curl -X GET https://tanflare.com/api/user \
+  -H "Authorization: Bearer YOUR_API_KEY"
+```
+
+Response:
+
+```json
+{
+	"id": "user_2X...",
+	"name": "Huda",
+	"email": "huda@example.com",
+	"avatar": "https://...",
+	"createdAt": "2024-04-11T12:00:00Z"
+}
+```

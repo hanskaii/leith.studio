@@ -1,0 +1,32 @@
+{
+	"useTabs": true,
+	"tabWidth": 4,
+	"printWidth": 80,
+	"singleQuote": false,
+	"jsxSingleQuote": false,
+	"quoteProps": "as-needed",
+	"trailingComma": "none",
+	"semi": true,
+	"arrowParens": "always",
+	"bracketSameLine": false,
+	"bracketSpacing": true,
+	"ignorePatterns": [
+		"**/.next",
+		"**/dist",
+		"**/.turbo",
+		"**/dev-dist",
+		"**/.zed",
+		"**/.vscode",
+		"**/routeTree.gen.ts",
+		"**/src-tauri",
+		"**/.nuxt",
+		"bts.jsonc",
+		"**/.expo",
+		"**/.wrangler",
+		"**/.source",
+		"**/.agent",
+		"**/.agents",
+		"**/.trae",
+		"**/worker-configuration.d.ts"
+	]
+}

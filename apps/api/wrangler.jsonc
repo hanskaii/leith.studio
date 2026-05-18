@@ -1,0 +1,61 @@
+{
+	"$schema": "node_modules/wrangler/config-schema.json",
+	"name": "tanflare-api",
+	"main": "src/index.ts",
+	"compatibility_date": "2025-09-02",
+	"compatibility_flags": ["nodejs_compat"],
+	"placement": {
+		"mode": "smart"
+	},
+	"observability": {
+		"enabled": true
+	},
+	"d1_databases": [
+		{
+			"binding": "DATABASE",
+			"database_name": "tanflare",
+			"database_id": "c8ea511b-1cfd-46e2-ba78-0ed1e441bd7e",
+			"migrations_dir": "../../packages/db/drizzle"
+		}
+	],
+	"kv_namespaces": [
+		{
+			"binding": "SESSION_KV",
+			"id": "511eaf1c98e14028bc598a68fb10a3b6"
+		}
+	],
+	"r2_buckets": [
+		{
+			"binding": "STORAGE",
+			"bucket_name": "tanflare"
+		}
+	],
+	"ai": {
+		"binding": "AI"
+	},
+	"vars": {
+		// Production values — for local dev, override via apps/api/.dev.vars
+		"APP_ENV": "production",
+		"APP_NAME": "tanflare",
+		"BETTER_AUTH_URL": "https://tanflare-api.inurhuda00-526.workers.dev",
+		"CORS_ORIGIN": "https://tanflare-web.inurhuda00-526.workers.dev",
+		"VITE_URL": "https://tanflare-web.inurhuda00-526.workers.dev",
+		"SESSION_DOMAIN": "inurhuda00-526.workers.dev",
+		"RESEND_FROM_EMAIL": "no-reply@mixetape.com",
+		"R2_BUCKET_NAME": "tanflare"
+	},
+	"durable_objects": {
+		"bindings": [
+			{
+				"name": "chat-agent",
+				"class_name": "ChatAgent"
+			}
+		]
+	},
+	"migrations": [
+		{
+			"tag": "v2",
+			"new_sqlite_classes": ["ChatAgent"]
+		}
+	]
+}
