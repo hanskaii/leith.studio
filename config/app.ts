@@ -1,85 +1,36 @@
 import type { PaymentPlan } from "@workspace/core";
 
 export const appConfig = {
-	name: "Tanflare",
+	name: "Leith",
 	version: "1.0.0",
-	supportEmail: "support@tanflare.com",
+	supportEmail: "support@leith.so",
 
-	authDefaultRedirect: "/overview",
+	authDefaultRedirect: "/feed",
 
 	payments: [
 		{
-			productId: "pdt_starter_replace_me",
-			slug: "starter",
-			name: "Starter",
+			productId: "pdt_allaccess_replace_me",
+			slug: "all-access",
+			name: "All Access",
 			description:
-				"Everything you need to ship your edge-native SaaS in hours.",
-			price: "$199",
-			originalPrice: "$299",
-			currency: "USD",
-			interval: "one-time",
-			type: "standard",
-			features: [
-				"TanStack Start Boilerplate",
-				"Cloudflare Workers & D1",
-				"Better Auth Integration",
-				"Dodo Payments Setup",
-				"Drizzle ORM Schema",
-				"Hono API Framework",
-				"Google OAuth & Magic Links",
-				"Components & Animations",
-				"SEO & Blog Template",
-				"Lifetime Updates"
-			],
-			cta: "Get Tanflare Starter",
-			popular: false,
-			footer: "Pay once. Build unlimited projects!"
-		},
-		{
-			productId: "pdt_pro_replace_me",
-			slug: "pro-subscription",
-			name: "Pro",
-			description:
-				"Scale your business with advanced features and priority support.",
+				"Unlimited downloads of every background — free and premium — forever.",
 			price: "$29",
 			currency: "USD",
-			interval: "month",
+			interval: "one-time",
 			type: "standard",
 			features: [
-				"All Starter features",
-				"Advanced Org Management",
-				"Role-Based Access (RBAC)",
-				"Priority Email Support",
-				"Discord Community Access",
-				"Premium UI Components"
+				"Unlimited downloads, forever",
+				"All current and future backgrounds",
+				"MP4, PNG, JPG, WebP formats",
+				"1080p and 4K resolutions",
+				"Seamless loop videos",
+				"Stream-ready Twitch & YouTube assets",
+				"New drops added regularly",
+				"No subscription, no renewal"
 			],
-			cta: "Start Pro Trial",
+			cta: "Get All Access",
 			popular: true,
-			footer: "14-day free trial included."
-		},
-		{
-			productId: "pdt_credits_replace_me",
-			slug: "prepaid-credits",
-			name: "Prepaid Credits",
-			description:
-				"Top up credits anytime — never run out mid-conversation.",
-			price: "$49",
-			currency: "USD",
-			interval: "one-time",
-			type: "credits",
-			unit: "10k tokens",
-			creditAmount: 10000,
-			features: [
-				"10,000 AI tokens",
-				"Credits never expire",
-				"Usable for all AI features",
-				"Easy top-up anytime",
-				"Bulk purchase discounts",
-				"Detailed usage ledger"
-			],
-			cta: "Buy Credits",
-			popular: false,
-			footer: "Credits added instantly to your account."
+			footer: "Pay once. Download forever."
 		}
 	]
 } as const satisfies {

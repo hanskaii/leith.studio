@@ -13,7 +13,10 @@ import {
 	ModalFooter,
 	Field,
 	FieldLabel,
+	FieldTitle,
+	FieldContent,
 	FieldError,
+	Spinner,
 	toast
 } from "@workspace/ui";
 import { createApiKeyFn } from "@/routes/-fn/auth";
@@ -78,28 +81,35 @@ export function CreateApiKeyModal({
 				</ModalHeader>
 
 				<form.Field name="name">
-					{(field) => (
-						<Field>
-							<FieldLabel htmlFor={field.name}>
-								Key Name
-							</FieldLabel>
-							<Input
-								id={field.name}
-								value={field.state.value}
-								onBlur={field.handleBlur}
-								onChange={(e) =>
-									field.handleChange(e.target.value)
-								}
-								placeholder="e.g. Production App"
-							/>
-							{field.state.meta.isTouched &&
-								field.state.meta.errors.length > 0 && (
-									<FieldError
-										errors={field.state.meta.errors}
+					{(field) => {
+						const isInvalid =
+							field.state.meta.isTouched &&
+							!field.state.meta.isValid;
+						return (
+							<Field data-invalid={isInvalid}>
+								<FieldLabel htmlFor={field.name}>
+									<FieldTitle>Key Name</FieldTitle>
+								</FieldLabel>
+								<FieldContent>
+									<Input
+										id={field.name}
+										value={field.state.value}
+										onBlur={field.handleBlur}
+										onChange={(e) =>
+											field.handleChange(e.target.value)
+										}
+										placeholder="e.g. Production App"
+										disabled={createMutation.isPending}
 									/>
-								)}
-						</Field>
-					)}
+									{isInvalid && (
+										<FieldError
+											errors={field.state.meta.errors}
+										/>
+									)}
+								</FieldContent>
+							</Field>
+						);
+					}}
 				</form.Field>
 
 				<ModalFooter>
@@ -110,18 +120,18 @@ export function CreateApiKeyModal({
 					>
 						Cancel
 					</Button>
-					<form.Subscribe
-						selector={(state) => [
-							state.canSubmit,
-							state.isSubmitting
-						]}
-					>
-						{([canSubmit, isSubmitting]) => (
+					<form.Subscribe selector={(state) => state.canSubmit}>
+						{(canSubmit) => (
 							<Button
 								type="submit"
-								disabled={!canSubmit || isSubmitting}
+								disabled={
+									!canSubmit || createMutation.isPending
+								}
 							>
-								{isSubmitting ? "Creating..." : "Create Key"}
+								{createMutation.isPending && <Spinner />}
+								{createMutation.isPending
+									? "Creating..."
+									: "Create Key"}
 							</Button>
 						)}
 					</form.Subscribe>

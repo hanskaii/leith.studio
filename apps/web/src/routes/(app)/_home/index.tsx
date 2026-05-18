@@ -83,7 +83,7 @@ function LandingPage() {
 						letterSpacing: "-0.02em"
 					}}
 				>
-					funnnit
+					leith
 				</span>
 				<div className="flex items-center gap-4">
 					{session ? (
@@ -351,7 +351,7 @@ function LandingPage() {
 						fontFamily: "var(--font-sans)"
 					}}
 				>
-					funnnit &copy; 2026
+					leith &copy; 2026
 				</span>
 				<Link
 					to="/login"

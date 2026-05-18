@@ -2,7 +2,7 @@ import { queryOptions } from "@tanstack/react-query";
 import { createServerFn } from "@tanstack/react-start";
 import { hc } from "hono/client";
 import type { AppType } from "@workspace/api";
-import { createApiClient } from "@/routes/-fn/api-client";
+import { createApiClient, fetchApiWithAuth } from "@/routes/-fn/api-client";
 import { handleError } from "@/routes/-fn/handle-error";
 import type { InferResponseType } from "hono/client";
 
@@ -77,3 +77,9 @@ export const postStatsQueryOptions = () =>
 		queryKey: ["post-stats"],
 		queryFn: () => getPostStatsFn()
 	});
+
+export const downloadAssetFn = createServerFn({ method: "GET" })
+	.inputValidator((input: { data: string }) => input)
+	.handler(({ data: { data: slug } }) =>
+		fetchApiWithAuth(`/api/v1/posts/${slug}/download`)
+	);

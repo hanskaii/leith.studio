@@ -4,6 +4,7 @@ import { AccountPolicy } from "./policies/account";
 import { AppPolicy } from "./policies/app";
 import { ContentPolicy } from "./policies/content";
 import { LicensePolicy } from "./policies/license";
+import { AssetPolicy } from "./policies/asset";
 
 /**
  * Extend GateActions with app-specific policy action types.
@@ -16,7 +17,8 @@ declare module "@workspace/core" {
 			InferPolicyActions<typeof AccountPolicy>,
 			InferPolicyActions<typeof AppPolicy>,
 			InferPolicyActions<typeof ContentPolicy>,
-			InferPolicyActions<typeof LicensePolicy> {}
+			InferPolicyActions<typeof LicensePolicy>,
+			InferPolicyActions<typeof AssetPolicy> {}
 }
 
 /**
@@ -28,7 +30,8 @@ Gate.policies({
 	account: AccountPolicy,
 	app: AppPolicy,
 	content: ContentPolicy,
-	license: LicensePolicy
+	license: LicensePolicy,
+	asset: AssetPolicy
 });
 
 export * from "./app";
@@ -38,3 +41,4 @@ export * from "./policies/account";
 export * from "./policies/app";
 export * from "./policies/content";
 export * from "./policies/license";
+export * from "./policies/asset";

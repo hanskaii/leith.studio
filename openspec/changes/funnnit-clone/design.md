@@ -1,6 +1,6 @@
 ## Context
 
-This is a greenfield feature set building a Funnnit-style member-only content platform on top of the existing Tanflare monorepo stack (Hono API on Cloudflare Workers, TanStack Start, better-auth, Drizzle + D1, Dodo Payments).
+This is a greenfield feature set building a Leith-style member-only content platform on top of the existing Tanflare monorepo stack (Hono API on Cloudflare Workers, TanStack Start, better-auth, Drizzle + D1, Dodo Payments).
 
 The platform targets a single creator publishing AI image creation breakdowns and tutorials. Access is sold once as a license key (no recurring subscription) via Dodo Payments' license key product. Members get permanent access after key activation.
 
@@ -87,7 +87,7 @@ Skills driving the UI implementation: `impeccable` (production-grade frontend cr
 
 **Decision**: Apply `design-taste-frontend` baseline (DESIGN_VARIANCE:8, MOTION_INTENSITY:6, VISUAL_DENSITY:4) using shadcn/ui components customized with a "post-cringe" palette — off-black base (`zinc-950`), a single high-saturation accent (electric rose or chartreuse), Satoshi or Geist font, aggressive asymmetric layouts.
 
-**Rationale**: funnnit's brand is intentionally "chill and fun, post-cringe." This maps to high design variance (asymmetric), moderate motion (fluid CSS transitions, Framer Motion reveals), and low-medium density (content-first, airy).
+**Rationale**: leith's brand is intentionally "chill and fun, post-cringe." This maps to high design variance (asymmetric), moderate motion (fluid CSS transitions, Framer Motion reveals), and low-medium density (content-first, airy).
 
 ## Risks / Trade-offs
 

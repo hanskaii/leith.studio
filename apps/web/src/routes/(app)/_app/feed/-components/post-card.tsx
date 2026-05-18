@@ -55,6 +55,55 @@ export function PostCard({ post }: { post: Post }) {
 						{post.title}
 					</h2>
 
+					{(post as any).format && (
+						<div className="flex items-center gap-1.5 mb-2">
+							<span
+								className="rounded px-1.5 py-0.5 uppercase"
+								style={{
+									background: "oklch(0.62 0.14 47 / 0.12)",
+									color: "oklch(0.52 0.14 47)",
+									fontSize: "0.625rem",
+									fontFamily: "var(--font-sans)",
+									fontWeight: 600,
+									letterSpacing: "0.04em"
+								}}
+							>
+								{(post as any).format}
+							</span>
+							{(post as any).resolution && (
+								<span
+									className="rounded px-1.5 py-0.5"
+									style={{
+										background: "oklch(0.92 0.006 80)",
+										color: "oklch(0.50 0.010 60)",
+										fontSize: "0.625rem",
+										fontFamily: "var(--font-sans)",
+										fontWeight: 500,
+										letterSpacing: "0.02em"
+									}}
+								>
+									{(post as any).resolution}
+								</span>
+							)}
+							{(post as any).access === "free" && (
+								<span
+									className="rounded px-1.5 py-0.5"
+									style={{
+										background:
+											"oklch(0.85 0.09 145 / 0.15)",
+										color: "oklch(0.45 0.12 145)",
+										fontSize: "0.625rem",
+										fontFamily: "var(--font-sans)",
+										fontWeight: 600,
+										letterSpacing: "0.02em"
+									}}
+								>
+									Free
+								</span>
+							)}
+						</div>
+					)}
+
 					<div className="flex items-center justify-between gap-2 mt-3">
 						<div className="flex flex-wrap gap-1">
 							{Array.isArray(post.tags) &&

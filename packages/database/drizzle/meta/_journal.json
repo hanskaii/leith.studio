@@ -15,6 +15,13 @@
 			"when": 1779102071321,
 			"tag": "0001_great_norrin_radd",
 			"breakpoints": true
+		},
+		{
+			"idx": 2,
+			"version": "6",
+			"when": 1779107842799,
+			"tag": "0002_cooing_guardsmen",
+			"breakpoints": true
 		}
 	]
 }

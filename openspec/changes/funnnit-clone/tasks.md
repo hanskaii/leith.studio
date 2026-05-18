@@ -79,9 +79,9 @@
 
 ## 11. Design Polish
 
-- [x] 11.1 Run `npx impeccable teach` to set up PRODUCT.md and DESIGN.md for the funnnit-clone brand context (completed in prior session)
+- [x] 11.1 Run `npx impeccable teach` to set up PRODUCT.md and DESIGN.md for the leith-clone brand context (completed in prior session)
 - [x] 11.2 Apply consistent typography: Space Grotesk Variable + Instrument Sans Variable; set in `packages/ui/src/styles/globals.css`
-- [x] 11.3 Configure shadcn theme tokens in globals.css: Funnnit Amber Archive palette (terracotta primary, warm paper background, OKLCH neutrals)
+- [x] 11.3 Configure shadcn theme tokens in globals.css: Leith Amber Archive palette (terracotta primary, warm paper background, OKLCH neutrals)
 - [ ] 11.4 Add Framer Motion page-entry animations on feed, post, and creator routes (staggered children, `layout` props on card grid for smooth pagination transitions)
 - [ ] 11.5 Run `/impeccable polish` on landing page and feed page; address any flagged issues
 - [x] 11.6 Ensure all new pages pass responsive checks: single-column layout on `< 768px`, no `h-screen` (use `min-h-[100dvh]`), no horizontal scroll

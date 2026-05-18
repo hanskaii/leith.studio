@@ -1,5 +1,5 @@
 ---
-name: Funnnit
+name: Leith
 description: Member-only AI image creation breakdowns by @Superoutman. Playful, precise, self-aware.
 colors:
     surface: "oklch(0.97 0.008 80)"
@@ -98,13 +98,13 @@ components:
         padding: "8px 12px"
 ---
 
-# Design System: Funnnit
+# Design System: Leith
 
 ## 1. Overview
 
 **Creative North Star: "The Quiet Punch"**
 
-Funnnit is a platform where restraint does the heavy lifting. Every screen is composed, almost dull, and then something lands: a proportion that's slightly off in a way that makes you pause, a color moment that doesn't need to announce itself, a heading weight that breaks the rhythm exactly once. The joke, when it exists, is quiet. The technique is always legible.
+Leith is a platform where restraint does the heavy lifting. Every screen is composed, almost dull, and then something lands: a proportion that's slightly off in a way that makes you pause, a color moment that doesn't need to announce itself, a heading weight that breaks the rhythm exactly once. The joke, when it exists, is quiet. The technique is always legible.
 
 The visual system is built on warm aged-paper tones with a single terracotta accent used with deliberate scarcity. Space Grotesk brings character at display scale without performing: its quirky numerals and slightly odd uppercase letters are the personality. Instrument Sans carries the body copy with warmth and no fuss. Together, the pairing has personality without ego. Surfaces are almost flat. Shadows appear only when elevation is structurally required.
 
@@ -250,7 +250,7 @@ The teaser card shown on the public landing page. A post card with its cover ima
 
 ### Don't:
 
-- **Don't** use hype streetwear energy. No aggressive red, no drop-culture type treatment, no Supreme-style uppercase-everything. Funnnit is precise and self-aware, not confrontational.
+- **Don't** use hype streetwear energy. No aggressive red, no drop-culture type treatment, no Supreme-style uppercase-everything. Leith is precise and self-aware, not confrontational.
 - **Don't** use dark AI portal aesthetics. No neon on black, no glowing orbs, no Midjourney-style visual language. The platform is about craft, not about selling AI.
 - **Don't** use generic SaaS patterns: no cream background with purple accent, no identical rounded card grids, no "Elevate your workflow" copywriting, no hero metric templates (big number, gradient accent).
 - **Don't** use newsletter minimalism. Pure white background, Georgia serif, Substack-like restraint: that is the opposite of the "quiet punch." Restraint here means _precise_ weirdness, not the absence of personality.

@@ -19,9 +19,16 @@ export const ROLE_PERMISSIONS = {
 		"agents:chat",
 		"content:manage",
 		"content:read",
-		"license:activate"
+		"license:activate",
+		"asset:download:free",
+		"asset:download:premium"
 	],
-	member: ["content:read", "license:activate"],
+	member: [
+		"content:read",
+		"license:activate",
+		"asset:download:free",
+		"asset:download:premium"
+	],
 	user: [
 		"app:use",
 		"account:delete",
@@ -30,7 +37,8 @@ export const ROLE_PERMISSIONS = {
 		"profile:update",
 		"security:manage",
 		"agents:chat",
-		"license:activate"
+		"license:activate",
+		"asset:download:free"
 	]
 } as const;
 

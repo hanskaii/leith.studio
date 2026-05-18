@@ -1,4 +1,7 @@
 import { index, integer, sqliteTable, text } from "drizzle-orm/sqlite-core";
+import { relations } from "drizzle-orm";
+import { postMetadata } from "./post-metadata";
+import { postStats } from "./post-stats";
 
 export const posts = sqliteTable(
 	"posts",
@@ -27,3 +30,25 @@ export const posts = sqliteTable(
 		index("idx_posts_published_at").on(table.publishedAt)
 	]
 );
+
+export const postsRelations = relations(posts, ({ one, many }) => ({
+	metadata: one(postMetadata, {
+		fields: [posts.id],
+		references: [postMetadata.postId]
+	}),
+	stats: many(postStats)
+}));
+
+export const postMetadataRelations = relations(postMetadata, ({ one }) => ({
+	post: one(posts, {
+		fields: [postMetadata.postId],
+		references: [posts.id]
+	})
+}));
+
+export const postStatsRelations = relations(postStats, ({ one }) => ({
+	post: one(posts, {
+		fields: [postStats.postId],
+		references: [posts.id]
+	})
+}));

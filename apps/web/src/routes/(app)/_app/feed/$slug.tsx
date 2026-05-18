@@ -1,11 +1,17 @@
 import { createFileRoute, Link, redirect } from "@tanstack/react-router";
-import { useSuspenseQuery } from "@tanstack/react-query";
+import {
+	useSuspenseQuery,
+	useMutation,
+	useQueryClient
+} from "@tanstack/react-query";
 import { Suspense } from "react";
 import { Gate } from "@workspace/core";
+import { toast } from "@workspace/ui";
 import { EditorContent, useEditor } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import Image from "@tiptap/extension-image";
-import { postQueryOptions } from "@/routes/-fn/posts";
+import { postQueryOptions, downloadAssetFn } from "@/routes/-fn/posts";
+import { sessionsOptions } from "@/routes/-fn/auth";
 import { z } from "zod";
 
 const postSearchSchema = z.object({
@@ -37,6 +43,19 @@ function formatDate(d: string | number | Date | null | undefined): string {
 	});
 }
 
+function formatFileSize(bytes: number | null | undefined): string {
+	if (!bytes) return "";
+	if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(0)} KB`;
+	return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+}
+
+function formatDuration(seconds: number | null | undefined): string {
+	if (!seconds) return "";
+	const m = Math.floor(seconds / 60);
+	const s = seconds % 60;
+	return `${m}:${String(s).padStart(2, "0")}`;
+}
+
 function PostSkeleton() {
 	return (
 		<div className="max-w-[68ch] mx-auto flex flex-col gap-4 animate-pulse">
@@ -56,8 +75,167 @@ function PostSkeleton() {
 	);
 }
 
+function AssetSpecTable({ post }: { post: any }) {
+	const rows = [
+		{ label: "Format", value: post.format?.toUpperCase() },
+		{ label: "Resolution", value: post.resolution },
+		post.duration != null
+			? { label: "Duration", value: formatDuration(post.duration) }
+			: null,
+		post.isLoop ? { label: "Loop", value: "Seamless" } : null,
+		{ label: "File size", value: formatFileSize(post.fileSize) },
+		{
+			label: "Access",
+			value: post.access === "free" ? "Free" : "All Access"
+		}
+	].filter(Boolean) as { label: string; value: string }[];
+
+	return (
+		<div
+			className="rounded-md border overflow-hidden mt-8 mb-8"
+			style={{ borderColor: "oklch(0.88 0.008 80)" }}
+		>
+			<div
+				className="px-4 py-2 text-xs font-medium"
+				style={{
+					background: "oklch(0.94 0.025 55)",
+					color: "oklch(0.50 0.010 60)",
+					fontFamily: "var(--font-sans)",
+					letterSpacing: "0.04em",
+					textTransform: "uppercase"
+				}}
+			>
+				Specifications
+			</div>
+			{rows.map((row) => (
+				<div
+					key={row.label}
+					className="flex items-center justify-between px-4 py-2.5 border-t"
+					style={{ borderColor: "oklch(0.92 0.006 80)" }}
+				>
+					<span
+						className="text-xs"
+						style={{
+							color: "oklch(0.50 0.010 60)",
+							fontFamily: "var(--font-sans)"
+						}}
+					>
+						{row.label}
+					</span>
+					<span
+						className="text-xs font-medium"
+						style={{
+							color: "oklch(0.15 0.008 60)",
+							fontFamily: "var(--font-sans)"
+						}}
+					>
+						{row.value}
+					</span>
+				</div>
+			))}
+		</div>
+	);
+}
+
+function DownloadButton({
+	slug,
+	access,
+	userRole
+}: {
+	slug: string;
+	access: "free" | "premium";
+	userRole: string | null | undefined;
+}) {
+	const canDownload =
+		access === "free" || userRole === "member" || userRole === "admin";
+
+	const mutation = useMutation({
+		mutationFn: async () => {
+			const res = await downloadAssetFn({ data: { data: slug } });
+			if (!res.ok) throw new Error("Download failed");
+			const blob = await res.blob();
+			const url = URL.createObjectURL(blob);
+			const a = document.createElement("a");
+			a.href = url;
+			a.download = slug;
+			a.click();
+			URL.revokeObjectURL(url);
+		},
+		onError: () => toast.error("Download failed. Please try again.")
+	});
+
+	if (!canDownload) {
+		return (
+			<a
+				href={import.meta.env.VITE_DODO_CHECKOUT_URL}
+				className="inline-flex items-center px-6 py-2.5 rounded-md text-sm font-medium transition-all"
+				style={{
+					background: "oklch(0.62 0.14 47)",
+					color: "oklch(0.97 0.008 80)",
+					fontFamily: "var(--font-sans)"
+				}}
+			>
+				Get All Access
+			</a>
+		);
+	}
+
+	return (
+		<button
+			type="button"
+			onClick={() => mutation.mutate()}
+			disabled={mutation.isPending}
+			className="inline-flex items-center gap-2 px-6 py-2.5 rounded-md text-sm font-medium transition-all disabled:opacity-60"
+			style={{
+				background: "oklch(0.62 0.14 47)",
+				color: "oklch(0.97 0.008 80)",
+				fontFamily: "var(--font-sans)"
+			}}
+		>
+			{mutation.isPending ? (
+				<>
+					<svg
+						className="animate-spin h-4 w-4"
+						viewBox="0 0 24 24"
+						fill="none"
+					>
+						<circle
+							className="opacity-25"
+							cx="12"
+							cy="12"
+							r="10"
+							stroke="currentColor"
+							strokeWidth="4"
+						/>
+						<path
+							className="opacity-75"
+							fill="currentColor"
+							d="M4 12a8 8 0 018-8v8z"
+						/>
+					</svg>
+					Downloading...
+				</>
+			) : (
+				<>
+					<svg
+						className="h-4 w-4"
+						viewBox="0 0 16 16"
+						fill="none"
+						stroke="currentColor"
+						strokeWidth="1.5"
+					>
+						<path d="M8 2v8M5 7l3 3 3-3M2 11v2a1 1 0 001 1h10a1 1 0 001-1v-2" />
+					</svg>
+					Download
+				</>
+			)}
+		</button>
+	);
+}
+
 function PostContent({ slug }: { slug: string }) {
 	const { data: post } = useSuspenseQuery(postQueryOptions(slug));
+	const { data: session } = useSuspenseQuery(sessionsOptions());
 
 	let content: any = null;
 	if (post?.body) {
@@ -75,6 +253,8 @@ function PostContent({ slug }: { slug: string }) {
 	});
 
 	if (!post) return null;
+
+	const hasAsset = !!(post as any).format;
 
 	return (
 		<article className="max-w-[68ch] mx-auto">
@@ -135,9 +315,21 @@ function PostContent({ slug }: { slug: string }) {
 				)}
 			</header>
 
+			{hasAsset && <AssetSpecTable post={post} />}
+
+			{hasAsset && (
+				<div className="mb-10">
+					<DownloadButton
+						slug={slug}
+						access={(post as any).access}
+						userRole={session?.user?.role}
+					/>
+				</div>
+			)}
+
 			{editor && (
 				<div
-					className="prose-funnnit"
+					className="prose-leith"
 					style={{ fontFamily: "var(--font-sans)", lineHeight: 1.65 }}
 				>
 					<EditorContent editor={editor} />

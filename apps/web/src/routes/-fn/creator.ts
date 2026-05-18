@@ -94,6 +94,21 @@ export const uploadImageFn = createServerFn({ method: "POST" })
 		})
 	);
 
+export const uploadAssetFn = createServerFn({ method: "POST" })
+	.inputValidator((data: FormData) => data)
+	.handler(({ data }) =>
+		handleError(async () => {
+			const api = createApiClient();
+			const res = await (api.api.v1.creator as any)["upload-asset"].$post(
+				{
+					form: data
+				}
+			);
+			const json = await res.json();
+			return (json as any).data as { url: string; key: string };
+		})
+	);
+
 export const creatorPostsQueryOptions = () =>
 	queryOptions({
 		queryKey: ["creator-posts"],

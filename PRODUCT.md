@@ -10,9 +10,9 @@ Working designers mid-project, researching AI image creation technique. They arr
 
 ## Product Purpose
 
-Funnnit is a single-creator member-only platform where @Superoutman publishes AI image creation breakdowns, technique notes, and process walkthroughs. Members pay once (license key) and get permanent access to the full archive. The platform's personality is the product as much as the content itself: the creator's voice, taste, and slightly absurdist framing are inseparable from the value.
+Leith is a single-creator member-only platform where @Superoutman publishes AI image creation breakdowns, technique notes, and process walkthroughs. Members pay once (license key) and get permanent access to the full archive. The platform's personality is the product as much as the content itself: the creator's voice, taste, and slightly absurdist framing are inseparable from the value.
 
-Success looks like: a working designer reads a breakdown, immediately understands what to try, and tells a colleague "have you seen funnnit?"
+Success looks like: a working designer reads a breakdown, immediately understands what to try, and tells a colleague "have you seen leith?"
 
 ## Brand Personality
 
@@ -20,8 +20,8 @@ Playful, precise, self-aware. Absurd but never chaotic. The design smiles at you
 
 ## Anti-references
 
-- **Hype streetwear energy**: Supreme-red, drop-culture aggression, type-as-assault. Funnnit is not loud. It doesn't need to be.
-- **Dark AI portal**: Neon on black, glowing orbs, Midjourney/Replicate landing page aesthetics. Funnnit is not a product pitch for AI itself.
+- **Hype streetwear energy**: Supreme-red, drop-culture aggression, type-as-assault. Leith is not loud. It doesn't need to be.
+- **Dark AI portal**: Neon on black, glowing orbs, Midjourney/Replicate landing page aesthetics. Leith is not a product pitch for AI itself.
 - **Generic SaaS**: shadcn default, cream background, purple accent, rounded card grids, "Elevate your workflow" copywriting.
 - **Newsletter minimalism**: Pure white, wide margins, Georgia serif, Substack-clone restraint. Too safe, no personality.
 

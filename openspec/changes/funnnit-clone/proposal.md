@@ -1,6 +1,6 @@
 ## Why
 
-There's no existing member-only content platform in this project. We need to build a Funnnit-style platform where a creator publishes exclusive AI image creation breakdowns, tutorials, and behind-the-scenes content that is gated behind a one-time license key purchase via Dodo Payments — removing the recurring subscription friction entirely.
+There's no existing member-only content platform in this project. We need to build a Leith-style platform where a creator publishes exclusive AI image creation breakdowns, tutorials, and behind-the-scenes content that is gated behind a one-time license key purchase via Dodo Payments — removing the recurring subscription friction entirely.
 
 ## What Changes
 

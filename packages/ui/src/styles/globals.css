@@ -8,7 +8,7 @@
 @custom-variant data-vertical (&[data-orientation="vertical"]);
 
 :root {
-	/* Funnnit — Amber Archive Palette */
+	/* Leith — Amber Archive Palette */
 	--background: oklch(0.97 0.008 80);
 	--foreground: oklch(0.15 0.008 60);
 	--card: oklch(0.97 0.008 80);
