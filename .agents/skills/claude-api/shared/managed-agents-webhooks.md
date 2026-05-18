@@ -2,7 +2,7 @@
 
 Anthropic can POST to your HTTPS endpoint when a Managed Agents resource changes state — an alternative to holding an SSE stream or polling. Payloads are **thin** (event type + resource IDs only); on receipt, fetch the resource for current state. Every delivery is HMAC-signed.
 
-> **Direction matters.** This page covers _Anthropic → you_ notifications about session/vault state. It does **not** cover _third-party → you_ webhooks that _trigger_ a session (e.g. a GitHub push handler that calls `sessions.create()`) — that's ordinary application code on your side with no Anthropic-specific wire format.
+> **Direction matters.** This page covers *Anthropic → you* notifications about session/vault state. It does **not** cover *third-party → you* webhooks that *trigger* a session (e.g. a GitHub push handler that calls `sessions.create()`) — that's ordinary application code on your side with no Anthropic-specific wire format.
 
 ---
 
@@ -10,11 +10,11 @@ Anthropic can POST to your HTTPS endpoint when a Managed Agents resource changes
 
 Console → **Manage → Webhooks**. There is no programmatic endpoint-management API yet. Secret rotation is supported from the same page.
 
-| Field          | Constraint                                                                       |
-| -------------- | -------------------------------------------------------------------------------- |
-| URL            | HTTPS on port 443, publicly resolvable hostname                                  |
-| Event types    | Subscribe per `data.type` — you only receive subscribed types (plus test events) |
-| Signing secret | `whsec_`-prefixed, 32 bytes, **shown once at creation** — store it               |
+| Field | Constraint |
+|---|---|
+| URL | HTTPS on port 443, publicly resolvable hostname |
+| Event types | Subscribe per `data.type` — you only receive subscribed types (plus test events) |
+| Signing secret | `whsec_`-prefixed, 32 bytes, **shown once at creation** — store it |
 
 ---
 
@@ -62,40 +62,40 @@ Pass the **raw request body** to `unwrap()` — frameworks that re-serialize JSO
 
 ```json
 {
-	"type": "event",
-	"id": "event_01ABC...",
-	"created_at": "2026-03-18T14:05:22Z",
-	"data": {
-		"type": "session.status_idled",
-		"id": "session_01XYZ...",
-		"organization_id": "8a3d2f1e-...",
-		"workspace_id": "c7b0e4d9-..."
-	}
+  "type": "event",
+  "id": "event_01ABC...",
+  "created_at": "2026-03-18T14:05:22Z",
+  "data": {
+    "type": "session.status_idled",
+    "id": "session_01XYZ...",
+    "organization_id": "8a3d2f1e-...",
+    "workspace_id": "c7b0e4d9-..."
+  }
 }
 ```
 
-Switch on `data.type`, fetch the resource by `data.id`, return any **2xx** to acknowledge. `created_at` is when the _state transition_ happened, not when the webhook fired.
+Switch on `data.type`, fetch the resource by `data.id`, return any **2xx** to acknowledge. `created_at` is when the *state transition* happened, not when the webhook fired.
 
 ---
 
 ## Supported `data.type` values
 
-| `data.type`                        | Fires when                                                                |
-| ---------------------------------- | ------------------------------------------------------------------------- |
-| `session.status_scheduled`         | Session created and ready to accept events                                |
-| `session.status_run_started`       | Agent execution kicked off (every transition to `running`)                |
-| `session.status_idled`             | Agent awaiting input (tool approval, custom tool result, or next message) |
-| `session.status_terminated`        | Session hit a terminal error                                              |
-| `session.thread_created`           | Multiagent: coordinator opened a new subagent thread                      |
-| `session.thread_idled`             | Multiagent: a subagent thread is waiting for input                        |
-| `session.outcome_evaluation_ended` | Outcome grader finished one iteration                                     |
-| `vault.archived`                   | Vault was archived                                                        |
-| `vault.created`                    | Vault was created                                                         |
-| `vault.deleted`                    | Vault was deleted                                                         |
-| `vault_credential.archived`        | Vault credential was archived                                             |
-| `vault_credential.created`         | Vault credential was created                                              |
-| `vault_credential.deleted`         | Vault credential was deleted                                              |
-| `vault_credential.refresh_failed`  | MCP OAuth vault credential failed to refresh                              |
+| `data.type` | Fires when |
+|---|---|
+| `session.status_scheduled` | Session created and ready to accept events |
+| `session.status_run_started` | Agent execution kicked off (every transition to `running`) |
+| `session.status_idled` | Agent awaiting input (tool approval, custom tool result, or next message) |
+| `session.status_terminated` | Session hit a terminal error |
+| `session.thread_created` | Multiagent: coordinator opened a new subagent thread |
+| `session.thread_idled` | Multiagent: a subagent thread is waiting for input |
+| `session.outcome_evaluation_ended` | Outcome grader finished one iteration |
+| `vault.archived` | Vault was archived |
+| `vault.created` | Vault was created |
+| `vault.deleted` | Vault was deleted |
+| `vault_credential.archived` | Vault credential was archived |
+| `vault_credential.created` | Vault credential was created |
+| `vault_credential.deleted` | Vault credential was deleted |
+| `vault_credential.refresh_failed` | MCP OAuth vault credential failed to refresh |
 
 > These are **webhook** `data.type` values — a separate namespace from SSE event types (`session.status_idle`, `span.outcome_evaluation_end`, etc. in `shared/managed-agents-events.md`). Don't reuse SSE constants in webhook handlers.
 

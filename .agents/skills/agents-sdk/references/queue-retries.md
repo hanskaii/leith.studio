@@ -8,22 +8,15 @@ FIFO queue persisted in SQLite. Sequential processing, one item at a time.
 
 ```typescript
 export class MyAgent extends Agent<Env, State> {
-	async onRequest(request: Request) {
-		this.queue("processItem", { id: "abc", data: "..." });
-		this.queue(
-			"processItem",
-			{ id: "def", data: "..." },
-			{ retry: { maxAttempts: 5 } }
-		);
-		return new Response("Queued");
-	}
+  async onRequest(request: Request) {
+    this.queue("processItem", { id: "abc", data: "..." });
+    this.queue("processItem", { id: "def", data: "..." }, { retry: { maxAttempts: 5 } });
+    return new Response("Queued");
+  }
 
-	async processItem(
-		payload: { id: string; data: string },
-		queueItem: QueueItem
-	) {
-		await doWork(payload);
-	}
+  async processItem(payload: { id: string; data: string }, queueItem: QueueItem) {
+    await doWork(payload);
+  }
 }
 ```
 
@@ -43,21 +36,21 @@ Exponential backoff with full jitter. Defaults: 3 attempts, 100ms base, 3000ms m
 
 ```typescript
 const result = await this.retry(
-	async () => {
-		const res = await fetch("https://api.example.com/data");
-		if (!res.ok) throw new Error(`HTTP ${res.status}`);
-		return res.json();
-	},
-	{
-		maxAttempts: 5,
-		baseDelayMs: 200,
-		maxDelayMs: 5000,
-		shouldRetry: (err, nextAttempt) => {
-			if (err.message.includes("429")) return true;
-			if (err.message.includes("401")) return false;
-			return nextAttempt <= 3;
-		}
-	}
+  async () => {
+    const res = await fetch("https://api.example.com/data");
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    return res.json();
+  },
+  {
+    maxAttempts: 5,
+    baseDelayMs: 200,
+    maxDelayMs: 5000,
+    shouldRetry: (err, nextAttempt) => {
+      if (err.message.includes("429")) return true;
+      if (err.message.includes("401")) return false;
+      return nextAttempt <= 3;
+    }
+  }
 );
 ```
 
@@ -73,9 +66,9 @@ this.queue("handler", payload, { retry: { maxAttempts: 5 } });
 
 ```typescript
 export class MyAgent extends Agent<Env, State> {
-	static options = {
-		retry: { maxAttempts: 5, baseDelayMs: 200, maxDelayMs: 10000 }
-	};
+  static options = {
+    retry: { maxAttempts: 5, baseDelayMs: 200, maxDelayMs: 10000 }
+  };
 }
 ```
 

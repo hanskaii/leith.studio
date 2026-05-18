@@ -1,19 +1,19 @@
 ---
 name: solid-start
 description: >-
-    Solid bindings for TanStack Start: useServerFn hook, tanstackStart
-    Vite plugin, StartClient, StartServer, Solid-specific setup,
-    re-exports from @tanstack/start-client-core. Full project setup
-    with Solid.
+  Solid bindings for TanStack Start: useServerFn hook, tanstackStart
+  Vite plugin, StartClient, StartServer, Solid-specific setup,
+  re-exports from @tanstack/start-client-core. Full project setup
+  with Solid.
 type: framework
 library: tanstack-start
-library_version: "1.166.2"
+library_version: '1.166.2'
 framework: solid
 requires:
-    - start-core
+  - start-core
 sources:
-    - TanStack/router:packages/solid-start/src
-    - TanStack/router:docs/start/framework/solid/build-from-scratch.md
+  - TanStack/router:packages/solid-start/src
+  - TanStack/router:docs/start/framework/solid/build-from-scratch.md
 ---
 
 # Solid Start (`@tanstack/solid-start`)
@@ -51,12 +51,12 @@ npm i -D vite vite-plugin-solid typescript
 
 ```json
 {
-	"type": "module",
-	"scripts": {
-		"dev": "vite dev",
-		"build": "vite build",
-		"start": "node .output/server/index.mjs"
-	}
+  "type": "module",
+  "scripts": {
+    "dev": "vite dev",
+    "build": "vite build",
+    "start": "node .output/server/index.mjs"
+  }
 }
 ```
 
@@ -64,45 +64,45 @@ npm i -D vite vite-plugin-solid typescript
 
 ```json
 {
-	"compilerOptions": {
-		"jsx": "preserve",
-		"jsxImportSource": "solid-js",
-		"moduleResolution": "Bundler",
-		"module": "ESNext",
-		"target": "ES2022",
-		"skipLibCheck": true,
-		"strictNullChecks": true
-	}
+  "compilerOptions": {
+    "jsx": "preserve",
+    "jsxImportSource": "solid-js",
+    "moduleResolution": "Bundler",
+    "module": "ESNext",
+    "target": "ES2022",
+    "skipLibCheck": true,
+    "strictNullChecks": true
+  }
 }
 ```
 
 ### 4. vite.config.ts
 
 ```ts
-import { defineConfig } from "vite";
-import { tanstackStart } from "@tanstack/solid-start/plugin/vite";
-import solidPlugin from "vite-plugin-solid";
+import { defineConfig } from 'vite'
+import { tanstackStart } from '@tanstack/solid-start/plugin/vite'
+import solidPlugin from 'vite-plugin-solid'
 
 export default defineConfig({
-	plugins: [
-		tanstackStart(), // MUST come before solid plugin
-		solidPlugin({ ssr: true })
-	]
-});
+  plugins: [
+    tanstackStart(), // MUST come before solid plugin
+    solidPlugin({ ssr: true }),
+  ],
+})
 ```
 
 ### 5. Router Factory (src/router.tsx)
 
 ```tsx
-import { createRouter } from "@tanstack/solid-router";
-import { routeTree } from "./routeTree.gen";
+import { createRouter } from '@tanstack/solid-router'
+import { routeTree } from './routeTree.gen'
 
 export function getRouter() {
-	const router = createRouter({
-		routeTree,
-		scrollRestoration: true
-	});
-	return router;
+  const router = createRouter({
+    routeTree,
+    scrollRestoration: true,
+  })
+  return router
 }
 ```
 
@@ -110,63 +110,60 @@ export function getRouter() {
 
 ```tsx
 import {
-	Outlet,
-	createRootRoute,
-	HeadContent,
-	Scripts
-} from "@tanstack/solid-router";
-import { HydrationScript } from "solid-js/web";
-import { Suspense } from "solid-js";
+  Outlet,
+  createRootRoute,
+  HeadContent,
+  Scripts,
+} from '@tanstack/solid-router'
+import { HydrationScript } from 'solid-js/web'
+import { Suspense } from 'solid-js'
 
 export const Route = createRootRoute({
-	head: () => ({
-		meta: [
-			{ charSet: "utf-8" },
-			{
-				name: "viewport",
-				content: "width=device-width, initial-scale=1"
-			},
-			{ title: "My TanStack Start App" }
-		]
-	}),
-	// shellComponent renders the HTML document shell (always SSR'd)
-	shellComponent: RootDocument
-});
+  head: () => ({
+    meta: [
+      { charSet: 'utf-8' },
+      { name: 'viewport', content: 'width=device-width, initial-scale=1' },
+      { title: 'My TanStack Start App' },
+    ],
+  }),
+  // shellComponent renders the HTML document shell (always SSR'd)
+  shellComponent: RootDocument,
+})
 
 function RootDocument(props: { children: any }) {
-	return (
-		<html>
-			<head>
-				<HydrationScript />
-			</head>
-			<body>
-				<HeadContent />
-				<Suspense>{props.children}</Suspense>
-				<Scripts />
-			</body>
-		</html>
-	);
+  return (
+    <html>
+      <head>
+        <HydrationScript />
+      </head>
+      <body>
+        <HeadContent />
+        <Suspense>{props.children}</Suspense>
+        <Scripts />
+      </body>
+    </html>
+  )
 }
 ```
 
 ### 7. Index Route (src/routes/index.tsx)
 
 ```tsx
-import { createFileRoute } from "@tanstack/solid-router";
-import { createServerFn } from "@tanstack/solid-start";
+import { createFileRoute } from '@tanstack/solid-router'
+import { createServerFn } from '@tanstack/solid-start'
 
-const getGreeting = createServerFn({ method: "GET" }).handler(async () => {
-	return "Hello from TanStack Start!";
-});
+const getGreeting = createServerFn({ method: 'GET' }).handler(async () => {
+  return 'Hello from TanStack Start!'
+})
 
-export const Route = createFileRoute("/")({
-	loader: () => getGreeting(),
-	component: HomePage
-});
+export const Route = createFileRoute('/')({
+  loader: () => getGreeting(),
+  component: HomePage,
+})
 
 function HomePage() {
-	const greeting = Route.useLoaderData();
-	return <h1>{greeting()}</h1>;
+  const greeting = Route.useLoaderData()
+  return <h1>{greeting()}</h1>
 }
 ```
 
@@ -175,33 +172,31 @@ function HomePage() {
 Use `useServerFn` to call server functions from Solid components with automatic redirect handling:
 
 ```tsx
-import { createServerFn, useServerFn } from "@tanstack/solid-start";
-import { createSignal } from "solid-js";
+import { createServerFn, useServerFn } from '@tanstack/solid-start'
+import { createSignal } from 'solid-js'
 
-const updatePost = createServerFn({ method: "POST" })
-	.inputValidator((data: { id: string; title: string }) => data)
-	.handler(async ({ data }) => {
-		await db.posts.update(data.id, { title: data.title });
-		return { success: true };
-	});
+const updatePost = createServerFn({ method: 'POST' })
+  .inputValidator((data: { id: string; title: string }) => data)
+  .handler(async ({ data }) => {
+    await db.posts.update(data.id, { title: data.title })
+    return { success: true }
+  })
 
 function EditPostForm(props: { postId: string }) {
-	const updatePostFn = useServerFn(updatePost);
-	const [title, setTitle] = createSignal("");
+  const updatePostFn = useServerFn(updatePost)
+  const [title, setTitle] = createSignal('')
 
-	return (
-		<form
-			onSubmit={async (e) => {
-				e.preventDefault();
-				await updatePostFn({
-					data: { id: props.postId, title: title() }
-				});
-			}}
-		>
-			<input value={title()} onInput={(e) => setTitle(e.target.value)} />
-			<button type="submit">Save</button>
-		</form>
-	);
+  return (
+    <form
+      onSubmit={async (e) => {
+        e.preventDefault()
+        await updatePostFn({ data: { id: props.postId, title: title() } })
+      }}
+    >
+      <input value={title()} onInput={(e) => setTitle(e.target.value)} />
+      <button type="submit">Save</button>
+    </form>
+  )
 }
 ```
 
@@ -241,13 +236,13 @@ All hooks from `@tanstack/solid-router` work in Start. Most return `Accessor<T>`
 
 ```tsx
 // WRONG — this is the SPA router, NOT Start
-import { createServerFn } from "@tanstack/solid-router";
+import { createServerFn } from '@tanstack/solid-router'
 
 // CORRECT — server functions come from solid-start
-import { createServerFn } from "@tanstack/solid-start";
+import { createServerFn } from '@tanstack/solid-start'
 
 // CORRECT — routing APIs come from solid-router (re-exported by Start too)
-import { createFileRoute, Link } from "@tanstack/solid-router";
+import { createFileRoute, Link } from '@tanstack/solid-router'
 ```
 
 ### 2. CRITICAL: Forgetting to call Accessor
@@ -256,12 +251,12 @@ Most hooks return `Accessor<T>`. Must call to read the value.
 
 ```tsx
 // WRONG
-const data = Route.useLoaderData();
-return <h1>{data.message}</h1>;
+const data = Route.useLoaderData()
+return <h1>{data.message}</h1>
 
 // CORRECT
-const data = Route.useLoaderData();
-return <h1>{data().message}</h1>;
+const data = Route.useLoaderData()
+return <h1>{data().message}</h1>
 ```
 
 ### 3. HIGH: Missing Scripts component
@@ -272,10 +267,10 @@ Without `<Scripts />` in the root route's `<body>`, client JavaScript doesn't lo
 
 ```ts
 // WRONG
-plugins: [solidPlugin(), tanstackStart()];
+plugins: [solidPlugin(), tanstackStart()]
 
 // CORRECT
-plugins: [tanstackStart(), solidPlugin()];
+plugins: [tanstackStart(), solidPlugin()]
 ```
 
 ## Cross-References

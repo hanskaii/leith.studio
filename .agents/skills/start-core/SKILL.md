@@ -1,17 +1,17 @@
 ---
 name: start-core
 description: >-
-    Core overview for TanStack Start: tanstackStart() Vite plugin,
-    getRouter() factory, root route document shell (HeadContent,
-    Scripts, Outlet), client/server entry points, routeTree.gen.ts,
-    tsconfig configuration. Entry point for all Start skills.
+  Core overview for TanStack Start: tanstackStart() Vite plugin,
+  getRouter() factory, root route document shell (HeadContent,
+  Scripts, Outlet), client/server entry points, routeTree.gen.ts,
+  tsconfig configuration. Entry point for all Start skills.
 type: core
 library: tanstack-start
-library_version: "1.166.2"
+library_version: '1.166.2'
 sources:
-    - TanStack/router:docs/start/framework/react/build-from-scratch.md
-    - TanStack/router:docs/start/framework/react/quick-start.md
-    - TanStack/router:docs/start/framework/react/guide/routing.md
+  - TanStack/router:docs/start/framework/react/build-from-scratch.md
+  - TanStack/router:docs/start/framework/react/quick-start.md
+  - TanStack/router:docs/start/framework/react/guide/routing.md
 ---
 
 # TanStack Start Core
@@ -68,33 +68,33 @@ npm i -D vite @vitejs/plugin-react typescript
 
 ```ts
 // vite.config.ts
-import { defineConfig } from "vite";
-import { tanstackStart } from "@tanstack/react-start/plugin/vite";
-import viteReact from "@vitejs/plugin-react";
+import { defineConfig } from 'vite'
+import { tanstackStart } from '@tanstack/react-start/plugin/vite'
+import viteReact from '@vitejs/plugin-react'
 
 export default defineConfig({
-	plugins: [
-		// MUST come before react()
-		tanstackStart(),
-		viteReact()
-	]
-});
+  plugins: [
+    // MUST come before react()
+    tanstackStart(),
+    viteReact(),
+  ],
+})
 ```
 
 ### 3. Create Router Factory
 
 ```tsx
 // src/router.tsx
-import { createRouter } from "@tanstack/react-router";
-import { routeTree } from "./routeTree.gen";
+import { createRouter } from '@tanstack/react-router'
+import { routeTree } from './routeTree.gen'
 
 export function getRouter() {
-	const router = createRouter({
-		routeTree,
-		scrollRestoration: true
-	});
+  const router = createRouter({
+    routeTree,
+    scrollRestoration: true,
+  })
 
-	return router;
+  return router
 }
 ```
 
@@ -102,40 +102,37 @@ export function getRouter() {
 
 ```tsx
 // src/routes/__root.tsx
-import type { ReactNode } from "react";
+import type { ReactNode } from 'react'
 import {
-	Outlet,
-	createRootRoute,
-	HeadContent,
-	Scripts
-} from "@tanstack/react-router";
+  Outlet,
+  createRootRoute,
+  HeadContent,
+  Scripts,
+} from '@tanstack/react-router'
 
 export const Route = createRootRoute({
-	head: () => ({
-		meta: [
-			{ charSet: "utf-8" },
-			{
-				name: "viewport",
-				content: "width=device-width, initial-scale=1"
-			},
-			{ title: "My App" }
-		]
-	}),
-	component: RootComponent
-});
+  head: () => ({
+    meta: [
+      { charSet: 'utf-8' },
+      { name: 'viewport', content: 'width=device-width, initial-scale=1' },
+      { title: 'My App' },
+    ],
+  }),
+  component: RootComponent,
+})
 
 function RootComponent() {
-	return (
-		<html>
-			<head>
-				<HeadContent />
-			</head>
-			<body>
-				<Outlet />
-				<Scripts />
-			</body>
-		</html>
-	);
+  return (
+    <html>
+      <head>
+        <HeadContent />
+      </head>
+      <body>
+        <Outlet />
+        <Scripts />
+      </body>
+    </html>
+  )
 }
 ```
 
@@ -143,21 +140,21 @@ function RootComponent() {
 
 ```tsx
 // src/routes/index.tsx
-import { createFileRoute } from "@tanstack/react-router";
-import { createServerFn } from "@tanstack/react-start";
+import { createFileRoute } from '@tanstack/react-router'
+import { createServerFn } from '@tanstack/react-start'
 
-const getGreeting = createServerFn({ method: "GET" }).handler(async () => {
-	return { message: "Hello from the server!" };
-});
+const getGreeting = createServerFn({ method: 'GET' }).handler(async () => {
+  return { message: 'Hello from the server!' }
+})
 
-export const Route = createFileRoute("/")({
-	loader: () => getGreeting(),
-	component: HomePage
-});
+export const Route = createFileRoute('/')({
+  loader: () => getGreeting(),
+  component: HomePage,
+})
 
 function HomePage() {
-	const data = Route.useLoaderData();
-	return <h1>{data.message}</h1>;
+  const data = Route.useLoaderData()
+  return <h1>{data.message}</h1>
 }
 ```
 
@@ -167,10 +164,10 @@ function HomePage() {
 
 ```ts
 // WRONG — route generation and server function compilation fail
-plugins: [react(), tanstackStart()];
+plugins: [react(), tanstackStart()]
 
 // CORRECT — Start plugin must come first
-plugins: [tanstackStart(), react()];
+plugins: [tanstackStart(), react()]
 ```
 
 ### 2. HIGH: Enabling verbatimModuleSyntax in tsconfig
@@ -184,31 +181,31 @@ The `<Scripts />` component must be rendered in the `<body>` of the root route. 
 ```tsx
 // WRONG — no Scripts
 function RootComponent() {
-	return (
-		<html>
-			<head>
-				<HeadContent />
-			</head>
-			<body>
-				<Outlet />
-			</body>
-		</html>
-	);
+  return (
+    <html>
+      <head>
+        <HeadContent />
+      </head>
+      <body>
+        <Outlet />
+      </body>
+    </html>
+  )
 }
 
 // CORRECT — Scripts in body
 function RootComponent() {
-	return (
-		<html>
-			<head>
-				<HeadContent />
-			</head>
-			<body>
-				<Outlet />
-				<Scripts />
-			</body>
-		</html>
-	);
+  return (
+    <html>
+      <head>
+        <HeadContent />
+      </head>
+      <body>
+        <Outlet />
+        <Scripts />
+      </body>
+    </html>
+  )
 }
 ```
 

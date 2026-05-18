@@ -1,21 +1,21 @@
 ---
 name: compositions/router-query
 description: >-
-    Integrating TanStack Router with TanStack Query: queryClient
-    in router context, ensureQueryData/prefetchQuery in loaders,
-    useSuspenseQuery in components, defaultPreloadStaleTime: 0,
-    setupRouterSsrQueryIntegration for SSR dehydration/hydration
-    and streaming, per-request QueryClient isolation.
+  Integrating TanStack Router with TanStack Query: queryClient
+  in router context, ensureQueryData/prefetchQuery in loaders,
+  useSuspenseQuery in components, defaultPreloadStaleTime: 0,
+  setupRouterSsrQueryIntegration for SSR dehydration/hydration
+  and streaming, per-request QueryClient isolation.
 type: composition
 library: tanstack-router
-library_version: "1.166.2"
+library_version: '1.166.2'
 requires:
-    - router-core
-    - router-core/data-loading
-    - react-router
+  - router-core
+  - router-core/data-loading
+  - react-router
 sources:
-    - TanStack/router:docs/router/guide/external-data-loading.md
-    - TanStack/router:docs/router/integrations/query.md
+  - TanStack/router:docs/router/guide/external-data-loading.md
+  - TanStack/router:docs/router/integrations/query.md
 ---
 
 # TanStack Router + TanStack Query Integration
@@ -34,38 +34,36 @@ This skill covers coordinating TanStack Query as an external data cache with Tan
 
 ```tsx
 // src/main.tsx
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import {
-	RouterProvider,
-	createRouter,
-	createRootRouteWithContext
-} from "@tanstack/react-router";
-import { routeTree } from "./routeTree.gen";
+  RouterProvider,
+  createRouter,
+  createRootRouteWithContext,
+} from '@tanstack/react-router'
+import { routeTree } from './routeTree.gen'
 
 // Root route declares that router context includes queryClient
 // (root route file creates it with createRootRouteWithContext — see below)
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient()
 
 const router = createRouter({
-	routeTree,
-	defaultPreloadStaleTime: 0, // Let Query manage caching
-	context: { queryClient },
-	Wrap: ({ children }) => (
-		<QueryClientProvider client={queryClient}>
-			{children}
-		</QueryClientProvider>
-	)
-});
+  routeTree,
+  defaultPreloadStaleTime: 0, // Let Query manage caching
+  context: { queryClient },
+  Wrap: ({ children }) => (
+    <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+  ),
+})
 
-declare module "@tanstack/react-router" {
-	interface Register {
-		router: typeof router;
-	}
+declare module '@tanstack/react-router' {
+  interface Register {
+    router: typeof router
+  }
 }
 
 function App() {
-	return <RouterProvider router={router} />;
+  return <RouterProvider router={router} />
 }
 ```
 
@@ -73,45 +71,43 @@ function App() {
 
 ```tsx
 // src/routes/__root.tsx
-import { createRootRouteWithContext, Outlet } from "@tanstack/react-router";
-import type { QueryClient } from "@tanstack/react-query";
+import { createRootRouteWithContext, Outlet } from '@tanstack/react-router'
+import type { QueryClient } from '@tanstack/react-query'
 
 // Double parentheses: factory pattern
 export const Route = createRootRouteWithContext<{
-	queryClient: QueryClient;
+  queryClient: QueryClient
 }>()({
-	component: () => <Outlet />
-});
+  component: () => <Outlet />,
+})
 ```
 
 ### SSR-Safe Setup
 
 ```tsx
 // src/router.tsx
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { createRouter } from "@tanstack/react-router";
-import { routeTree } from "./routeTree.gen";
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import { createRouter } from '@tanstack/react-router'
+import { routeTree } from './routeTree.gen'
 
 export function createAppRouter() {
-	// Fresh QueryClient per request — prevents data leaking between SSR requests
-	const queryClient = new QueryClient();
+  // Fresh QueryClient per request — prevents data leaking between SSR requests
+  const queryClient = new QueryClient()
 
-	return createRouter({
-		routeTree,
-		defaultPreloadStaleTime: 0,
-		context: { queryClient },
-		Wrap: ({ children }) => (
-			<QueryClientProvider client={queryClient}>
-				{children}
-			</QueryClientProvider>
-		)
-	});
+  return createRouter({
+    routeTree,
+    defaultPreloadStaleTime: 0,
+    context: { queryClient },
+    Wrap: ({ children }) => (
+      <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+    ),
+  })
 }
 
-declare module "@tanstack/react-router" {
-	interface Register {
-		router: ReturnType<typeof createAppRouter>;
-	}
+declare module '@tanstack/react-router' {
+  interface Register {
+    router: ReturnType<typeof createAppRouter>
+  }
 }
 ```
 
@@ -125,28 +121,28 @@ npm install @tanstack/react-router-ssr-query
 
 ```tsx
 // src/router.tsx
-import { QueryClient } from "@tanstack/react-query";
-import { createRouter } from "@tanstack/react-router";
-import { setupRouterSsrQueryIntegration } from "@tanstack/react-router-ssr-query";
-import { routeTree } from "./routeTree.gen";
+import { QueryClient } from '@tanstack/react-query'
+import { createRouter } from '@tanstack/react-router'
+import { setupRouterSsrQueryIntegration } from '@tanstack/react-router-ssr-query'
+import { routeTree } from './routeTree.gen'
 
 export function createAppRouter() {
-	const queryClient = new QueryClient();
+  const queryClient = new QueryClient()
 
-	const router = createRouter({
-		routeTree,
-		defaultPreloadStaleTime: 0,
-		context: { queryClient }
-	});
+  const router = createRouter({
+    routeTree,
+    defaultPreloadStaleTime: 0,
+    context: { queryClient },
+  })
 
-	setupRouterSsrQueryIntegration({
-		router,
-		queryClient
-		// wrapQueryClient: true (default — wraps with QueryClientProvider)
-		// handleRedirects: true (default — handles redirect() from queries)
-	});
+  setupRouterSsrQueryIntegration({
+    router,
+    queryClient,
+    // wrapQueryClient: true (default — wraps with QueryClientProvider)
+    // handleRedirects: true (default — handles redirect() from queries)
+  })
 
-	return router;
+  return router
 }
 ```
 
@@ -160,30 +156,28 @@ The integration:
 
 ```tsx
 // src/router.tsx
-import { QueryClient, dehydrate, hydrate } from "@tanstack/react-query";
-import { QueryClientProvider } from "@tanstack/react-query";
-import { createRouter } from "@tanstack/react-router";
-import { routeTree } from "./routeTree.gen";
+import { QueryClient, dehydrate, hydrate } from '@tanstack/react-query'
+import { QueryClientProvider } from '@tanstack/react-query'
+import { createRouter } from '@tanstack/react-router'
+import { routeTree } from './routeTree.gen'
 
 export function createAppRouter() {
-	const queryClient = new QueryClient();
+  const queryClient = new QueryClient()
 
-	return createRouter({
-		routeTree,
-		defaultPreloadStaleTime: 0,
-		context: { queryClient },
-		dehydrate: () => ({
-			queryClientState: dehydrate(queryClient)
-		}),
-		hydrate: (dehydrated) => {
-			hydrate(queryClient, dehydrated.queryClientState);
-		},
-		Wrap: ({ children }) => (
-			<QueryClientProvider client={queryClient}>
-				{children}
-			</QueryClientProvider>
-		)
-	});
+  return createRouter({
+    routeTree,
+    defaultPreloadStaleTime: 0,
+    context: { queryClient },
+    dehydrate: () => ({
+      queryClientState: dehydrate(queryClient),
+    }),
+    hydrate: (dehydrated) => {
+      hydrate(queryClient, dehydrated.queryClientState)
+    },
+    Wrap: ({ children }) => (
+      <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+    ),
+  })
 }
 ```
 
@@ -193,40 +187,40 @@ This is the recommended pattern. The loader ensures data is in the cache before 
 
 ```tsx
 // src/routes/posts.tsx
-import { queryOptions, useSuspenseQuery } from "@tanstack/react-query";
-import { createFileRoute } from "@tanstack/react-router";
+import { queryOptions, useSuspenseQuery } from '@tanstack/react-query'
+import { createFileRoute } from '@tanstack/react-router'
 
 interface Post {
-	id: string;
-	title: string;
+  id: string
+  title: string
 }
 
 const postsQueryOptions = queryOptions({
-	queryKey: ["posts"],
-	queryFn: (): Promise<Array<Post>> =>
-		fetch("/api/posts").then((r) => r.json())
-});
+  queryKey: ['posts'],
+  queryFn: (): Promise<Array<Post>> =>
+    fetch('/api/posts').then((r) => r.json()),
+})
 
-export const Route = createFileRoute("/posts")({
-	loader: ({ context }) => {
-		// ensureQueryData returns cached data if available, fetches if not in cache
-		// To also refetch stale data, pass revalidateIfStale: true
-		return context.queryClient.ensureQueryData(postsQueryOptions);
-	},
-	component: PostsPage
-});
+export const Route = createFileRoute('/posts')({
+  loader: ({ context }) => {
+    // ensureQueryData returns cached data if available, fetches if not in cache
+    // To also refetch stale data, pass revalidateIfStale: true
+    return context.queryClient.ensureQueryData(postsQueryOptions)
+  },
+  component: PostsPage,
+})
 
 function PostsPage() {
-	// useSuspenseQuery subscribes to cache — gets background updates
-	const { data: posts } = useSuspenseQuery(postsQueryOptions);
+  // useSuspenseQuery subscribes to cache — gets background updates
+  const { data: posts } = useSuspenseQuery(postsQueryOptions)
 
-	return (
-		<ul>
-			{posts.map((post) => (
-				<li key={post.id}>{post.title}</li>
-			))}
-		</ul>
-	);
+  return (
+    <ul>
+      {posts.map((post) => (
+        <li key={post.id}>{post.title}</li>
+      ))}
+    </ul>
+  )
 }
 ```
 
@@ -234,35 +228,33 @@ function PostsPage() {
 
 ```tsx
 // src/routes/posts/$postId.tsx
-import { queryOptions, useSuspenseQuery } from "@tanstack/react-query";
-import { createFileRoute } from "@tanstack/react-router";
+import { queryOptions, useSuspenseQuery } from '@tanstack/react-query'
+import { createFileRoute } from '@tanstack/react-router'
 
 interface Post {
-	id: string;
-	title: string;
-	content: string;
+  id: string
+  title: string
+  content: string
 }
 
 const postQueryOptions = (postId: string) =>
-	queryOptions({
-		queryKey: ["posts", postId],
-		queryFn: () => fetch(`/api/posts/${postId}`).then((r) => r.json())
-	});
+  queryOptions({
+    queryKey: ['posts', postId],
+    queryFn: () => fetch(`/api/posts/${postId}`).then((r) => r.json()),
+  })
 
-export const Route = createFileRoute("/posts/$postId")({
-	loader: ({ context, params }) => {
-		return context.queryClient.ensureQueryData(
-			postQueryOptions(params.postId)
-		);
-	},
-	component: PostPage
-});
+export const Route = createFileRoute('/posts/$postId')({
+  loader: ({ context, params }) => {
+    return context.queryClient.ensureQueryData(postQueryOptions(params.postId))
+  },
+  component: PostPage,
+})
 
 function PostPage() {
-	const { postId } = Route.useParams();
-	const { data: post } = useSuspenseQuery(postQueryOptions(postId));
+  const { postId } = Route.useParams()
+  const { data: post } = useSuspenseQuery(postQueryOptions(postId))
 
-	return <article>{post.title}</article>;
+  return <article>{post.title}</article>
 }
 ```
 
@@ -271,71 +263,71 @@ function PostPage() {
 For non-critical data, start the fetch without blocking navigation:
 
 ```tsx
-import { useQuery, useSuspenseQuery } from "@tanstack/react-query";
+import { useQuery, useSuspenseQuery } from '@tanstack/react-query'
 
-export const Route = createFileRoute("/dashboard")({
-	loader: ({ context }) => {
-		// Await critical data
-		const user = context.queryClient.ensureQueryData(userQueryOptions);
+export const Route = createFileRoute('/dashboard')({
+  loader: ({ context }) => {
+    // Await critical data
+    const user = context.queryClient.ensureQueryData(userQueryOptions)
 
-		// Start non-critical fetch without awaiting — streams during SSR
-		context.queryClient.prefetchQuery(analyticsQueryOptions);
+    // Start non-critical fetch without awaiting — streams during SSR
+    context.queryClient.prefetchQuery(analyticsQueryOptions)
 
-		return user;
-	},
-	component: Dashboard
-});
+    return user
+  },
+  component: Dashboard,
+})
 
 function Dashboard() {
-	// Critical: suspense (data ready immediately)
-	const { data: user } = useSuspenseQuery(userQueryOptions);
+  // Critical: suspense (data ready immediately)
+  const { data: user } = useSuspenseQuery(userQueryOptions)
 
-	// Non-critical: regular query (shows loading state)
-	const { data: analytics, isLoading } = useQuery(analyticsQueryOptions);
+  // Non-critical: regular query (shows loading state)
+  const { data: analytics, isLoading } = useQuery(analyticsQueryOptions)
 
-	return (
-		<div>
-			<h1>Welcome {user.name}</h1>
-			{isLoading ? <Skeleton /> : <AnalyticsChart data={analytics} />}
-		</div>
-	);
+  return (
+    <div>
+      <h1>Welcome {user.name}</h1>
+      {isLoading ? <Skeleton /> : <AnalyticsChart data={analytics} />}
+    </div>
+  )
 }
 ```
 
 ## Error Handling with `useQueryErrorResetBoundary`
 
 ```tsx
-import { useEffect } from "react";
-import { useQueryErrorResetBoundary } from "@tanstack/react-query";
-import { useRouter } from "@tanstack/react-router";
+import { useEffect } from 'react'
+import { useQueryErrorResetBoundary } from '@tanstack/react-query'
+import { useRouter } from '@tanstack/react-router'
 
-export const Route = createFileRoute("/posts")({
-	loader: ({ context }) =>
-		context.queryClient.ensureQueryData(postsQueryOptions),
-	errorComponent: PostsErrorComponent,
-	component: PostsPage
-});
+export const Route = createFileRoute('/posts')({
+  loader: ({ context }) =>
+    context.queryClient.ensureQueryData(postsQueryOptions),
+  errorComponent: PostsErrorComponent,
+  component: PostsPage,
+})
 
 function PostsErrorComponent({
-	error,
-	reset
+  error,
+  reset,
 }: {
-	error: Error;
-	reset: () => void;
+  error: Error
+  reset: () => void
 }) {
-	const router = useRouter();
-	const queryErrorResetBoundary = useQueryErrorResetBoundary();
+  const router = useRouter()
+  const queryErrorResetBoundary = useQueryErrorResetBoundary()
 
-	useEffect(() => {
-		queryErrorResetBoundary.reset();
-	}, [queryErrorResetBoundary]);
+  useEffect(() => {
+    queryErrorResetBoundary.reset()
+  }, [queryErrorResetBoundary])
 
-	return (
-		<div>
-			<p>{error.message}</p>
-			<button onClick={() => router.invalidate()}>Retry</button>
-		</div>
-	);
+  return (
+    <div>
+      <p>{error.message}</p>
+      <button onClick={() => router.invalidate()}>Retry</button>
+    </div>
+  )
 }
 ```
 
@@ -347,13 +339,13 @@ Router has a built-in preload cache (default `staleTime` for preloads is 30s). T
 
 ```tsx
 // WRONG — Router's preload cache serves stale data, Query never refetches
-const router = createRouter({ routeTree });
+const router = createRouter({ routeTree })
 
 // CORRECT — disable Router's preload cache, let Query manage freshness
 const router = createRouter({
-	routeTree,
-	defaultPreloadStaleTime: 0
-});
+  routeTree,
+  defaultPreloadStaleTime: 0,
+})
 ```
 
 ### 2. HIGH: Creating QueryClient outside `createRouter` for SSR
@@ -362,21 +354,21 @@ A module-level singleton `QueryClient` is shared across all server requests, lea
 
 ```tsx
 // WRONG — shared across SSR requests
-const queryClient = new QueryClient();
+const queryClient = new QueryClient()
 export function createAppRouter() {
-	return createRouter({
-		routeTree,
-		context: { queryClient }
-	});
+  return createRouter({
+    routeTree,
+    context: { queryClient },
+  })
 }
 
 // CORRECT — new QueryClient per createAppRouter call
 export function createAppRouter() {
-	const queryClient = new QueryClient();
-	return createRouter({
-		routeTree,
-		context: { queryClient }
-	});
+  const queryClient = new QueryClient()
+  return createRouter({
+    routeTree,
+    context: { queryClient },
+  })
 }
 ```
 
@@ -387,18 +379,18 @@ export function createAppRouter() {
 ```tsx
 // WRONG — blocks navigation, no streaming benefit
 loader: async ({ context }) => {
-	await context.queryClient.prefetchQuery(analyticsQueryOptions);
-};
+  await context.queryClient.prefetchQuery(analyticsQueryOptions)
+}
 
 // CORRECT — fire and forget for streaming
 loader: ({ context }) => {
-	context.queryClient.prefetchQuery(analyticsQueryOptions);
-};
+  context.queryClient.prefetchQuery(analyticsQueryOptions)
+}
 
 // If you need to block (critical data), use ensureQueryData instead:
 loader: ({ context }) => {
-	return context.queryClient.ensureQueryData(criticalQueryOptions);
-};
+  return context.queryClient.ensureQueryData(criticalQueryOptions)
+}
 ```
 
 ### 4. HIGH: Missing double parentheses on `createRootRouteWithContext`
@@ -408,13 +400,13 @@ loader: ({ context }) => {
 ```tsx
 // WRONG — passing options to the factory, not the returned function
 const rootRoute = createRootRouteWithContext<{ queryClient: QueryClient }>({
-	component: RootComponent
-});
+  component: RootComponent,
+})
 
 // CORRECT — double call: factory()({options})
 const rootRoute = createRootRouteWithContext<{ queryClient: QueryClient }>()({
-	component: RootComponent
-});
+  component: RootComponent,
+})
 ```
 
 ## Tension: Built-In SWR Cache vs External Cache

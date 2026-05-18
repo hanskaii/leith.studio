@@ -9,9 +9,9 @@ CDP-powered browser tools that let agents scrape, screenshot, and interact with 
 ```jsonc
 // wrangler.jsonc
 {
-	"browser": { "binding": "BROWSER" },
-	"worker_loaders": [{ "binding": "LOADER" }],
-	"compatibility_flags": ["nodejs_compat"]
+  "browser": { "binding": "BROWSER" },
+  "worker_loaders": [{ "binding": "LOADER" }],
+  "compatibility_flags": ["nodejs_compat"]
 }
 ```
 
@@ -21,28 +21,28 @@ CDP-powered browser tools that let agents scrape, screenshot, and interact with 
 import { createBrowserTools } from "agents/browser/ai";
 
 export class MyAgent extends AIChatAgent<Env> {
-	async onChatMessage(onFinish) {
-		const browserTools = createBrowserTools({
-			browser: this.env.BROWSER,
-			loader: this.env.LOADER
-		});
+  async onChatMessage(onFinish) {
+    const browserTools = createBrowserTools({
+      browser: this.env.BROWSER,
+      loader: this.env.LOADER
+    });
 
-		const result = streamText({
-			model: openai("gpt-4o"),
-			messages: await convertToModelMessages(this.messages),
-			tools: { ...myTools, ...browserTools },
-			onFinish
-		});
-		return result.toUIMessageStreamResponse();
-	}
+    const result = streamText({
+      model: openai("gpt-4o"),
+      messages: await convertToModelMessages(this.messages),
+      tools: { ...myTools, ...browserTools },
+      onFinish
+    });
+    return result.toUIMessageStreamResponse();
+  }
 }
 ```
 
 ## Available Tools
 
-| Tool              | Purpose                                     |
-| ----------------- | ------------------------------------------- |
-| `browser_search`  | Search the web and return results           |
+| Tool | Purpose |
+|------|---------|
+| `browser_search` | Search the web and return results |
 | `browser_execute` | Navigate to URL, execute JS, return results |
 
 The LLM writes async JavaScript IIFEs that run in a fresh browser session.

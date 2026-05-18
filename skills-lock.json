@@ -1,521 +1,521 @@
 {
-	"version": 1,
-	"skills": {
-		"agents-sdk": {
-			"source": "cloudflare/skills",
-			"sourceType": "github",
-			"skillPath": "skills/agents-sdk/SKILL.md",
-			"computedHash": "01515ef239bee4ab1464d0eb735a857de3832a304fccd9315bf439837c053e62"
-		},
-		"algorithmic-art": {
-			"source": "anthropics/skills",
-			"sourceType": "github",
-			"skillPath": "skills/algorithmic-art/SKILL.md",
-			"computedHash": "987b24aa98171a0d3690420173b2cdb6eaafd57981ed716b5d50371affa82ea3"
-		},
-		"better-auth-best-practices": {
-			"source": "better-auth/skills",
-			"sourceType": "github",
-			"skillPath": "better-auth/best-practices/SKILL.md",
-			"computedHash": "9ab075b5061be2a5f299c10505667345cc1ec76e8de4120901cfd586643e776f"
-		},
-		"better-auth-security-best-practices": {
-			"source": "better-auth/skills",
-			"sourceType": "github",
-			"skillPath": "security/SKILL.md",
-			"computedHash": "ed38caef4b297cc399d717258d6ea4e6ecb8894c453c83450064c7e7c6e5cc02"
-		},
-		"billing-sdk": {
-			"source": "dodopayments/skills",
-			"sourceType": "github",
-			"skillPath": "dodo-payments/billing-sdk/SKILL.md",
-			"computedHash": "f146915e1ec917908ae3d9e2ea2e9a7f9d4629998dfe3f9f954dc5ce100db68d"
-		},
-		"brand-guidelines": {
-			"source": "anthropics/skills",
-			"sourceType": "github",
-			"skillPath": "skills/brand-guidelines/SKILL.md",
-			"computedHash": "c82f0b24cdcc7e2693a963d30c810558b7bb89ed84508b2328228d21256ef865"
-		},
-		"brandkit": {
-			"source": "Leonxlnx/taste-skill",
-			"sourceType": "github",
-			"skillPath": "skills/brandkit/SKILL.md",
-			"computedHash": "735007879f5110aeae1e981a53fe74a12afde70347f9773dacd50e4697a091bf"
-		},
-		"canvas-design": {
-			"source": "anthropics/skills",
-			"sourceType": "github",
-			"skillPath": "skills/canvas-design/SKILL.md",
-			"computedHash": "4e8bbc31d3b159efdd32d31a63ba8cd5a44d84911e924c1f2c709c50cbcdd0ec"
-		},
-		"checkout-integration": {
-			"source": "dodopayments/skills",
-			"sourceType": "github",
-			"skillPath": "dodo-payments/checkout-integration/SKILL.md",
-			"computedHash": "d1f4db7aed0b940b400cb7e25d047df9b4b3e86d529e00a0364b6b3a8321689e"
-		},
-		"claude-api": {
-			"source": "anthropics/skills",
-			"sourceType": "github",
-			"skillPath": "skills/claude-api/SKILL.md",
-			"computedHash": "6e1f9a5c9e26aa8fe54d16b7bb636c7d96f708f3442cf6806d3ddeba51b76585"
-		},
-		"cloudflare": {
-			"source": "cloudflare/skills",
-			"sourceType": "github",
-			"skillPath": "skills/cloudflare/SKILL.md",
-			"computedHash": "44858fa40396bc5a664e816aac0409fad0a8c801b5126f249bf7c29c0e188f6c"
-		},
-		"cloudflare-email-service": {
-			"source": "cloudflare/skills",
-			"sourceType": "github",
-			"skillPath": "skills/cloudflare-email-service/SKILL.md",
-			"computedHash": "72992561f31a3e70cdaf7353610b8d2739fda6a6d519163539f658632f9c00d1"
-		},
-		"compositions/router-query": {
-			"source": "tanstack/router",
-			"sourceType": "github",
-			"skillPath": "packages/react-router/skills/compositions/router-query/SKILL.md",
-			"computedHash": "8f6610e21e062c0521eecc65298415e0aab928e6d35699471451645cf0b8f637"
-		},
-		"create-auth-skill": {
-			"source": "better-auth/skills",
-			"sourceType": "github",
-			"skillPath": "better-auth/create-auth/SKILL.md",
-			"computedHash": "393e8d2d795fa5797c9a4e0665f29183ea2e140233db59746d510340a10456e6"
-		},
-		"credit-based-billing": {
-			"source": "dodopayments/skills",
-			"sourceType": "github",
-			"skillPath": "dodo-payments/credit-based-billing/SKILL.md",
-			"computedHash": "498dc2f80f914407515872b2896aa1eaab4560adbc246d09f6bf52a7195ad0f8"
-		},
-		"design-taste-frontend": {
-			"source": "Leonxlnx/taste-skill",
-			"sourceType": "github",
-			"skillPath": "skills/taste-skill/SKILL.md",
-			"computedHash": "d823593e24d7493ab740db8f082cbe3b148ed29af9e804d11f5302ad79e4b96d"
-		},
-		"doc-coauthoring": {
-			"source": "anthropics/skills",
-			"sourceType": "github",
-			"skillPath": "skills/doc-coauthoring/SKILL.md",
-			"computedHash": "62cd7744438ee2aecc986c520bb603988a78ff6aaaf70a471bf4584fe0b78dae"
-		},
-		"docx": {
-			"source": "anthropics/skills",
-			"sourceType": "github",
-			"skillPath": "skills/docx/SKILL.md",
-			"computedHash": "150be87ff7b18f273ad07da303adb1cf2ca21cc3e76db7a2cf0373405178a278"
-		},
-		"dodo-best-practices": {
-			"source": "dodopayments/skills",
-			"sourceType": "github",
-			"skillPath": "dodo-payments/best-practices/SKILL.md",
-			"computedHash": "b91766c293068ca85b613e12b7064cd73bf062c4793d31e02a9ef94389b7db1d"
-		},
-		"durable-objects": {
-			"source": "cloudflare/skills",
-			"sourceType": "github",
-			"skillPath": "skills/durable-objects/SKILL.md",
-			"computedHash": "afa5e9dfcbbe3b70107d9f263a1c183ef89afbb5eb97f42be01cad7bd942958f"
-		},
-		"email-and-password-best-practices": {
-			"source": "better-auth/skills",
-			"sourceType": "github",
-			"skillPath": "better-auth/emailAndPassword/SKILL.md",
-			"computedHash": "7786d722fa682b3d6a99793e73a9d51b59becefa595676134a993020633e068f"
-		},
-		"emil-design-eng": {
-			"source": "emilkowalski/skill",
-			"sourceType": "github",
-			"skillPath": "skills/emil-design-eng/SKILL.md",
-			"computedHash": "ac3fc5b4e206488ffc408a2806f829bb2e5eaf518fded09be34790685c2b3a0d"
-		},
-		"frontend-design": {
-			"source": "anthropics/skills",
-			"sourceType": "github",
-			"skillPath": "skills/frontend-design/SKILL.md",
-			"computedHash": "516bd2154eb843a8240e43d5b285229129853114ad7075a5e141e1c08e408c84"
-		},
-		"full-output-enforcement": {
-			"source": "Leonxlnx/taste-skill",
-			"sourceType": "github",
-			"skillPath": "skills/output-skill/SKILL.md",
-			"computedHash": "524f7c7950c3fde726101613f630140411c7d080e63be718687f4b38f919be81"
-		},
-		"gpt-taste": {
-			"source": "Leonxlnx/taste-skill",
-			"sourceType": "github",
-			"skillPath": "skills/gpt-tasteskill/SKILL.md",
-			"computedHash": "7bd1bfdda0e51016ca222693401a65fc0dd9bf9487e0bd5b1740ba510f6f963a"
-		},
-		"high-end-visual-design": {
-			"source": "Leonxlnx/taste-skill",
-			"sourceType": "github",
-			"skillPath": "skills/soft-skill/SKILL.md",
-			"computedHash": "f730e4132775f13eea19e3dc39afc6bb453cfc0498872b127ad8f0d47cfd802d"
-		},
-		"hono": {
-			"source": "yusukebe/hono-skill",
-			"sourceType": "github",
-			"skillPath": "skills/hono/SKILL.md",
-			"computedHash": "24bad73932f309cec73a5a9171b838f59050990a634d8590c2d2c204507e64f9"
-		},
-		"image-to-code": {
-			"source": "Leonxlnx/taste-skill",
-			"sourceType": "github",
-			"skillPath": "skills/image-to-code-skill/SKILL.md",
-			"computedHash": "3d2ac14d956fdafc5500d2108b90895e134d847f9f199e7f1d18bf1f814cf7c8"
-		},
-		"imagegen-frontend-mobile": {
-			"source": "Leonxlnx/taste-skill",
-			"sourceType": "github",
-			"skillPath": "skills/imagegen-frontend-mobile/SKILL.md",
-			"computedHash": "7c1d1dc59cd0df4063b8621af543bf5dea1d576b261507e17b0323c69680b048"
-		},
-		"imagegen-frontend-web": {
-			"source": "Leonxlnx/taste-skill",
-			"sourceType": "github",
-			"skillPath": "skills/imagegen-frontend-web/SKILL.md",
-			"computedHash": "27255c7c50181e58add156b2aa2bd5325285b85f04027e4c8b73742d98d7be0a"
-		},
-		"impeccable": {
-			"source": "pbakaus/impeccable",
-			"sourceType": "github",
-			"skillPath": "skill/SKILL.md",
-			"computedHash": "c8f645c3e9aace8baf528021165168bac77d4f761f0ab7baf45e06e01691500f"
-		},
-		"industrial-brutalist-ui": {
-			"source": "Leonxlnx/taste-skill",
-			"sourceType": "github",
-			"skillPath": "skills/brutalist-skill/SKILL.md",
-			"computedHash": "e66e5a2a8b73cef79ab6546459c665e8b983645689c5f3772f7eed8b9f1e8e0e"
-		},
-		"internal-comms": {
-			"source": "anthropics/skills",
-			"sourceType": "github",
-			"skillPath": "skills/internal-comms/SKILL.md",
-			"computedHash": "cf3dba93fd569d7380505db211f89a467869c1a2ef301941148d06f33ed17332"
-		},
-		"license-keys": {
-			"source": "dodopayments/skills",
-			"sourceType": "github",
-			"skillPath": "dodo-payments/license-keys/SKILL.md",
-			"computedHash": "bb36b8e5b1983a4407f45702263beaaf0870f24e06cda3122211a2a5b084a2bc"
-		},
-		"lifecycle/migrate-from-nextjs": {
-			"source": "tanstack/router",
-			"sourceType": "github",
-			"skillPath": "packages/react-start/skills/lifecycle/migrate-from-nextjs/SKILL.md",
-			"computedHash": "fdcf597cd42b657c4e9eb0ec5506c58bbe2d8fb9e96a62d495c5a726bfee2904"
-		},
-		"lifecycle/migrate-from-react-router": {
-			"source": "tanstack/router",
-			"sourceType": "github",
-			"skillPath": "packages/react-router/skills/lifecycle/migrate-from-react-router/SKILL.md",
-			"computedHash": "901989f8c01a93a6d72dac3b5401b4aa53bb1efe081fda49009c85e093941a2f"
-		},
-		"mcp-builder": {
-			"source": "anthropics/skills",
-			"sourceType": "github",
-			"skillPath": "skills/mcp-builder/SKILL.md",
-			"computedHash": "6498a736a8dc5c645047c8a875b8ea7417e2ad97146f005200e50d20a9337ada"
-		},
-		"minimalist-ui": {
-			"source": "Leonxlnx/taste-skill",
-			"sourceType": "github",
-			"skillPath": "skills/minimalist-skill/SKILL.md",
-			"computedHash": "7e88897e0371184e97a82b8d9ef080323c13f21eb067b58ef71eb05173a08ac2"
-		},
-		"organization-best-practices": {
-			"source": "better-auth/skills",
-			"sourceType": "github",
-			"skillPath": "better-auth/organization/SKILL.md",
-			"computedHash": "fa7a76e45a1f9632e6d63e92b476cf566e64f6e93a2c8ee00bc77b4a74008fbd"
-		},
-		"pdf": {
-			"source": "anthropics/skills",
-			"sourceType": "github",
-			"skillPath": "skills/pdf/SKILL.md",
-			"computedHash": "37226d4220d844377e6b2a386c51a011df4cd130855ff0b80bcc22f9c28abd57"
-		},
-		"pptx": {
-			"source": "anthropics/skills",
-			"sourceType": "github",
-			"skillPath": "skills/pptx/SKILL.md",
-			"computedHash": "2275e4d8dba1790d52f6619b3e2fed04edc948beef545a2ad18e4a1be644426d"
-		},
-		"react-router": {
-			"source": "tanstack/router",
-			"sourceType": "github",
-			"skillPath": "packages/react-router/skills/react-router/SKILL.md",
-			"computedHash": "875bf263cea87107e65cab32ee34d3fa878570efd32e131b901663029947dfdf"
-		},
-		"react-start": {
-			"source": "tanstack/router",
-			"sourceType": "github",
-			"skillPath": "packages/react-start/skills/react-start/SKILL.md",
-			"computedHash": "521c6ae846f75ab7a28a56d6dd5758fbf87be828ddaed88ecc71df66486cf1b5"
-		},
-		"react-start/server-components": {
-			"source": "tanstack/router",
-			"sourceType": "github",
-			"skillPath": "packages/react-start/skills/react-start/server-components/SKILL.md",
-			"computedHash": "450bb7a4433fff2d21cfb395bce40b84f70c7587bd374a69328d71e08e12461b"
-		},
-		"redesign-existing-projects": {
-			"source": "Leonxlnx/taste-skill",
-			"sourceType": "github",
-			"skillPath": "skills/redesign-skill/SKILL.md",
-			"computedHash": "47eced3e960a2c961d3cbee11fa1216264f589344b586a5cbd03967cd6b9c54b"
-		},
-		"router-core": {
-			"source": "tanstack/router",
-			"sourceType": "github",
-			"skillPath": "packages/router-core/skills/router-core/SKILL.md",
-			"computedHash": "64055c372657824bbde083adc053be48d3f36c1ba6cc6bd5a1f7bcb8619dc15a"
-		},
-		"router-core/auth-and-guards": {
-			"source": "tanstack/router",
-			"sourceType": "github",
-			"skillPath": "packages/router-core/skills/router-core/auth-and-guards/SKILL.md",
-			"computedHash": "1d789c3451f625ef117803ff7c0c20a5fc67af4d6615c7c687055d905d26ef24"
-		},
-		"router-core/code-splitting": {
-			"source": "tanstack/router",
-			"sourceType": "github",
-			"skillPath": "packages/router-core/skills/router-core/code-splitting/SKILL.md",
-			"computedHash": "c5f7a5675b72519546a1514a9a9bf9ec071ff36e87b1c6b1fc02a8506f493c25"
-		},
-		"router-core/data-loading": {
-			"source": "tanstack/router",
-			"sourceType": "github",
-			"skillPath": "packages/router-core/skills/router-core/data-loading/SKILL.md",
-			"computedHash": "ccdbd8d3c910eb3810fbdb76b50744f74e6a7a267b40662cf67496c330e425dd"
-		},
-		"router-core/navigation": {
-			"source": "tanstack/router",
-			"sourceType": "github",
-			"skillPath": "packages/router-core/skills/router-core/navigation/SKILL.md",
-			"computedHash": "960e0e29b71071ba592daaf844f16e21b6217950f451544504c74c1f56e2680c"
-		},
-		"router-core/not-found-and-errors": {
-			"source": "tanstack/router",
-			"sourceType": "github",
-			"skillPath": "packages/router-core/skills/router-core/not-found-and-errors/SKILL.md",
-			"computedHash": "27c5bbe54defa32d7f6f90f02872a98ec0af16a38f75474340446cdacb37375b"
-		},
-		"router-core/path-params": {
-			"source": "tanstack/router",
-			"sourceType": "github",
-			"skillPath": "packages/router-core/skills/router-core/path-params/SKILL.md",
-			"computedHash": "1b6bcc9118a8f9c485f5e73b190c13d64ca902cbbfd79d1501271cb4f74fa31a"
-		},
-		"router-core/search-params": {
-			"source": "tanstack/router",
-			"sourceType": "github",
-			"skillPath": "packages/router-core/skills/router-core/search-params/SKILL.md",
-			"computedHash": "2f26625aafcad072e79c00a2375f1473d621caf3086f75f6c8821f92643c340f"
-		},
-		"router-core/ssr": {
-			"source": "tanstack/router",
-			"sourceType": "github",
-			"skillPath": "packages/router-core/skills/router-core/ssr/SKILL.md",
-			"computedHash": "58dea314623ce34a171091f7f035e0a3e99c56930e9d14441edf3d55947dcb78"
-		},
-		"router-core/type-safety": {
-			"source": "tanstack/router",
-			"sourceType": "github",
-			"skillPath": "packages/router-core/skills/router-core/type-safety/SKILL.md",
-			"computedHash": "66f73dd96fe9a14325c2547ed1f03db42a3fa348d84ee3ebd06be94e080f95c2"
-		},
-		"router-plugin": {
-			"source": "tanstack/router",
-			"sourceType": "github",
-			"skillPath": "packages/router-plugin/skills/router-plugin/SKILL.md",
-			"computedHash": "34ad6f207c21ffe052d39d385b8051791ed0c4abb33dae83909a6a81ca49192a"
-		},
-		"sandbox-sdk": {
-			"source": "cloudflare/skills",
-			"sourceType": "github",
-			"skillPath": "skills/sandbox-sdk/SKILL.md",
-			"computedHash": "684861194888ff4ff36d32273c2ad73b5148c4ff1e45c216c9ed38d0e72db1da"
-		},
-		"shadcn": {
-			"source": "shadcn/ui",
-			"sourceType": "github",
-			"skillPath": "skills/shadcn/SKILL.md",
-			"computedHash": "f0fdd03f4755cbb3b57e20fe6fd4a97c00d34e6780187b6559316986e8d848db"
-		},
-		"skill-creator": {
-			"source": "anthropics/skills",
-			"sourceType": "github",
-			"skillPath": "skills/skill-creator/SKILL.md",
-			"computedHash": "7e3c9cd74e9e2b4828527a857170e86310f2dab5ea8030a9043df2c7e6c88857"
-		},
-		"slack-gif-creator": {
-			"source": "anthropics/skills",
-			"sourceType": "github",
-			"skillPath": "skills/slack-gif-creator/SKILL.md",
-			"computedHash": "a36e1ceb3f07eb37bdc259f1bfb18e48cc0e809b2e1651cb2369286cd66b2107"
-		},
-		"solid-router": {
-			"source": "tanstack/router",
-			"sourceType": "github",
-			"skillPath": "packages/solid-router/skills/solid-router/SKILL.md",
-			"computedHash": "b39fa2fdfa215d51a42dba20c255a485a2e63d0237f5decb571fddff23137e77"
-		},
-		"solid-start": {
-			"source": "tanstack/router",
-			"sourceType": "github",
-			"skillPath": "packages/solid-start/skills/solid-start/SKILL.md",
-			"computedHash": "9438133c15ad6f5f4756f3c4f554dd058d643cd5fe0cf4945138650d3ae0ff5e"
-		},
-		"start-core": {
-			"source": "tanstack/router",
-			"sourceType": "github",
-			"skillPath": "packages/start-client-core/skills/start-core/SKILL.md",
-			"computedHash": "4853ca618320984b6bcdfec8bd64778d795174752484c7e654996ad7028ca79b"
-		},
-		"start-core/auth-server-primitives": {
-			"source": "tanstack/router",
-			"sourceType": "github",
-			"skillPath": "packages/start-client-core/skills/start-core/auth-server-primitives/SKILL.md",
-			"computedHash": "9a8efe8b49bcce452f1578c6297c44b5d12a65c31cc48d44c1d8392e6323e935"
-		},
-		"start-core/deployment": {
-			"source": "tanstack/router",
-			"sourceType": "github",
-			"skillPath": "packages/start-client-core/skills/start-core/deployment/SKILL.md",
-			"computedHash": "2adb3abbbd0a76e4aa3e1c82e58fc2a56a0bc9b566ad1a74d3834d1e1610bd94"
-		},
-		"start-core/execution-model": {
-			"source": "tanstack/router",
-			"sourceType": "github",
-			"skillPath": "packages/start-client-core/skills/start-core/execution-model/SKILL.md",
-			"computedHash": "092781d65f078ee3286bae0306e31e93885ecc7c1e015f7f2e338f4ff573fbc5"
-		},
-		"start-core/middleware": {
-			"source": "tanstack/router",
-			"sourceType": "github",
-			"skillPath": "packages/start-client-core/skills/start-core/middleware/SKILL.md",
-			"computedHash": "c1de0099a3eadf906de0f32cabcc2490aa62299c54750053a10e868f43047ec3"
-		},
-		"start-core/server-functions": {
-			"source": "tanstack/router",
-			"sourceType": "github",
-			"skillPath": "packages/start-client-core/skills/start-core/server-functions/SKILL.md",
-			"computedHash": "8ba0881ce063ef4f12fa94a0199b332add058daed785dff2a764dfcaa68092c7"
-		},
-		"start-core/server-routes": {
-			"source": "tanstack/router",
-			"sourceType": "github",
-			"skillPath": "packages/start-client-core/skills/start-core/server-routes/SKILL.md",
-			"computedHash": "51d5055360ae0fb12a55bca249433d66285174fc7b2c4c286700efbcdbe3d7b0"
-		},
-		"start-server-core": {
-			"source": "tanstack/router",
-			"sourceType": "github",
-			"skillPath": "packages/start-server-core/skills/start-server-core/SKILL.md",
-			"computedHash": "666996082891f61186b8271b930ce333bfbf47426d3fef1e221354c20b9bc19a"
-		},
-		"stitch-design-taste": {
-			"source": "Leonxlnx/taste-skill",
-			"sourceType": "github",
-			"skillPath": "skills/stitch-skill/SKILL.md",
-			"computedHash": "acf2921a7e50c06e637f072ba52e36a994cbb44ecbe6e31435bc113b894f5499"
-		},
-		"subscription-integration": {
-			"source": "dodopayments/skills",
-			"sourceType": "github",
-			"skillPath": "dodo-payments/subscription-integration/SKILL.md",
-			"computedHash": "10790c7171568919f1ca53ea150be7ac49e9ba15eeafe4c8cbe9cefcfd4b8a75"
-		},
-		"template-skill": {
-			"source": "anthropics/skills",
-			"sourceType": "github",
-			"skillPath": "template/SKILL.md",
-			"computedHash": "daf176f2cd0030d321982d3e813fd1a794a0b4744c5a92d2931a37001bb40fb9"
-		},
-		"theme-factory": {
-			"source": "anthropics/skills",
-			"sourceType": "github",
-			"skillPath": "skills/theme-factory/SKILL.md",
-			"computedHash": "e9ec1fe85faa729e9f3d1731cd7e4e485f98c099ccc7c1c0d198f473aa4b654a"
-		},
-		"two-factor-authentication-best-practices": {
-			"source": "better-auth/skills",
-			"sourceType": "github",
-			"skillPath": "better-auth/twoFactor/SKILL.md",
-			"computedHash": "c4f3a299c62c1985b774b7c28e53b7e55c565dbf973fd52b08899e4bcfffa3f9"
-		},
-		"usage-based-billing": {
-			"source": "dodopayments/skills",
-			"sourceType": "github",
-			"skillPath": "dodo-payments/usage-based-billing/SKILL.md",
-			"computedHash": "d60f9ccb03bf70c85949a29c3a29670562877082a9bb5f0aea764fcc8ae6a124"
-		},
-		"virtual-file-routes": {
-			"source": "tanstack/router",
-			"sourceType": "github",
-			"skillPath": "packages/virtual-file-routes/skills/virtual-file-routes/SKILL.md",
-			"computedHash": "9cf6737cd1d244c3bc532df8157f660bea804a7106e7aa779a41d49c2e36beb9"
-		},
-		"vue-router": {
-			"source": "tanstack/router",
-			"sourceType": "github",
-			"skillPath": "packages/vue-router/skills/vue-router/SKILL.md",
-			"computedHash": "602f92ec110f2045d43956f27889528de56b02e9871ea5e1734edec8f8a4d4fc"
-		},
-		"vue-start": {
-			"source": "tanstack/router",
-			"sourceType": "github",
-			"skillPath": "packages/vue-start/skills/vue-start/SKILL.md",
-			"computedHash": "94491634281b35ef512c299189c3b09bb66f8af1687a8a68d818bbe728d5a295"
-		},
-		"web-artifacts-builder": {
-			"source": "anthropics/skills",
-			"sourceType": "github",
-			"skillPath": "skills/web-artifacts-builder/SKILL.md",
-			"computedHash": "fdddbe9bb720ea1aea9292ee513ec10b2a8f4912e2c343bdc246ab3febd7c9b3"
-		},
-		"web-perf": {
-			"source": "cloudflare/skills",
-			"sourceType": "github",
-			"skillPath": "skills/web-perf/SKILL.md",
-			"computedHash": "a411d7a1d052e39069ad7c898d6b7e22100945a3f104794e0b76e3af480d3f44"
-		},
-		"webapp-testing": {
-			"source": "anthropics/skills",
-			"sourceType": "github",
-			"skillPath": "skills/webapp-testing/SKILL.md",
-			"computedHash": "3f14af7f5690695209c22fbf8c8d133769a86d64892602c09bb13f135e14e857"
-		},
-		"webhook-integration": {
-			"source": "dodopayments/skills",
-			"sourceType": "github",
-			"skillPath": "dodo-payments/webhook-integration/SKILL.md",
-			"computedHash": "c46ba82cf4aaa31568debb59d9bfc8a47ecbab04f881fdacca86d68cf046dda1"
-		},
-		"workers-best-practices": {
-			"source": "cloudflare/skills",
-			"sourceType": "github",
-			"skillPath": "skills/workers-best-practices/SKILL.md",
-			"computedHash": "c919a93c9db826a0ee2818f6f7977c40c1a43bb87abc848b22181fdbabe2ef80"
-		},
-		"wrangler": {
-			"source": "cloudflare/skills",
-			"sourceType": "github",
-			"skillPath": "skills/wrangler/SKILL.md",
-			"computedHash": "d2094f7a5a76414fc0cd365fd8ddba3258c2135a1d468b78213c0fa02c309b9b"
-		},
-		"xlsx": {
-			"source": "anthropics/skills",
-			"sourceType": "github",
-			"skillPath": "skills/xlsx/SKILL.md",
-			"computedHash": "cb7fba2177d0d35d14b3244272b25d1b05246e99b3468a087fe06c84193dbd20"
-		}
-	}
+  "version": 1,
+  "skills": {
+    "agents-sdk": {
+      "source": "cloudflare/skills",
+      "sourceType": "github",
+      "skillPath": "skills/agents-sdk/SKILL.md",
+      "computedHash": "01515ef239bee4ab1464d0eb735a857de3832a304fccd9315bf439837c053e62"
+    },
+    "algorithmic-art": {
+      "source": "anthropics/skills",
+      "sourceType": "github",
+      "skillPath": "skills/algorithmic-art/SKILL.md",
+      "computedHash": "987b24aa98171a0d3690420173b2cdb6eaafd57981ed716b5d50371affa82ea3"
+    },
+    "better-auth-best-practices": {
+      "source": "better-auth/skills",
+      "sourceType": "github",
+      "skillPath": "better-auth/best-practices/SKILL.md",
+      "computedHash": "9ab075b5061be2a5f299c10505667345cc1ec76e8de4120901cfd586643e776f"
+    },
+    "better-auth-security-best-practices": {
+      "source": "better-auth/skills",
+      "sourceType": "github",
+      "skillPath": "security/SKILL.md",
+      "computedHash": "ed38caef4b297cc399d717258d6ea4e6ecb8894c453c83450064c7e7c6e5cc02"
+    },
+    "billing-sdk": {
+      "source": "dodopayments/skills",
+      "sourceType": "github",
+      "skillPath": "dodo-payments/billing-sdk/SKILL.md",
+      "computedHash": "f146915e1ec917908ae3d9e2ea2e9a7f9d4629998dfe3f9f954dc5ce100db68d"
+    },
+    "brand-guidelines": {
+      "source": "anthropics/skills",
+      "sourceType": "github",
+      "skillPath": "skills/brand-guidelines/SKILL.md",
+      "computedHash": "c82f0b24cdcc7e2693a963d30c810558b7bb89ed84508b2328228d21256ef865"
+    },
+    "brandkit": {
+      "source": "Leonxlnx/taste-skill",
+      "sourceType": "github",
+      "skillPath": "skills/brandkit/SKILL.md",
+      "computedHash": "735007879f5110aeae1e981a53fe74a12afde70347f9773dacd50e4697a091bf"
+    },
+    "canvas-design": {
+      "source": "anthropics/skills",
+      "sourceType": "github",
+      "skillPath": "skills/canvas-design/SKILL.md",
+      "computedHash": "4e8bbc31d3b159efdd32d31a63ba8cd5a44d84911e924c1f2c709c50cbcdd0ec"
+    },
+    "checkout-integration": {
+      "source": "dodopayments/skills",
+      "sourceType": "github",
+      "skillPath": "dodo-payments/checkout-integration/SKILL.md",
+      "computedHash": "d1f4db7aed0b940b400cb7e25d047df9b4b3e86d529e00a0364b6b3a8321689e"
+    },
+    "claude-api": {
+      "source": "anthropics/skills",
+      "sourceType": "github",
+      "skillPath": "skills/claude-api/SKILL.md",
+      "computedHash": "6e1f9a5c9e26aa8fe54d16b7bb636c7d96f708f3442cf6806d3ddeba51b76585"
+    },
+    "cloudflare": {
+      "source": "cloudflare/skills",
+      "sourceType": "github",
+      "skillPath": "skills/cloudflare/SKILL.md",
+      "computedHash": "44858fa40396bc5a664e816aac0409fad0a8c801b5126f249bf7c29c0e188f6c"
+    },
+    "cloudflare-email-service": {
+      "source": "cloudflare/skills",
+      "sourceType": "github",
+      "skillPath": "skills/cloudflare-email-service/SKILL.md",
+      "computedHash": "72992561f31a3e70cdaf7353610b8d2739fda6a6d519163539f658632f9c00d1"
+    },
+    "compositions/router-query": {
+      "source": "tanstack/router",
+      "sourceType": "github",
+      "skillPath": "packages/react-router/skills/compositions/router-query/SKILL.md",
+      "computedHash": "8f6610e21e062c0521eecc65298415e0aab928e6d35699471451645cf0b8f637"
+    },
+    "create-auth-skill": {
+      "source": "better-auth/skills",
+      "sourceType": "github",
+      "skillPath": "better-auth/create-auth/SKILL.md",
+      "computedHash": "393e8d2d795fa5797c9a4e0665f29183ea2e140233db59746d510340a10456e6"
+    },
+    "credit-based-billing": {
+      "source": "dodopayments/skills",
+      "sourceType": "github",
+      "skillPath": "dodo-payments/credit-based-billing/SKILL.md",
+      "computedHash": "498dc2f80f914407515872b2896aa1eaab4560adbc246d09f6bf52a7195ad0f8"
+    },
+    "design-taste-frontend": {
+      "source": "Leonxlnx/taste-skill",
+      "sourceType": "github",
+      "skillPath": "skills/taste-skill/SKILL.md",
+      "computedHash": "d823593e24d7493ab740db8f082cbe3b148ed29af9e804d11f5302ad79e4b96d"
+    },
+    "doc-coauthoring": {
+      "source": "anthropics/skills",
+      "sourceType": "github",
+      "skillPath": "skills/doc-coauthoring/SKILL.md",
+      "computedHash": "62cd7744438ee2aecc986c520bb603988a78ff6aaaf70a471bf4584fe0b78dae"
+    },
+    "docx": {
+      "source": "anthropics/skills",
+      "sourceType": "github",
+      "skillPath": "skills/docx/SKILL.md",
+      "computedHash": "150be87ff7b18f273ad07da303adb1cf2ca21cc3e76db7a2cf0373405178a278"
+    },
+    "dodo-best-practices": {
+      "source": "dodopayments/skills",
+      "sourceType": "github",
+      "skillPath": "dodo-payments/best-practices/SKILL.md",
+      "computedHash": "b91766c293068ca85b613e12b7064cd73bf062c4793d31e02a9ef94389b7db1d"
+    },
+    "durable-objects": {
+      "source": "cloudflare/skills",
+      "sourceType": "github",
+      "skillPath": "skills/durable-objects/SKILL.md",
+      "computedHash": "afa5e9dfcbbe3b70107d9f263a1c183ef89afbb5eb97f42be01cad7bd942958f"
+    },
+    "email-and-password-best-practices": {
+      "source": "better-auth/skills",
+      "sourceType": "github",
+      "skillPath": "better-auth/emailAndPassword/SKILL.md",
+      "computedHash": "7786d722fa682b3d6a99793e73a9d51b59becefa595676134a993020633e068f"
+    },
+    "emil-design-eng": {
+      "source": "emilkowalski/skill",
+      "sourceType": "github",
+      "skillPath": "skills/emil-design-eng/SKILL.md",
+      "computedHash": "ac3fc5b4e206488ffc408a2806f829bb2e5eaf518fded09be34790685c2b3a0d"
+    },
+    "frontend-design": {
+      "source": "anthropics/skills",
+      "sourceType": "github",
+      "skillPath": "skills/frontend-design/SKILL.md",
+      "computedHash": "516bd2154eb843a8240e43d5b285229129853114ad7075a5e141e1c08e408c84"
+    },
+    "full-output-enforcement": {
+      "source": "Leonxlnx/taste-skill",
+      "sourceType": "github",
+      "skillPath": "skills/output-skill/SKILL.md",
+      "computedHash": "524f7c7950c3fde726101613f630140411c7d080e63be718687f4b38f919be81"
+    },
+    "gpt-taste": {
+      "source": "Leonxlnx/taste-skill",
+      "sourceType": "github",
+      "skillPath": "skills/gpt-tasteskill/SKILL.md",
+      "computedHash": "7bd1bfdda0e51016ca222693401a65fc0dd9bf9487e0bd5b1740ba510f6f963a"
+    },
+    "high-end-visual-design": {
+      "source": "Leonxlnx/taste-skill",
+      "sourceType": "github",
+      "skillPath": "skills/soft-skill/SKILL.md",
+      "computedHash": "f730e4132775f13eea19e3dc39afc6bb453cfc0498872b127ad8f0d47cfd802d"
+    },
+    "hono": {
+      "source": "yusukebe/hono-skill",
+      "sourceType": "github",
+      "skillPath": "skills/hono/SKILL.md",
+      "computedHash": "24bad73932f309cec73a5a9171b838f59050990a634d8590c2d2c204507e64f9"
+    },
+    "image-to-code": {
+      "source": "Leonxlnx/taste-skill",
+      "sourceType": "github",
+      "skillPath": "skills/image-to-code-skill/SKILL.md",
+      "computedHash": "3d2ac14d956fdafc5500d2108b90895e134d847f9f199e7f1d18bf1f814cf7c8"
+    },
+    "imagegen-frontend-mobile": {
+      "source": "Leonxlnx/taste-skill",
+      "sourceType": "github",
+      "skillPath": "skills/imagegen-frontend-mobile/SKILL.md",
+      "computedHash": "7c1d1dc59cd0df4063b8621af543bf5dea1d576b261507e17b0323c69680b048"
+    },
+    "imagegen-frontend-web": {
+      "source": "Leonxlnx/taste-skill",
+      "sourceType": "github",
+      "skillPath": "skills/imagegen-frontend-web/SKILL.md",
+      "computedHash": "27255c7c50181e58add156b2aa2bd5325285b85f04027e4c8b73742d98d7be0a"
+    },
+    "impeccable": {
+      "source": "pbakaus/impeccable",
+      "sourceType": "github",
+      "skillPath": "skill/SKILL.md",
+      "computedHash": "c8f645c3e9aace8baf528021165168bac77d4f761f0ab7baf45e06e01691500f"
+    },
+    "industrial-brutalist-ui": {
+      "source": "Leonxlnx/taste-skill",
+      "sourceType": "github",
+      "skillPath": "skills/brutalist-skill/SKILL.md",
+      "computedHash": "e66e5a2a8b73cef79ab6546459c665e8b983645689c5f3772f7eed8b9f1e8e0e"
+    },
+    "internal-comms": {
+      "source": "anthropics/skills",
+      "sourceType": "github",
+      "skillPath": "skills/internal-comms/SKILL.md",
+      "computedHash": "cf3dba93fd569d7380505db211f89a467869c1a2ef301941148d06f33ed17332"
+    },
+    "license-keys": {
+      "source": "dodopayments/skills",
+      "sourceType": "github",
+      "skillPath": "dodo-payments/license-keys/SKILL.md",
+      "computedHash": "bb36b8e5b1983a4407f45702263beaaf0870f24e06cda3122211a2a5b084a2bc"
+    },
+    "lifecycle/migrate-from-nextjs": {
+      "source": "tanstack/router",
+      "sourceType": "github",
+      "skillPath": "packages/react-start/skills/lifecycle/migrate-from-nextjs/SKILL.md",
+      "computedHash": "fdcf597cd42b657c4e9eb0ec5506c58bbe2d8fb9e96a62d495c5a726bfee2904"
+    },
+    "lifecycle/migrate-from-react-router": {
+      "source": "tanstack/router",
+      "sourceType": "github",
+      "skillPath": "packages/react-router/skills/lifecycle/migrate-from-react-router/SKILL.md",
+      "computedHash": "901989f8c01a93a6d72dac3b5401b4aa53bb1efe081fda49009c85e093941a2f"
+    },
+    "mcp-builder": {
+      "source": "anthropics/skills",
+      "sourceType": "github",
+      "skillPath": "skills/mcp-builder/SKILL.md",
+      "computedHash": "6498a736a8dc5c645047c8a875b8ea7417e2ad97146f005200e50d20a9337ada"
+    },
+    "minimalist-ui": {
+      "source": "Leonxlnx/taste-skill",
+      "sourceType": "github",
+      "skillPath": "skills/minimalist-skill/SKILL.md",
+      "computedHash": "7e88897e0371184e97a82b8d9ef080323c13f21eb067b58ef71eb05173a08ac2"
+    },
+    "organization-best-practices": {
+      "source": "better-auth/skills",
+      "sourceType": "github",
+      "skillPath": "better-auth/organization/SKILL.md",
+      "computedHash": "fa7a76e45a1f9632e6d63e92b476cf566e64f6e93a2c8ee00bc77b4a74008fbd"
+    },
+    "pdf": {
+      "source": "anthropics/skills",
+      "sourceType": "github",
+      "skillPath": "skills/pdf/SKILL.md",
+      "computedHash": "37226d4220d844377e6b2a386c51a011df4cd130855ff0b80bcc22f9c28abd57"
+    },
+    "pptx": {
+      "source": "anthropics/skills",
+      "sourceType": "github",
+      "skillPath": "skills/pptx/SKILL.md",
+      "computedHash": "2275e4d8dba1790d52f6619b3e2fed04edc948beef545a2ad18e4a1be644426d"
+    },
+    "react-router": {
+      "source": "tanstack/router",
+      "sourceType": "github",
+      "skillPath": "packages/react-router/skills/react-router/SKILL.md",
+      "computedHash": "875bf263cea87107e65cab32ee34d3fa878570efd32e131b901663029947dfdf"
+    },
+    "react-start": {
+      "source": "tanstack/router",
+      "sourceType": "github",
+      "skillPath": "packages/react-start/skills/react-start/SKILL.md",
+      "computedHash": "521c6ae846f75ab7a28a56d6dd5758fbf87be828ddaed88ecc71df66486cf1b5"
+    },
+    "react-start/server-components": {
+      "source": "tanstack/router",
+      "sourceType": "github",
+      "skillPath": "packages/react-start/skills/react-start/server-components/SKILL.md",
+      "computedHash": "450bb7a4433fff2d21cfb395bce40b84f70c7587bd374a69328d71e08e12461b"
+    },
+    "redesign-existing-projects": {
+      "source": "Leonxlnx/taste-skill",
+      "sourceType": "github",
+      "skillPath": "skills/redesign-skill/SKILL.md",
+      "computedHash": "47eced3e960a2c961d3cbee11fa1216264f589344b586a5cbd03967cd6b9c54b"
+    },
+    "router-core": {
+      "source": "tanstack/router",
+      "sourceType": "github",
+      "skillPath": "packages/router-core/skills/router-core/SKILL.md",
+      "computedHash": "64055c372657824bbde083adc053be48d3f36c1ba6cc6bd5a1f7bcb8619dc15a"
+    },
+    "router-core/auth-and-guards": {
+      "source": "tanstack/router",
+      "sourceType": "github",
+      "skillPath": "packages/router-core/skills/router-core/auth-and-guards/SKILL.md",
+      "computedHash": "1d789c3451f625ef117803ff7c0c20a5fc67af4d6615c7c687055d905d26ef24"
+    },
+    "router-core/code-splitting": {
+      "source": "tanstack/router",
+      "sourceType": "github",
+      "skillPath": "packages/router-core/skills/router-core/code-splitting/SKILL.md",
+      "computedHash": "c5f7a5675b72519546a1514a9a9bf9ec071ff36e87b1c6b1fc02a8506f493c25"
+    },
+    "router-core/data-loading": {
+      "source": "tanstack/router",
+      "sourceType": "github",
+      "skillPath": "packages/router-core/skills/router-core/data-loading/SKILL.md",
+      "computedHash": "ccdbd8d3c910eb3810fbdb76b50744f74e6a7a267b40662cf67496c330e425dd"
+    },
+    "router-core/navigation": {
+      "source": "tanstack/router",
+      "sourceType": "github",
+      "skillPath": "packages/router-core/skills/router-core/navigation/SKILL.md",
+      "computedHash": "960e0e29b71071ba592daaf844f16e21b6217950f451544504c74c1f56e2680c"
+    },
+    "router-core/not-found-and-errors": {
+      "source": "tanstack/router",
+      "sourceType": "github",
+      "skillPath": "packages/router-core/skills/router-core/not-found-and-errors/SKILL.md",
+      "computedHash": "27c5bbe54defa32d7f6f90f02872a98ec0af16a38f75474340446cdacb37375b"
+    },
+    "router-core/path-params": {
+      "source": "tanstack/router",
+      "sourceType": "github",
+      "skillPath": "packages/router-core/skills/router-core/path-params/SKILL.md",
+      "computedHash": "1b6bcc9118a8f9c485f5e73b190c13d64ca902cbbfd79d1501271cb4f74fa31a"
+    },
+    "router-core/search-params": {
+      "source": "tanstack/router",
+      "sourceType": "github",
+      "skillPath": "packages/router-core/skills/router-core/search-params/SKILL.md",
+      "computedHash": "2f26625aafcad072e79c00a2375f1473d621caf3086f75f6c8821f92643c340f"
+    },
+    "router-core/ssr": {
+      "source": "tanstack/router",
+      "sourceType": "github",
+      "skillPath": "packages/router-core/skills/router-core/ssr/SKILL.md",
+      "computedHash": "58dea314623ce34a171091f7f035e0a3e99c56930e9d14441edf3d55947dcb78"
+    },
+    "router-core/type-safety": {
+      "source": "tanstack/router",
+      "sourceType": "github",
+      "skillPath": "packages/router-core/skills/router-core/type-safety/SKILL.md",
+      "computedHash": "66f73dd96fe9a14325c2547ed1f03db42a3fa348d84ee3ebd06be94e080f95c2"
+    },
+    "router-plugin": {
+      "source": "tanstack/router",
+      "sourceType": "github",
+      "skillPath": "packages/router-plugin/skills/router-plugin/SKILL.md",
+      "computedHash": "34ad6f207c21ffe052d39d385b8051791ed0c4abb33dae83909a6a81ca49192a"
+    },
+    "sandbox-sdk": {
+      "source": "cloudflare/skills",
+      "sourceType": "github",
+      "skillPath": "skills/sandbox-sdk/SKILL.md",
+      "computedHash": "684861194888ff4ff36d32273c2ad73b5148c4ff1e45c216c9ed38d0e72db1da"
+    },
+    "shadcn": {
+      "source": "shadcn/ui",
+      "sourceType": "github",
+      "skillPath": "skills/shadcn/SKILL.md",
+      "computedHash": "f0fdd03f4755cbb3b57e20fe6fd4a97c00d34e6780187b6559316986e8d848db"
+    },
+    "skill-creator": {
+      "source": "anthropics/skills",
+      "sourceType": "github",
+      "skillPath": "skills/skill-creator/SKILL.md",
+      "computedHash": "7e3c9cd74e9e2b4828527a857170e86310f2dab5ea8030a9043df2c7e6c88857"
+    },
+    "slack-gif-creator": {
+      "source": "anthropics/skills",
+      "sourceType": "github",
+      "skillPath": "skills/slack-gif-creator/SKILL.md",
+      "computedHash": "a36e1ceb3f07eb37bdc259f1bfb18e48cc0e809b2e1651cb2369286cd66b2107"
+    },
+    "solid-router": {
+      "source": "tanstack/router",
+      "sourceType": "github",
+      "skillPath": "packages/solid-router/skills/solid-router/SKILL.md",
+      "computedHash": "b39fa2fdfa215d51a42dba20c255a485a2e63d0237f5decb571fddff23137e77"
+    },
+    "solid-start": {
+      "source": "tanstack/router",
+      "sourceType": "github",
+      "skillPath": "packages/solid-start/skills/solid-start/SKILL.md",
+      "computedHash": "9438133c15ad6f5f4756f3c4f554dd058d643cd5fe0cf4945138650d3ae0ff5e"
+    },
+    "start-core": {
+      "source": "tanstack/router",
+      "sourceType": "github",
+      "skillPath": "packages/start-client-core/skills/start-core/SKILL.md",
+      "computedHash": "4853ca618320984b6bcdfec8bd64778d795174752484c7e654996ad7028ca79b"
+    },
+    "start-core/auth-server-primitives": {
+      "source": "tanstack/router",
+      "sourceType": "github",
+      "skillPath": "packages/start-client-core/skills/start-core/auth-server-primitives/SKILL.md",
+      "computedHash": "9a8efe8b49bcce452f1578c6297c44b5d12a65c31cc48d44c1d8392e6323e935"
+    },
+    "start-core/deployment": {
+      "source": "tanstack/router",
+      "sourceType": "github",
+      "skillPath": "packages/start-client-core/skills/start-core/deployment/SKILL.md",
+      "computedHash": "2adb3abbbd0a76e4aa3e1c82e58fc2a56a0bc9b566ad1a74d3834d1e1610bd94"
+    },
+    "start-core/execution-model": {
+      "source": "tanstack/router",
+      "sourceType": "github",
+      "skillPath": "packages/start-client-core/skills/start-core/execution-model/SKILL.md",
+      "computedHash": "092781d65f078ee3286bae0306e31e93885ecc7c1e015f7f2e338f4ff573fbc5"
+    },
+    "start-core/middleware": {
+      "source": "tanstack/router",
+      "sourceType": "github",
+      "skillPath": "packages/start-client-core/skills/start-core/middleware/SKILL.md",
+      "computedHash": "c1de0099a3eadf906de0f32cabcc2490aa62299c54750053a10e868f43047ec3"
+    },
+    "start-core/server-functions": {
+      "source": "tanstack/router",
+      "sourceType": "github",
+      "skillPath": "packages/start-client-core/skills/start-core/server-functions/SKILL.md",
+      "computedHash": "8ba0881ce063ef4f12fa94a0199b332add058daed785dff2a764dfcaa68092c7"
+    },
+    "start-core/server-routes": {
+      "source": "tanstack/router",
+      "sourceType": "github",
+      "skillPath": "packages/start-client-core/skills/start-core/server-routes/SKILL.md",
+      "computedHash": "51d5055360ae0fb12a55bca249433d66285174fc7b2c4c286700efbcdbe3d7b0"
+    },
+    "start-server-core": {
+      "source": "tanstack/router",
+      "sourceType": "github",
+      "skillPath": "packages/start-server-core/skills/start-server-core/SKILL.md",
+      "computedHash": "666996082891f61186b8271b930ce333bfbf47426d3fef1e221354c20b9bc19a"
+    },
+    "stitch-design-taste": {
+      "source": "Leonxlnx/taste-skill",
+      "sourceType": "github",
+      "skillPath": "skills/stitch-skill/SKILL.md",
+      "computedHash": "acf2921a7e50c06e637f072ba52e36a994cbb44ecbe6e31435bc113b894f5499"
+    },
+    "subscription-integration": {
+      "source": "dodopayments/skills",
+      "sourceType": "github",
+      "skillPath": "dodo-payments/subscription-integration/SKILL.md",
+      "computedHash": "10790c7171568919f1ca53ea150be7ac49e9ba15eeafe4c8cbe9cefcfd4b8a75"
+    },
+    "template-skill": {
+      "source": "anthropics/skills",
+      "sourceType": "github",
+      "skillPath": "template/SKILL.md",
+      "computedHash": "daf176f2cd0030d321982d3e813fd1a794a0b4744c5a92d2931a37001bb40fb9"
+    },
+    "theme-factory": {
+      "source": "anthropics/skills",
+      "sourceType": "github",
+      "skillPath": "skills/theme-factory/SKILL.md",
+      "computedHash": "e9ec1fe85faa729e9f3d1731cd7e4e485f98c099ccc7c1c0d198f473aa4b654a"
+    },
+    "two-factor-authentication-best-practices": {
+      "source": "better-auth/skills",
+      "sourceType": "github",
+      "skillPath": "better-auth/twoFactor/SKILL.md",
+      "computedHash": "c4f3a299c62c1985b774b7c28e53b7e55c565dbf973fd52b08899e4bcfffa3f9"
+    },
+    "usage-based-billing": {
+      "source": "dodopayments/skills",
+      "sourceType": "github",
+      "skillPath": "dodo-payments/usage-based-billing/SKILL.md",
+      "computedHash": "d60f9ccb03bf70c85949a29c3a29670562877082a9bb5f0aea764fcc8ae6a124"
+    },
+    "virtual-file-routes": {
+      "source": "tanstack/router",
+      "sourceType": "github",
+      "skillPath": "packages/virtual-file-routes/skills/virtual-file-routes/SKILL.md",
+      "computedHash": "9cf6737cd1d244c3bc532df8157f660bea804a7106e7aa779a41d49c2e36beb9"
+    },
+    "vue-router": {
+      "source": "tanstack/router",
+      "sourceType": "github",
+      "skillPath": "packages/vue-router/skills/vue-router/SKILL.md",
+      "computedHash": "602f92ec110f2045d43956f27889528de56b02e9871ea5e1734edec8f8a4d4fc"
+    },
+    "vue-start": {
+      "source": "tanstack/router",
+      "sourceType": "github",
+      "skillPath": "packages/vue-start/skills/vue-start/SKILL.md",
+      "computedHash": "94491634281b35ef512c299189c3b09bb66f8af1687a8a68d818bbe728d5a295"
+    },
+    "web-artifacts-builder": {
+      "source": "anthropics/skills",
+      "sourceType": "github",
+      "skillPath": "skills/web-artifacts-builder/SKILL.md",
+      "computedHash": "fdddbe9bb720ea1aea9292ee513ec10b2a8f4912e2c343bdc246ab3febd7c9b3"
+    },
+    "web-perf": {
+      "source": "cloudflare/skills",
+      "sourceType": "github",
+      "skillPath": "skills/web-perf/SKILL.md",
+      "computedHash": "a411d7a1d052e39069ad7c898d6b7e22100945a3f104794e0b76e3af480d3f44"
+    },
+    "webapp-testing": {
+      "source": "anthropics/skills",
+      "sourceType": "github",
+      "skillPath": "skills/webapp-testing/SKILL.md",
+      "computedHash": "3f14af7f5690695209c22fbf8c8d133769a86d64892602c09bb13f135e14e857"
+    },
+    "webhook-integration": {
+      "source": "dodopayments/skills",
+      "sourceType": "github",
+      "skillPath": "dodo-payments/webhook-integration/SKILL.md",
+      "computedHash": "c46ba82cf4aaa31568debb59d9bfc8a47ecbab04f881fdacca86d68cf046dda1"
+    },
+    "workers-best-practices": {
+      "source": "cloudflare/skills",
+      "sourceType": "github",
+      "skillPath": "skills/workers-best-practices/SKILL.md",
+      "computedHash": "c919a93c9db826a0ee2818f6f7977c40c1a43bb87abc848b22181fdbabe2ef80"
+    },
+    "wrangler": {
+      "source": "cloudflare/skills",
+      "sourceType": "github",
+      "skillPath": "skills/wrangler/SKILL.md",
+      "computedHash": "d2094f7a5a76414fc0cd365fd8ddba3258c2135a1d468b78213c0fa02c309b9b"
+    },
+    "xlsx": {
+      "source": "anthropics/skills",
+      "sourceType": "github",
+      "skillPath": "skills/xlsx/SKILL.md",
+      "computedHash": "cb7fba2177d0d35d14b3244272b25d1b05246e99b3468a087fe06c84193dbd20"
+    }
+  }
 }

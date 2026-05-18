@@ -1,19 +1,19 @@
 ---
 name: lifecycle/migrate-from-react-router
 description: >-
-    Step-by-step migration from React Router v7 to TanStack Router:
-    route definition conversion, Link/useNavigate API differences,
-    useSearchParams to validateSearch + useSearch, useParams with from,
-    Outlet replacement, loader conversion, code splitting differences.
+  Step-by-step migration from React Router v7 to TanStack Router:
+  route definition conversion, Link/useNavigate API differences,
+  useSearchParams to validateSearch + useSearch, useParams with from,
+  Outlet replacement, loader conversion, code splitting differences.
 type: lifecycle
 library: tanstack-router
-library_version: "1.166.2"
+library_version: '1.166.2'
 requires:
-    - router-core
-    - react-router
+  - router-core
+  - react-router
 sources:
-    - TanStack/router:docs/router/how-to/migrate-from-react-router.md
-    - TanStack/router:docs/router/installation/migrate-from-react-router.md
+  - TanStack/router:docs/router/how-to/migrate-from-react-router.md
+  - TanStack/router:docs/router/installation/migrate-from-react-router.md
 ---
 
 # Migrate from React Router v7 to TanStack Router
@@ -45,16 +45,16 @@ npm install -D @tanstack/router-plugin
 
 ```ts
 // vite.config.ts
-import { defineConfig } from "vite";
-import react from "@vitejs/plugin-react";
-import { tanstackRouter } from "@tanstack/router-plugin/vite";
+import { defineConfig } from 'vite'
+import react from '@vitejs/plugin-react'
+import { tanstackRouter } from '@tanstack/router-plugin/vite'
 
 export default defineConfig({
-	plugins: [
-		tanstackRouter({ target: "react", autoCodeSplitting: true }),
-		react()
-	]
-});
+  plugins: [
+    tanstackRouter({ target: 'react', autoCodeSplitting: true }),
+    react(),
+  ],
+})
 ```
 
 - [ ] **Create routes directory**
@@ -73,47 +73,47 @@ TanStack Router: `src/routes/__root.tsx`
 
 ```tsx
 // src/routes/__root.tsx
-import { createRootRoute, Link, Outlet } from "@tanstack/react-router";
-import { TanStackRouterDevtools } from "@tanstack/react-router-devtools";
+import { createRootRoute, Link, Outlet } from '@tanstack/react-router'
+import { TanStackRouterDevtools } from '@tanstack/react-router-devtools'
 
 export const Route = createRootRoute({
-	component: () => (
-		<>
-			<nav>
-				<Link to="/">Home</Link>
-				<Link to="/about">About</Link>
-			</nav>
-			<Outlet />
-			<TanStackRouterDevtools />
-		</>
-	)
-});
+  component: () => (
+    <>
+      <nav>
+        <Link to="/">Home</Link>
+        <Link to="/about">About</Link>
+      </nav>
+      <Outlet />
+      <TanStackRouterDevtools />
+    </>
+  ),
+})
 ```
 
 - [ ] **Create router instance with type registration**
 
 ```tsx
 // src/main.tsx
-import { StrictMode } from "react";
-import ReactDOM from "react-dom/client";
-import { RouterProvider, createRouter } from "@tanstack/react-router";
-import { routeTree } from "./routeTree.gen";
+import { StrictMode } from 'react'
+import ReactDOM from 'react-dom/client'
+import { RouterProvider, createRouter } from '@tanstack/react-router'
+import { routeTree } from './routeTree.gen'
 
-const router = createRouter({ routeTree });
+const router = createRouter({ routeTree })
 
-declare module "@tanstack/react-router" {
-	interface Register {
-		router: typeof router;
-	}
+declare module '@tanstack/react-router' {
+  interface Register {
+    router: typeof router
+  }
 }
 
-const rootElement = document.getElementById("root")!;
+const rootElement = document.getElementById('root')!
 if (!rootElement.innerHTML) {
-	ReactDOM.createRoot(rootElement).render(
-		<StrictMode>
-			<RouterProvider router={router} />
-		</StrictMode>
-	);
+  ReactDOM.createRoot(rootElement).render(
+    <StrictMode>
+      <RouterProvider router={router} />
+    </StrictMode>,
+  )
 }
 ```
 
@@ -130,25 +130,25 @@ TanStack Router:
 
 ```tsx
 // src/routes/posts.tsx
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute } from '@tanstack/react-router'
 
-export const Route = createFileRoute("/posts")({
-	loader: async () => {
-		const posts = await fetchPosts();
-		return { posts };
-	},
-	component: PostsPage
-});
+export const Route = createFileRoute('/posts')({
+  loader: async () => {
+    const posts = await fetchPosts()
+    return { posts }
+  },
+  component: PostsPage,
+})
 
 function PostsPage() {
-	const { posts } = Route.useLoaderData();
-	return (
-		<ul>
-			{posts.map((p) => (
-				<li key={p.id}>{p.title}</li>
-			))}
-		</ul>
-	);
+  const { posts } = Route.useLoaderData()
+  return (
+    <ul>
+      {posts.map((p) => (
+        <li key={p.id}>{p.title}</li>
+      ))}
+    </ul>
+  )
 }
 ```
 
@@ -160,19 +160,19 @@ TanStack Router: `/posts/$postId` (dollar syntax)
 
 ```tsx
 // src/routes/posts/$postId.tsx
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute } from '@tanstack/react-router'
 
-export const Route = createFileRoute("/posts/$postId")({
-	loader: async ({ params }) => {
-		const post = await fetchPost(params.postId);
-		return { post };
-	},
-	component: PostPage
-});
+export const Route = createFileRoute('/posts/$postId')({
+  loader: async ({ params }) => {
+    const post = await fetchPost(params.postId)
+    return { post }
+  },
+  component: PostPage,
+})
 
 function PostPage() {
-	const { post } = Route.useLoaderData();
-	return <article>{post.title}</article>;
+  const { post } = Route.useLoaderData()
+  return <article>{post.title}</article>
 }
 ```
 
@@ -183,17 +183,17 @@ function PostPage() {
 React Router:
 
 ```tsx
-import { Link } from "react-router";
-<Link to={`/posts/${postId}`}>View Post</Link>;
+import { Link } from 'react-router'
+;<Link to={`/posts/${postId}`}>View Post</Link>
 ```
 
 TanStack Router:
 
 ```tsx
-import { Link } from "@tanstack/react-router";
-<Link to="/posts/$postId" params={{ postId }}>
-	View Post
-</Link>;
+import { Link } from '@tanstack/react-router'
+;<Link to="/posts/$postId" params={{ postId }}>
+  View Post
+</Link>
 ```
 
 Key differences:
@@ -207,17 +207,17 @@ Key differences:
 React Router:
 
 ```tsx
-import { useNavigate } from "react-router";
-const navigate = useNavigate();
-navigate(`/posts/${postId}`);
+import { useNavigate } from 'react-router'
+const navigate = useNavigate()
+navigate(`/posts/${postId}`)
 ```
 
 TanStack Router:
 
 ```tsx
-import { useNavigate } from "@tanstack/react-router";
-const navigate = useNavigate();
-navigate({ to: "/posts/$postId", params: { postId } });
+import { useNavigate } from '@tanstack/react-router'
+const navigate = useNavigate()
+navigate({ to: '/posts/$postId', params: { postId } })
 ```
 
 ## Search Params
@@ -227,13 +227,13 @@ navigate({ to: "/posts/$postId", params: { postId } });
 React Router:
 
 ```tsx
-import { useSearchParams } from "react-router";
+import { useSearchParams } from 'react-router'
 
 function Posts() {
-	const [searchParams, setSearchParams] = useSearchParams();
-	const page = Number(searchParams.get("page")) || 1;
+  const [searchParams, setSearchParams] = useSearchParams()
+  const page = Number(searchParams.get('page')) || 1
 
-	const goToPage = (p: number) => setSearchParams({ page: String(p) });
+  const goToPage = (p: number) => setSearchParams({ page: String(p) })
 }
 ```
 
@@ -241,26 +241,26 @@ TanStack Router:
 
 ```tsx
 // In the route definition:
-import { createFileRoute } from "@tanstack/react-router";
-import { z } from "zod";
+import { createFileRoute } from '@tanstack/react-router'
+import { z } from 'zod'
 
-export const Route = createFileRoute("/posts")({
-	validateSearch: z.object({
-		page: z.number().default(1).catch(1)
-	}),
-	component: Posts
-});
+export const Route = createFileRoute('/posts')({
+  validateSearch: z.object({
+    page: z.number().default(1).catch(1),
+  }),
+  component: Posts,
+})
 
 // In the component:
-import { useNavigate } from "@tanstack/react-router";
+import { useNavigate } from '@tanstack/react-router'
 
 function Posts() {
-	const { page } = Route.useSearch();
-	const navigate = useNavigate({ from: "/posts" });
+  const { page } = Route.useSearch()
+  const navigate = useNavigate({ from: '/posts' })
 
-	const goToPage = (p: number) => {
-		navigate({ search: (prev) => ({ ...prev, page: p }) });
-	};
+  const goToPage = (p: number) => {
+    navigate({ search: (prev) => ({ ...prev, page: p }) })
+  }
 }
 ```
 
@@ -277,21 +277,21 @@ Key differences:
 React Router:
 
 ```tsx
-import { useParams } from "react-router";
-const { postId } = useParams();
+import { useParams } from 'react-router'
+const { postId } = useParams()
 ```
 
 TanStack Router:
 
 ```tsx
-import { useParams } from "@tanstack/react-router";
-const { postId } = useParams({ from: "/posts/$postId" });
+import { useParams } from '@tanstack/react-router'
+const { postId } = useParams({ from: '/posts/$postId' })
 ```
 
 Or from within the route component:
 
 ```tsx
-const { postId } = Route.useParams();
+const { postId } = Route.useParams()
 ```
 
 ## `useLocation` — Common Pitfall
@@ -304,31 +304,31 @@ Replace based on what you actually need:
 
 ```tsx
 // React Router
-import { useLocation } from "react-router";
-const location = useLocation();
+import { useLocation } from 'react-router'
+const location = useLocation()
 
 // ❌ DON'T just swap to TanStack Router's useLocation — it's the "live" URL
-import { useLocation } from "@tanstack/react-router";
+import { useLocation } from '@tanstack/react-router'
 
 // ✅ DO use the specific hook for what you need:
 import {
-	useMatch,
-	useMatches,
-	useParams,
-	useSearch
-} from "@tanstack/react-router";
+  useMatch,
+  useMatches,
+  useParams,
+  useSearch,
+} from '@tanstack/react-router'
 
 // Current route match (replaces most useLocation().pathname usage)
-const match = useMatch({ from: "/posts/$postId" });
+const match = useMatch({ from: '/posts/$postId' })
 
 // All active matches (replaces useLocation for breadcrumbs/analytics)
-const matches = useMatches();
+const matches = useMatches()
 
 // Path params (replaces useLocation + manual parsing)
-const { postId } = useParams({ from: "/posts/$postId" });
+const { postId } = useParams({ from: '/posts/$postId' })
 
 // Search params (replaces useLocation().search parsing)
-const { page } = useSearch({ from: "/posts" });
+const { page } = useSearch({ from: '/posts' })
 ```
 
 ## Outlet
@@ -339,10 +339,10 @@ The API is identical — just change the import:
 
 ```tsx
 // Before
-import { Outlet } from "react-router";
+import { Outlet } from 'react-router'
 
 // After
-import { Outlet } from "@tanstack/react-router";
+import { Outlet } from '@tanstack/react-router'
 ```
 
 ## Loaders
@@ -353,30 +353,30 @@ React Router (v7):
 
 ```tsx
 export async function loader({ params }) {
-	const post = await fetchPost(params.postId);
-	return { post };
+  const post = await fetchPost(params.postId)
+  return { post }
 }
 
 export default function Post() {
-	const { post } = useLoaderData();
-	return <div>{post.title}</div>;
+  const { post } = useLoaderData()
+  return <div>{post.title}</div>
 }
 ```
 
 TanStack Router:
 
 ```tsx
-export const Route = createFileRoute("/posts/$postId")({
-	loader: async ({ params }) => {
-		const post = await fetchPost(params.postId);
-		return { post };
-	},
-	component: Post
-});
+export const Route = createFileRoute('/posts/$postId')({
+  loader: async ({ params }) => {
+    const post = await fetchPost(params.postId)
+    return { post }
+  },
+  component: Post,
+})
 
 function Post() {
-	const { post } = Route.useLoaderData();
-	return <div>{post.title}</div>;
+  const { post } = Route.useLoaderData()
+  return <div>{post.title}</div>
 }
 ```
 
@@ -393,11 +393,11 @@ Key differences:
 
 ```tsx
 // src/routes/lazy-page.lazy.tsx
-import { createLazyFileRoute } from "@tanstack/react-router";
+import { createLazyFileRoute } from '@tanstack/react-router'
 
-export const Route = createLazyFileRoute("/lazy-page")({
-	component: () => <div>Lazy loaded</div>
-});
+export const Route = createLazyFileRoute('/lazy-page')({
+  component: () => <div>Lazy loaded</div>,
+})
 ```
 
 ## Cleanup
@@ -420,11 +420,11 @@ Both libraries export `Link`, `useNavigate`, `Outlet`, etc. Leftover React Route
 
 ```tsx
 // WRONG — mixed imports
-import { Link } from "@tanstack/react-router";
-import { useNavigate } from "react-router"; // <- still React Router!
+import { Link } from '@tanstack/react-router'
+import { useNavigate } from 'react-router' // <- still React Router!
 
 // CORRECT — all from TanStack Router
-import { Link, useNavigate } from "@tanstack/react-router";
+import { Link, useNavigate } from '@tanstack/react-router'
 ```
 
 **Fix**: Uninstall `react-router`/`react-router-dom` completely. TypeScript will flag every stale import.

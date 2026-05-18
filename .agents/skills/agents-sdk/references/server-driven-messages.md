@@ -8,8 +8,8 @@ Patterns for server-initiated LLM turns in `AIChatAgent` — from schedules, web
 
 ```typescript
 await this.saveMessages((existingMessages) => [
-	...existingMessages,
-	{ role: "user", content: "Check for new notifications" }
+  ...existingMessages,
+  { role: "user", content: "Check for new notifications" }
 ]);
 ```
 
@@ -19,8 +19,8 @@ await this.saveMessages((existingMessages) => [
 
 ```typescript
 await this.persistMessages([
-	...this.messages,
-	{ role: "assistant", content: "System note: checked at " + new Date() }
+  ...this.messages,
+  { role: "assistant", content: "System note: checked at " + new Date() }
 ]);
 ```
 

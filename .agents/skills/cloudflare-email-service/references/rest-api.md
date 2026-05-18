@@ -22,20 +22,20 @@ Authorization: Bearer <API_TOKEN>
 
 **IMPORTANT:** The REST API uses different field names than the Workers binding in some cases.
 
-| Field         | Type                        | Required | Description                                             |
-| ------------- | --------------------------- | -------- | ------------------------------------------------------- |
-| `to`          | string or string[]          | Yes      | Recipient(s), max 50 combined with cc/bcc               |
-| `from`        | string or `{address, name}` | Yes      | Sender — **uses `address` not `email`** for object form |
-| `subject`     | string                      | Yes      | Email subject line                                      |
-| `html`        | string                      | No\*     | HTML body                                               |
-| `text`        | string                      | No\*     | Plain text body                                         |
-| `cc`          | string or string[]          | No       | CC recipients                                           |
-| `bcc`         | string or string[]          | No       | BCC recipients                                          |
-| `reply_to`    | string or `{address, name}` | No       | **Snake_case**, not camelCase                           |
-| `attachments` | array                       | No       | File attachments and inline images                      |
-| `headers`     | object                      | No       | Custom email headers                                    |
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `to` | string or string[] | Yes | Recipient(s), max 50 combined with cc/bcc |
+| `from` | string or `{address, name}` | Yes | Sender — **uses `address` not `email`** for object form |
+| `subject` | string | Yes | Email subject line |
+| `html` | string | No* | HTML body |
+| `text` | string | No* | Plain text body |
+| `cc` | string or string[] | No | CC recipients |
+| `bcc` | string or string[] | No | BCC recipients |
+| `reply_to` | string or `{address, name}` | No | **Snake_case**, not camelCase |
+| `attachments` | array | No | File attachments and inline images |
+| `headers` | object | No | Custom email headers |
 
-\*At least one of `html` or `text` required. Include both for best deliverability.
+*At least one of `html` or `text` required. Include both for best deliverability.
 
 **Key differences from Workers binding:** `from` uses `address` (REST) vs `email` (Workers), `reply_to` (REST) vs `replyTo` (Workers), `content_id` (REST) vs `contentId` (Workers) for inline attachments, errors use numeric codes (REST) vs string `E_*` codes (Workers), and responses return delivery status (`delivered`/`permanent_bounces`/`queued`) instead of just `messageId`.
 
@@ -120,7 +120,6 @@ curl "https://api.cloudflare.com/client/v4/accounts/{account_id}/email/sending/s
 ```
 
 Attachment fields differ by type:
-
 - **Regular attachment**: `content` (base64), `filename`, `type` (MIME), `disposition: "attachment"`
 - **Inline image**: `content` (base64), `filename`, `type` (MIME), `disposition: "inline"`, `content_id` (referenced in HTML as `cid:<content_id>`)
 
@@ -151,14 +150,14 @@ Success:
 
 ```json
 {
-	"success": true,
-	"errors": [],
-	"messages": [],
-	"result": {
-		"delivered": ["recipient@example.com"],
-		"permanent_bounces": [],
-		"queued": []
-	}
+  "success": true,
+  "errors": [],
+  "messages": [],
+  "result": {
+    "delivered": ["recipient@example.com"],
+    "permanent_bounces": [],
+    "queued": []
+  }
 }
 ```
 
@@ -166,20 +165,20 @@ Error (numeric codes, not `E_*` string codes like Workers):
 
 ```json
 {
-	"success": false,
-	"errors": [{ "code": 1000, "message": "Sender domain not verified" }],
-	"result": null
+  "success": false,
+  "errors": [{ "code": 1000, "message": "Sender domain not verified" }],
+  "result": null
 }
 ```
 
 ## Error Handling
 
-| Status | Meaning           | Retry?                    |
-| ------ | ----------------- | ------------------------- |
-| 200    | Success           | N/A                       |
-| 400    | Validation error  | No — fix the request      |
-| 401    | Invalid API token | No — check your token     |
-| 429    | Rate limited      | Yes — exponential backoff |
-| 500    | Server error      | Yes — exponential backoff |
+| Status | Meaning | Retry? |
+|--------|---------|--------|
+| 200 | Success | N/A |
+| 400 | Validation error | No — fix the request |
+| 401 | Invalid API token | No — check your token |
+| 429 | Rate limited | Yes — exponential backoff |
+| 500 | Server error | Yes — exponential backoff |
 
 Only retry on 429 and 500. Validation errors (400) won't succeed on retry.

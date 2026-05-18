@@ -1,21 +1,21 @@
 ---
 name: vue-router
 description: >-
-    Vue bindings for TanStack Router: RouterProvider, useRouter,
-    useRouterState, useMatch, useMatches, useLocation, useSearch,
-    useParams, useNavigate, useLoaderData, useLoaderDeps,
-    useRouteContext, useBlocker, useCanGoBack, Link, Navigate,
-    Outlet, CatchBoundary, ErrorComponent, Html, Body.
-    Vue-specific patterns with Ref<T> returns, defineComponent,
-    h() render functions, provide/inject, and computed refs.
+  Vue bindings for TanStack Router: RouterProvider, useRouter,
+  useRouterState, useMatch, useMatches, useLocation, useSearch,
+  useParams, useNavigate, useLoaderData, useLoaderDeps,
+  useRouteContext, useBlocker, useCanGoBack, Link, Navigate,
+  Outlet, CatchBoundary, ErrorComponent, Html, Body.
+  Vue-specific patterns with Ref<T> returns, defineComponent,
+  h() render functions, provide/inject, and computed refs.
 type: framework
 library: tanstack-router
-library_version: "1.166.2"
+library_version: '1.166.2'
 framework: vue
 requires:
-    - router-core
+  - router-core
 sources:
-    - TanStack/router:packages/vue-router/src
+  - TanStack/router:packages/vue-router/src
 ---
 
 # Vue Router (`@tanstack/vue-router`)
@@ -45,49 +45,49 @@ npm install -D @tanstack/router-plugin @vitejs/plugin-vue-jsx
 
 ```ts
 // vite.config.ts
-import { defineConfig } from "vite";
-import vue from "@vitejs/plugin-vue";
-import vueJsx from "@vitejs/plugin-vue-jsx";
-import { tanstackRouter } from "@tanstack/router-plugin/vite";
+import { defineConfig } from 'vite'
+import vue from '@vitejs/plugin-vue'
+import vueJsx from '@vitejs/plugin-vue-jsx'
+import { tanstackRouter } from '@tanstack/router-plugin/vite'
 
 export default defineConfig({
-	plugins: [
-		// MUST come before vue()
-		tanstackRouter({
-			target: "vue",
-			autoCodeSplitting: true
-		}),
-		vue(),
-		vueJsx() // Required for JSX/TSX route files
-	]
-});
+  plugins: [
+    // MUST come before vue()
+    tanstackRouter({
+      target: 'vue',
+      autoCodeSplitting: true,
+    }),
+    vue(),
+    vueJsx(), // Required for JSX/TSX route files
+  ],
+})
 ```
 
 ### 3. Create Root Route
 
 ```tsx
 // src/routes/__root.tsx
-import { createRootRoute, Link, Outlet } from "@tanstack/vue-router";
+import { createRootRoute, Link, Outlet } from '@tanstack/vue-router'
 
 export const Route = createRootRoute({
-	component: RootLayout
-});
+  component: RootLayout,
+})
 
 function RootLayout() {
-	return (
-		<>
-			<nav>
-				<Link to="/" activeProps={{ class: "font-bold" }}>
-					Home
-				</Link>
-				<Link to="/about" activeProps={{ class: "font-bold" }}>
-					About
-				</Link>
-			</nav>
-			<hr />
-			<Outlet />
-		</>
-	);
+  return (
+    <>
+      <nav>
+        <Link to="/" activeProps={{ class: 'font-bold' }}>
+          Home
+        </Link>
+        <Link to="/about" activeProps={{ class: 'font-bold' }}>
+          About
+        </Link>
+      </nav>
+      <hr />
+      <Outlet />
+    </>
+  )
 }
 ```
 
@@ -95,14 +95,14 @@ function RootLayout() {
 
 ```tsx
 // src/routes/index.tsx
-import { createFileRoute } from "@tanstack/vue-router";
+import { createFileRoute } from '@tanstack/vue-router'
 
-export const Route = createFileRoute("/")({
-	component: HomePage
-});
+export const Route = createFileRoute('/')({
+  component: HomePage,
+})
 
 function HomePage() {
-	return <h1>Welcome Home</h1>;
+  return <h1>Welcome Home</h1>
 }
 ```
 
@@ -110,21 +110,21 @@ function HomePage() {
 
 ```tsx
 // src/main.tsx
-import { createApp } from "vue";
-import { RouterProvider, createRouter } from "@tanstack/vue-router";
-import { routeTree } from "./routeTree.gen";
+import { createApp } from 'vue'
+import { RouterProvider, createRouter } from '@tanstack/vue-router'
+import { routeTree } from './routeTree.gen'
 
-const router = createRouter({ routeTree });
+const router = createRouter({ routeTree })
 
 // REQUIRED — without this, Link/useNavigate/useSearch have no type safety
-declare module "@tanstack/vue-router" {
-	interface Register {
-		router: typeof router;
-	}
+declare module '@tanstack/vue-router' {
+  interface Register {
+    router: typeof router
+  }
 }
 
-const app = createApp(RouterProvider, { router });
-app.mount("#root");
+const app = createApp(RouterProvider, { router })
+app.mount('#root')
 ```
 
 ## Composables Reference
@@ -134,10 +134,10 @@ All composables imported from `@tanstack/vue-router`. Most return `Ref<T>` — a
 ### `useRouter()` — returns `TRouter` (NOT a Ref)
 
 ```tsx
-import { useRouter } from "@tanstack/vue-router";
+import { useRouter } from '@tanstack/vue-router'
 
-const router = useRouter();
-router.invalidate();
+const router = useRouter()
+router.invalidate()
 ```
 
 ### `useRouterState()` — returns `Ref<T>`
@@ -146,58 +146,58 @@ Subscribe to router state changes. Exposes the entire state and thus incurs
 a performance cost. For matches or location favor `useMatches` and `useLocation`.
 
 ```tsx
-import { useRouterState } from "@tanstack/vue-router";
+import { useRouterState } from '@tanstack/vue-router'
 
-const isLoading = useRouterState({ select: (s) => s.isLoading });
+const isLoading = useRouterState({ select: (s) => s.isLoading })
 // Access: isLoading.value
 ```
 
 ### `useNavigate()` — returns a function (NOT a Ref)
 
 ```tsx
-import { useNavigate } from "@tanstack/vue-router";
+import { useNavigate } from '@tanstack/vue-router'
 
-const navigate = useNavigate();
+const navigate = useNavigate()
 
 async function handleSubmit() {
-	await saveData();
-	navigate({ to: "/posts/$postId", params: { postId: "123" } });
+  await saveData()
+  navigate({ to: '/posts/$postId', params: { postId: '123' } })
 }
 ```
 
 ### `useSearch({ from })` — returns `Ref<T>`
 
 ```tsx
-import { useSearch } from "@tanstack/vue-router";
+import { useSearch } from '@tanstack/vue-router'
 
-const search = useSearch({ from: "/products" });
+const search = useSearch({ from: '/products' })
 // Access: search.value.page
 ```
 
 ### `useParams({ from })` — returns `Ref<T>`
 
 ```tsx
-import { useParams } from "@tanstack/vue-router";
+import { useParams } from '@tanstack/vue-router'
 
-const params = useParams({ from: "/posts/$postId" });
+const params = useParams({ from: '/posts/$postId' })
 // Access: params.value.postId
 ```
 
 ### `useLoaderData({ from })` — returns `Ref<T>`
 
 ```tsx
-import { useLoaderData } from "@tanstack/vue-router";
+import { useLoaderData } from '@tanstack/vue-router'
 
-const data = useLoaderData({ from: "/posts/$postId" });
+const data = useLoaderData({ from: '/posts/$postId' })
 // Access: data.value.post.content
 ```
 
 ### `useMatch({ from })` — returns `Ref<T>`
 
 ```tsx
-import { useMatch } from "@tanstack/vue-router";
+import { useMatch } from '@tanstack/vue-router'
 
-const match = useMatch({ from: "/posts/$postId" });
+const match = useMatch({ from: '/posts/$postId' })
 // Access: match.value.loaderData.post.title
 ```
 
@@ -261,17 +261,17 @@ Vue-specific SSR shell components:
 
 ```tsx
 function RootComponent() {
-	return (
-		<Html>
-			<head>
-				<HeadContent />
-			</head>
-			<Body>
-				<Outlet />
-				<Scripts />
-			</Body>
-		</Html>
-	);
+  return (
+    <Html>
+      <head>
+        <HeadContent />
+      </head>
+      <Body>
+        <Outlet />
+        <Scripts />
+      </Body>
+    </Html>
+  )
 }
 ```
 
@@ -281,7 +281,7 @@ Renders children only after `onMounted` (hydration complete):
 
 ```tsx
 <ClientOnly fallback={<div>Loading...</div>}>
-	<BrowserOnlyWidget />
+  <BrowserOnlyWidget />
 </ClientOnly>
 ```
 
@@ -290,17 +290,16 @@ Renders children only after `onMounted` (hydration complete):
 ### Custom Link Component with `createLink`
 
 ```tsx
-import { createLink } from "@tanstack/vue-router";
-import { defineComponent, h } from "vue";
+import { createLink } from '@tanstack/vue-router'
+import { defineComponent, h } from 'vue'
 
 const StyledLinkComponent = defineComponent({
-	setup(props, { slots, attrs }) {
-		return () =>
-			h("a", { ...attrs, class: "styled-link" }, slots.default?.());
-	}
-});
+  setup(props, { slots, attrs }) {
+    return () => h('a', { ...attrs, class: 'styled-link' }, slots.default?.())
+  },
+})
 
-const StyledLink = createLink(StyledLinkComponent);
+const StyledLink = createLink(StyledLinkComponent)
 ```
 
 ### Render Functions (h())
@@ -311,35 +310,35 @@ SFC template (most common for user code) in `MyRoute.component.vue`:
 
 ```vue
 <template>
-	<div>{{ data.title }}</div>
+  <div>{{ data.title }}</div>
 </template>
 
 <script setup>
-import { useLoaderData } from "@tanstack/vue-router";
-const data = useLoaderData({ from: "/posts/$postId" });
+import { useLoaderData } from '@tanstack/vue-router'
+const data = useLoaderData({ from: '/posts/$postId' })
 </script>
 ```
 
 ### Auth with Router Context
 
 ```tsx
-import { createRootRouteWithContext } from "@tanstack/vue-router";
+import { createRootRouteWithContext } from '@tanstack/vue-router'
 
 const rootRoute = createRootRouteWithContext<{ auth: AuthState }>()({
-	component: RootComponent
-});
+  component: RootComponent,
+})
 
 const router = createRouter({
-	routeTree,
-	context: { auth: authState }
-});
+  routeTree,
+  context: { auth: authState },
+})
 
 // In a route — access via beforeLoad
 beforeLoad: ({ context }) => {
-	if (!context.auth.isAuthenticated) {
-		throw redirect({ to: "/login" });
-	}
-};
+  if (!context.auth.isAuthenticated) {
+    throw redirect({ to: '/login' })
+  }
+}
 ```
 
 ### Vue File Conventions for Code Splitting
@@ -360,12 +359,12 @@ Composables return `Ref<T>` — access via `.value` in `<script>`. Templates aut
 
 ```tsx
 // WRONG — accessing Ref without .value in script
-const params = useParams({ from: "/posts/$postId" });
-console.log(params.postId); // undefined!
+const params = useParams({ from: '/posts/$postId' })
+console.log(params.postId) // undefined!
 
 // CORRECT — use .value
-const params = useParams({ from: "/posts/$postId" });
-console.log(params.value.postId);
+const params = useParams({ from: '/posts/$postId' })
+console.log(params.value.postId)
 ```
 
 ### 2. HIGH: Confusing with vue-router (official)
@@ -374,10 +373,10 @@ console.log(params.value.postId);
 
 ```ts
 // WRONG — official vue-router imports
-import { useRoute, useRouter } from "vue-router";
+import { useRoute, useRouter } from 'vue-router'
 
 // CORRECT — TanStack Vue Router imports
-import { useMatch, useRouter } from "@tanstack/vue-router";
+import { useMatch, useRouter } from '@tanstack/vue-router'
 ```
 
 ### 3. HIGH: Using Vue hooks in beforeLoad or loader

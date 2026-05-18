@@ -12,23 +12,23 @@ Each tool requires a name, description, and JSON Schema for its inputs:
 
 ```json
 {
-	"name": "get_weather",
-	"description": "Get current weather for a location",
-	"input_schema": {
-		"type": "object",
-		"properties": {
-			"location": {
-				"type": "string",
-				"description": "City and state, e.g., San Francisco, CA"
-			},
-			"unit": {
-				"type": "string",
-				"enum": ["celsius", "fahrenheit"],
-				"description": "Temperature unit"
-			}
-		},
-		"required": ["location"]
-	}
+  "name": "get_weather",
+  "description": "Get current weather for a location",
+  "input_schema": {
+    "type": "object",
+    "properties": {
+      "location": {
+        "type": "string",
+        "description": "City and state, e.g., San Francisco, CA"
+      },
+      "unit": {
+        "type": "string",
+        "enum": ["celsius", "fahrenheit"],
+        "description": "Temperature unit"
+      }
+    },
+    "required": ["location"]
+  }
 }
 ```
 
@@ -116,8 +116,8 @@ The tool requires no schema — just declare it in the `tools` array:
 
 ```json
 {
-	"type": "code_execution_20260120",
-	"name": "code_execution"
+  "type": "code_execution_20260120",
+  "name": "code_execution"
 }
 ```
 
@@ -166,8 +166,8 @@ Web search and web fetch let Claude search the web and retrieve page content. Th
 
 ```json
 [
-	{ "type": "web_search_20260209", "name": "web_search" },
-	{ "type": "web_fetch_20260209", "name": "web_fetch" }
+  { "type": "web_search_20260209", "name": "web_search" },
+  { "type": "web_fetch_20260209", "name": "web_fetch" }
 ]
 ```
 
@@ -177,10 +177,10 @@ The `web_search_20260209` and `web_fetch_20260209` versions support **dynamic fi
 
 ```json
 {
-	"tools": [
-		{ "type": "web_search_20260209", "name": "web_search" },
-		{ "type": "web_fetch_20260209", "name": "web_fetch" }
-	]
+  "tools": [
+    { "type": "web_search_20260209", "name": "web_search" },
+    { "type": "web_fetch_20260209", "name": "web_fetch" }
+  ]
 }
 ```
 

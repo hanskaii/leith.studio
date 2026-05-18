@@ -20,10 +20,10 @@ When asked to add or optimize caching:
 
 1. **Trace the prompt assembly path.** Find where `system`, `tools`, and `messages` are constructed. Identify every input that flows into them.
 2. **Classify each input by stability:**
-    - Never changes → belongs early in the prompt, before any breakpoint
-    - Changes per-session → belongs after the global prefix, cache per-session
-    - Changes per-turn → belongs at the end, after the last breakpoint
-    - Changes per-request (timestamps, UUIDs, random IDs) → **eliminate or move to the very end**
+   - Never changes → belongs early in the prompt, before any breakpoint
+   - Changes per-session → belongs after the global prefix, cache per-session
+   - Changes per-turn → belongs at the end, after the last breakpoint
+   - Changes per-request (timestamps, UUIDs, random IDs) → **eliminate or move to the very end**
 3. **Check rendered order matches stability order.** Stable content must physically precede volatile content. If a timestamp is interpolated into the system prompt header, everything after it is uncacheable regardless of markers.
 4. **Place breakpoints at stability boundaries.** See placement patterns below.
 5. **Audit for silent invalidators.** See anti-patterns table.
@@ -84,14 +84,14 @@ These are the decisions that matter more than marker placement. Fix these first.
 
 When reviewing code, grep for these inside anything that feeds the prompt prefix:
 
-| Pattern                                                          | Why it breaks caching                                   |
-| ---------------------------------------------------------------- | ------------------------------------------------------- |
-| `datetime.now()` / `Date.now()` / `time.time()` in system prompt | Prefix changes every request                            |
-| `uuid4()` / `crypto.randomUUID()` / request IDs early in content | Same — every request is unique                          |
-| `json.dumps(d)` without `sort_keys=True` / iterating a `set`     | Non-deterministic serialization → prefix bytes differ   |
-| f-string interpolating session/user ID into system prompt        | Per-user prefix; no cross-user sharing                  |
-| Conditional system sections (`if flag: system += ...`)           | Every flag combination is a distinct prefix             |
-| `tools=build_tools(user)` where set varies per user              | Tools render at position 0; nothing caches across users |
+| Pattern | Why it breaks caching |
+|---|---|
+| `datetime.now()` / `Date.now()` / `time.time()` in system prompt | Prefix changes every request |
+| `uuid4()` / `crypto.randomUUID()` / request IDs early in content | Same — every request is unique |
+| `json.dumps(d)` without `sort_keys=True` / iterating a `set` | Non-deterministic serialization → prefix bytes differ |
+| f-string interpolating session/user ID into system prompt | Per-user prefix; no cross-user sharing |
+| Conditional system sections (`if flag: system += ...`) | Every flag combination is a distinct prefix |
+| `tools=build_tools(user)` where set varies per user | Tools render at position 0; nothing caches across users |
 
 Fix by moving the dynamic piece after the last breakpoint, making it deterministic, or deleting it if it's not load-bearing.
 
@@ -109,10 +109,10 @@ Fix by moving the dynamic piece after the last breakpoint, making it determinist
 - Top-level `cache_control` on `messages.create()` auto-places on the last cacheable block — simplest option when you don't need fine-grained placement.
 - Minimum cacheable prefix is model-dependent. Shorter prefixes silently won't cache even with a marker — no error, just `cache_creation_input_tokens: 0`:
 
-| Model                                        |     Minimum |
-| -------------------------------------------- | ----------: |
-| Opus 4.7, Opus 4.6, Opus 4.5, Haiku 4.5      | 4096 tokens |
-| Sonnet 4.6, Haiku 3.5, Haiku 3               | 2048 tokens |
+| Model | Minimum |
+|---|---:|
+| Opus 4.7, Opus 4.6, Opus 4.5, Haiku 4.5 | 4096 tokens |
+| Sonnet 4.6, Haiku 3.5, Haiku 3 | 2048 tokens |
 | Sonnet 4.5, Sonnet 4.1, Sonnet 4, Sonnet 3.7 | 1024 tokens |
 
 A 3K-token prompt caches on Sonnet 4.5 but silently won't on Opus 4.7.
@@ -125,11 +125,11 @@ A 3K-token prompt caches on Sonnet 4.5 but silently won't on Opus 4.7.
 
 The response `usage` object reports cache activity:
 
-| Field                         | Meaning                                                                  |
-| ----------------------------- | ------------------------------------------------------------------------ |
+| Field | Meaning |
+|---|---|
 | `cache_creation_input_tokens` | Tokens written to cache this request (you paid the ~1.25× write premium) |
-| `cache_read_input_tokens`     | Tokens served from cache this request (you paid ~0.1×)                   |
-| `input_tokens`                | Tokens processed at full price (not cached)                              |
+| `cache_read_input_tokens` | Tokens served from cache this request (you paid ~0.1×) |
+| `input_tokens` | Tokens processed at full price (not cached) |
 
 If `cache_read_input_tokens` is zero across repeated requests with identical prefixes, a silent invalidator is at work — diff the rendered prompt bytes between two requests to find it.
 
@@ -143,14 +143,14 @@ Language-specific access: `response.usage.cache_read_input_tokens` (Python/TS/Ru
 
 Not every parameter change invalidates everything. The API has three cache tiers, and changes only invalidate their own tier and below:
 
-| Change                                           | Tools cache | System cache | Messages cache |
-| ------------------------------------------------ | :---------: | :----------: | :------------: |
-| Tool definitions (add/remove/reorder)            |     ❌      |      ❌      |       ❌       |
-| Model switch                                     |     ❌      |      ❌      |       ❌       |
-| `speed`, web-search, citations toggle            |     ✅      |      ❌      |       ❌       |
-| System prompt content                            |     ✅      |      ❌      |       ❌       |
-| `tool_choice`, images, `thinking` enable/disable |     ✅      |      ✅      |       ❌       |
-| Message content                                  |     ✅      |      ✅      |       ❌       |
+| Change | Tools cache | System cache | Messages cache |
+|---|:---:|:---:|:---:|
+| Tool definitions (add/remove/reorder) | ❌ | ❌ | ❌ |
+| Model switch | ❌ | ❌ | ❌ |
+| `speed`, web-search, citations toggle | ✅ | ❌ | ❌ |
+| System prompt content | ✅ | ❌ | ❌ |
+| `tool_choice`, images, `thinking` enable/disable | ✅ | ✅ | ❌ |
+| Message content | ✅ | ✅ | ❌ |
 
 Implication: you can change `tool_choice` per-request or toggle `thinking` without losing the tools+system cache. Don't over-worry about these — only tool-definition and model changes force a full rebuild.
 

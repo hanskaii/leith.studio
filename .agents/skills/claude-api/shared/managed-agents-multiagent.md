@@ -29,11 +29,11 @@ orchestrator = client.beta.agents.create(
 session = client.beta.sessions.create(agent=orchestrator.id, environment_id=env.id)
 ```
 
-| Roster entry     | Shape                           | Notes                                                      |
-| ---------------- | ------------------------------- | ---------------------------------------------------------- |
-| String shorthand | `"agent_abc123"`                | References the latest version of a stored agent.           |
-| Agent reference  | `{type: "agent", id, version?}` | Omit `version` to pin the latest at coordinator save time. |
-| Self             | `{type: "self"}`                | The coordinator can spawn copies of itself.                |
+| Roster entry | Shape | Notes |
+|---|---|---|
+| String shorthand | `"agent_abc123"` | References the latest version of a stored agent. |
+| Agent reference | `{type: "agent", id, version?}` | Omit `version` to pin the latest at coordinator save time. |
+| Self | `{type: "self"}` | The coordinator can spawn copies of itself. |
 
 Up to **20 unique agents** in the roster; the coordinator may spawn **multiple copies** of each. **One level of delegation only** — depth > 1 is ignored.
 
@@ -43,13 +43,13 @@ Up to **20 unique agents** in the roster; the coordinator may spawn **multiple c
 
 The session-level event stream is the **primary thread** — it shows the coordinator's trace plus a condensed view of subagent activity (thread status transitions and cross-thread messages, not every subagent tool call). Drill into a specific subagent via the per-thread endpoints:
 
-| Operation            | HTTP                                            | SDK (`client.beta.sessions.threads.*`)      |
-| -------------------- | ----------------------------------------------- | ------------------------------------------- |
-| List threads         | `GET /v1/sessions/{sid}/threads`                | `.list(session_id)`                         |
-| Retrieve one         | `GET /v1/sessions/{sid}/threads/{tid}`          | `.retrieve(thread_id, session_id=...)`      |
-| Archive              | `POST /v1/sessions/{sid}/threads/{tid}/archive` | `.archive(thread_id, session_id=...)`       |
-| List thread events   | `GET /v1/sessions/{sid}/threads/{tid}/events`   | `.events.list(thread_id, session_id=...)`   |
-| Stream thread events | `GET /v1/sessions/{sid}/threads/{tid}/stream`   | `.events.stream(thread_id, session_id=...)` |
+| Operation | HTTP | SDK (`client.beta.sessions.threads.*`) |
+|---|---|---|
+| List threads | `GET /v1/sessions/{sid}/threads` | `.list(session_id)` |
+| Retrieve one | `GET /v1/sessions/{sid}/threads/{tid}` | `.retrieve(thread_id, session_id=...)` |
+| Archive | `POST /v1/sessions/{sid}/threads/{tid}/archive` | `.archive(thread_id, session_id=...)` |
+| List thread events | `GET /v1/sessions/{sid}/threads/{tid}/events` | `.events.list(thread_id, session_id=...)` |
+| Stream thread events | `GET /v1/sessions/{sid}/threads/{tid}/stream` | `.events.stream(thread_id, session_id=...)` |
 
 Each `SessionThread` carries `id`, `status` (`running` | `idle` | `rescheduling` | `terminated`), `agent` (a resolved snapshot of the agent config — `id`, `name`, `model`, `system`, `tools`, `skills`, `mcp_servers`, `version`), `parent_thread_id` (null for the primary thread, which is included in the list), `archived_at`, and optional `stats`/`usage`. **Session status aggregates thread statuses** — if any thread is `running`, `session.status` is `running`. Max **25 concurrent threads**. When draining a per-thread stream, break on `session.thread_status_idle` (and check its `stop_reason` as you would for the session-level idle).
 
@@ -57,15 +57,15 @@ Each `SessionThread` carries `id`, `status` (`running` | `idle` | `rescheduling`
 
 ## Multiagent events (on the session stream)
 
-| Event                               | Payload highlights                                     | Meaning                                                                                            |
-| ----------------------------------- | ------------------------------------------------------ | -------------------------------------------------------------------------------------------------- |
-| `session.thread_created`            | `session_thread_id`, `agent_name`                      | A new thread was created.                                                                          |
-| `session.thread_status_running`     | `session_thread_id`, `agent_name`                      | Thread started activity.                                                                           |
-| `session.thread_status_idle`        | `session_thread_id`, `agent_name`, **`stop_reason`**   | Thread is awaiting input. Inspect `stop_reason` (same shape as `session.status_idle.stop_reason`). |
-| `session.thread_status_rescheduled` | `session_thread_id`, `agent_name`                      | Thread is rescheduling after a retryable error.                                                    |
-| `session.thread_status_terminated`  | `session_thread_id`, `agent_name`                      | Thread was archived or hit a terminal error.                                                       |
-| `agent.thread_message_sent`         | `to_session_thread_id`, `to_agent_name`, `content`     | Coordinator sent a follow-up to another thread.                                                    |
-| `agent.thread_message_received`     | `from_session_thread_id`, `from_agent_name`, `content` | An agent delivered its result to the coordinator.                                                  |
+| Event | Payload highlights | Meaning |
+|---|---|---|
+| `session.thread_created` | `session_thread_id`, `agent_name` | A new thread was created. |
+| `session.thread_status_running` | `session_thread_id`, `agent_name` | Thread started activity. |
+| `session.thread_status_idle` | `session_thread_id`, `agent_name`, **`stop_reason`** | Thread is awaiting input. Inspect `stop_reason` (same shape as `session.status_idle.stop_reason`). |
+| `session.thread_status_rescheduled` | `session_thread_id`, `agent_name` | Thread is rescheduling after a retryable error. |
+| `session.thread_status_terminated` | `session_thread_id`, `agent_name` | Thread was archived or hit a terminal error. |
+| `agent.thread_message_sent` | `to_session_thread_id`, `to_agent_name`, `content` | Coordinator sent a follow-up to another thread. |
+| `agent.thread_message_received` | `from_session_thread_id`, `from_agent_name`, `content` | An agent delivered its result to the coordinator. |
 
 ---
 

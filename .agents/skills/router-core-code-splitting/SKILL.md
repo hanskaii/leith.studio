@@ -1,18 +1,18 @@
 ---
 name: router-core/code-splitting
 description: >-
-    Automatic code splitting (autoCodeSplitting), .lazy.tsx convention,
-    createLazyFileRoute, createLazyRoute, lazyRouteComponent, getRouteApi
-    for typed hooks in split files, codeSplitGroupings per-route override,
-    splitBehavior programmatic config, critical vs non-critical properties.
+  Automatic code splitting (autoCodeSplitting), .lazy.tsx convention,
+  createLazyFileRoute, createLazyRoute, lazyRouteComponent, getRouteApi
+  for typed hooks in split files, codeSplitGroupings per-route override,
+  splitBehavior programmatic config, critical vs non-critical properties.
 type: sub-skill
 library: tanstack-router
-library_version: "1.166.2"
+library_version: '1.166.2'
 requires:
-    - router-core
+  - router-core
 sources:
-    - TanStack/router:docs/router/guide/code-splitting.md
-    - TanStack/router:docs/router/guide/automatic-code-splitting.md
+  - TanStack/router:docs/router/guide/code-splitting.md
+  - TanStack/router:docs/router/guide/automatic-code-splitting.md
 ---
 
 # Code Splitting
@@ -46,43 +46,43 @@ Enable `autoCodeSplitting: true` in the bundler plugin. This is the recommended 
 
 ```ts
 // vite.config.ts
-import { defineConfig } from "vite";
-import react from "@vitejs/plugin-react";
-import { tanstackRouter } from "@tanstack/router-plugin/vite";
+import { defineConfig } from 'vite'
+import react from '@vitejs/plugin-react'
+import { tanstackRouter } from '@tanstack/router-plugin/vite'
 
 export default defineConfig({
-	plugins: [
-		// TanStack Router plugin MUST come before the framework plugin
-		tanstackRouter({
-			autoCodeSplitting: true
-		}),
-		react()
-	]
-});
+  plugins: [
+    // TanStack Router plugin MUST come before the framework plugin
+    tanstackRouter({
+      autoCodeSplitting: true,
+    }),
+    react(),
+  ],
+})
 ```
 
 With this enabled, route files are automatically transformed. Components are split into separate chunks; loaders stay in the main bundle. No `.lazy.tsx` files needed.
 
 ```tsx
 // src/routes/posts.tsx — everything in one file, splitting is automatic
-import { createFileRoute } from "@tanstack/react-router";
-import { fetchPosts } from "../api";
+import { createFileRoute } from '@tanstack/react-router'
+import { fetchPosts } from '../api'
 
-export const Route = createFileRoute("/posts")({
-	loader: fetchPosts,
-	component: PostsComponent
-});
+export const Route = createFileRoute('/posts')({
+  loader: fetchPosts,
+  component: PostsComponent,
+})
 
 // NOT exported — this is critical for automatic code splitting to work
 function PostsComponent() {
-	const posts = Route.useLoaderData();
-	return (
-		<ul>
-			{posts.map((post) => (
-				<li key={post.id}>{post.title}</li>
-			))}
-		</ul>
-	);
+  const posts = Route.useLoaderData()
+  return (
+    <ul>
+      {posts.map((post) => (
+        <li key={post.id}>{post.title}</li>
+      ))}
+    </ul>
+  )
 }
 ```
 
@@ -92,25 +92,25 @@ If you cannot use automatic code splitting (e.g. CLI-only, no bundler plugin), s
 
 ```tsx
 // src/routes/posts.tsx — critical route config only
-import { createFileRoute } from "@tanstack/react-router";
-import { fetchPosts } from "../api";
+import { createFileRoute } from '@tanstack/react-router'
+import { fetchPosts } from '../api'
 
-export const Route = createFileRoute("/posts")({
-	loader: fetchPosts
-});
+export const Route = createFileRoute('/posts')({
+  loader: fetchPosts,
+})
 ```
 
 ```tsx
 // src/routes/posts.lazy.tsx — non-critical (lazy-loaded)
-import { createLazyFileRoute } from "@tanstack/react-router";
+import { createLazyFileRoute } from '@tanstack/react-router'
 
-export const Route = createLazyFileRoute("/posts")({
-	component: PostsComponent
-});
+export const Route = createLazyFileRoute('/posts')({
+  component: PostsComponent,
+})
 
 function PostsComponent() {
-	// Use getRouteApi to access typed hooks without importing Route
-	return <div>Posts</div>;
+  // Use getRouteApi to access typed hooks without importing Route
+  return <div>Posts</div>
 }
 ```
 
@@ -122,11 +122,11 @@ If splitting leaves the critical route file empty, delete it entirely. A virtual
 
 ```tsx
 // src/routes/about.lazy.tsx — no about.tsx needed
-import { createLazyFileRoute } from "@tanstack/react-router";
+import { createLazyFileRoute } from '@tanstack/react-router'
 
-export const Route = createLazyFileRoute("/about")({
-	component: () => <h1>About Us</h1>
-});
+export const Route = createLazyFileRoute('/about')({
+  component: () => <h1>About Us</h1>,
+})
 ```
 
 ## Code-Based Splitting
@@ -135,25 +135,25 @@ For code-based (non-file-based) routing, use `createLazyRoute` and the `.lazy()`
 
 ```tsx
 // src/posts.lazy.tsx
-import { createLazyRoute } from "@tanstack/react-router";
+import { createLazyRoute } from '@tanstack/react-router'
 
-export const Route = createLazyRoute("/posts")({
-	component: PostsComponent
-});
+export const Route = createLazyRoute('/posts')({
+  component: PostsComponent,
+})
 
 function PostsComponent() {
-	return <div>Posts</div>;
+  return <div>Posts</div>
 }
 ```
 
 ```tsx
 // src/app.tsx
-import { createRoute } from "@tanstack/react-router";
+import { createRoute } from '@tanstack/react-router'
 
 const postsRoute = createRoute({
-	getParentRoute: () => rootRoute,
-	path: "/posts"
-}).lazy(() => import("./posts.lazy").then((d) => d.Route));
+  getParentRoute: () => rootRoute,
+  path: '/posts',
+}).lazy(() => import('./posts.lazy').then((d) => d.Route))
 ```
 
 ## Accessing Typed Hooks in Split Files: `getRouteApi`
@@ -162,20 +162,20 @@ When your component lives in a separate file, use `getRouteApi` to get typed acc
 
 ```tsx
 // src/routes/posts.lazy.tsx
-import { createLazyFileRoute, getRouteApi } from "@tanstack/react-router";
+import { createLazyFileRoute, getRouteApi } from '@tanstack/react-router'
 
-const routeApi = getRouteApi("/posts");
+const routeApi = getRouteApi('/posts')
 
-export const Route = createLazyFileRoute("/posts")({
-	component: PostsComponent
-});
+export const Route = createLazyFileRoute('/posts')({
+  component: PostsComponent,
+})
 
 function PostsComponent() {
-	const posts = routeApi.useLoaderData();
-	const { page } = routeApi.useSearch();
-	const params = routeApi.useParams();
-	const context = routeApi.useRouteContext();
-	return <div>Posts page {page}</div>;
+  const posts = routeApi.useLoaderData()
+  const { page } = routeApi.useSearch()
+  const params = routeApi.useParams()
+  const context = routeApi.useRouteContext()
+  return <div>Posts page {page}</div>
 }
 ```
 
@@ -187,19 +187,19 @@ Override split behavior for a specific route by adding `codeSplitGroupings` dire
 
 ```tsx
 // src/routes/posts.tsx
-import { createFileRoute } from "@tanstack/react-router";
-import { loadPostsData } from "./-heavy-posts-utils";
+import { createFileRoute } from '@tanstack/react-router'
+import { loadPostsData } from './-heavy-posts-utils'
 
-export const Route = createFileRoute("/posts")({
-	// Bundle loader and component together for this route
-	codeSplitGroupings: [["loader", "component"]],
-	loader: () => loadPostsData(),
-	component: PostsComponent
-});
+export const Route = createFileRoute('/posts')({
+  // Bundle loader and component together for this route
+  codeSplitGroupings: [['loader', 'component']],
+  loader: () => loadPostsData(),
+  component: PostsComponent,
+})
 
 function PostsComponent() {
-	const data = Route.useLoaderData();
-	return <div>{data.title}</div>;
+  const data = Route.useLoaderData()
+  return <div>{data.title}</div>
 }
 ```
 
@@ -209,51 +209,51 @@ function PostsComponent() {
 
 ```ts
 // vite.config.ts
-import { defineConfig } from "vite";
-import { tanstackRouter } from "@tanstack/router-plugin/vite";
+import { defineConfig } from 'vite'
+import { tanstackRouter } from '@tanstack/router-plugin/vite'
 
 export default defineConfig({
-	plugins: [
-		tanstackRouter({
-			autoCodeSplitting: true,
-			codeSplittingOptions: {
-				defaultBehavior: [
-					// Bundle all UI components into one chunk
-					[
-						"component",
-						"pendingComponent",
-						"errorComponent",
-						"notFoundComponent"
-					]
-				]
-			}
-		})
-	]
-});
+  plugins: [
+    tanstackRouter({
+      autoCodeSplitting: true,
+      codeSplittingOptions: {
+        defaultBehavior: [
+          // Bundle all UI components into one chunk
+          [
+            'component',
+            'pendingComponent',
+            'errorComponent',
+            'notFoundComponent',
+          ],
+        ],
+      },
+    }),
+  ],
+})
 ```
 
 ### `splitBehavior` — Programmatic Per-Route Logic
 
 ```ts
 // vite.config.ts
-import { defineConfig } from "vite";
-import { tanstackRouter } from "@tanstack/router-plugin/vite";
+import { defineConfig } from 'vite'
+import { tanstackRouter } from '@tanstack/router-plugin/vite'
 
 export default defineConfig({
-	plugins: [
-		tanstackRouter({
-			autoCodeSplitting: true,
-			codeSplittingOptions: {
-				splitBehavior: ({ routeId }) => {
-					if (routeId.startsWith("/posts")) {
-						return [["loader", "component"]];
-					}
-					// All other routes use defaultBehavior
-				}
-			}
-		})
-	]
-});
+  plugins: [
+    tanstackRouter({
+      autoCodeSplitting: true,
+      codeSplittingOptions: {
+        splitBehavior: ({ routeId }) => {
+          if (routeId.startsWith('/posts')) {
+            return [['loader', 'component']]
+          }
+          // All other routes use defaultBehavior
+        },
+      },
+    }),
+  ],
+})
 ```
 
 ### Precedence Order
@@ -269,12 +269,12 @@ export default defineConfig({
 ```tsx
 // WRONG — export puts PostsComponent in the main bundle
 export function PostsComponent() {
-	return <div>Posts</div>;
+  return <div>Posts</div>
 }
 
 // CORRECT — no export, function stays in the split chunk
 function PostsComponent() {
-	return <div>Posts</div>;
+  return <div>Posts</div>
 }
 ```
 
@@ -307,13 +307,13 @@ codeSplittingOptions: {
 
 ```tsx
 // WRONG — importing Route pulls route config into the lazy chunk
-import { Route } from "./posts.tsx";
-const data = Route.useLoaderData();
+import { Route } from './posts.tsx'
+const data = Route.useLoaderData()
 
 // CORRECT — getRouteApi gives typed hooks without pulling in the route
-import { getRouteApi } from "@tanstack/react-router";
-const routeApi = getRouteApi("/posts");
-const data = routeApi.useLoaderData();
+import { getRouteApi } from '@tanstack/react-router'
+const routeApi = getRouteApi('/posts')
+const data = routeApi.useLoaderData()
 ```
 
 ## Cross-References

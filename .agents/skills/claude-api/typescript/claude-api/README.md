@@ -24,16 +24,16 @@ const client = new Anthropic({ apiKey: "your-api-key" });
 
 ```typescript
 const response = await client.messages.create({
-	model: "claude-opus-4-7",
-	max_tokens: 16000,
-	messages: [{ role: "user", content: "What is the capital of France?" }]
+  model: "claude-opus-4-7",
+  max_tokens: 16000,
+  messages: [{ role: "user", content: "What is the capital of France?" }],
 });
 // response.content is ContentBlock[] — a discriminated union. Narrow by .type
 // before accessing .text (TypeScript will error on content[0].text without this).
 for (const block of response.content) {
-	if (block.type === "text") {
-		console.log(block.text);
-	}
+  if (block.type === "text") {
+    console.log(block.text);
+  }
 }
 ```
 
@@ -43,10 +43,11 @@ for (const block of response.content) {
 
 ```typescript
 const response = await client.messages.create({
-	model: "claude-opus-4-7",
-	max_tokens: 16000,
-	system: "You are a helpful coding assistant. Always provide examples in Python.",
-	messages: [{ role: "user", content: "How do I read a JSON file?" }]
+  model: "claude-opus-4-7",
+  max_tokens: 16000,
+  system:
+    "You are a helpful coding assistant. Always provide examples in Python.",
+  messages: [{ role: "user", content: "How do I read a JSON file?" }],
 });
 ```
 
@@ -58,23 +59,20 @@ const response = await client.messages.create({
 
 ```typescript
 const response = await client.messages.create({
-	model: "claude-opus-4-7",
-	max_tokens: 16000,
-	messages: [
-		{
-			role: "user",
-			content: [
-				{
-					type: "image",
-					source: {
-						type: "url",
-						url: "https://example.com/image.png"
-					}
-				},
-				{ type: "text", text: "Describe this image" }
-			]
-		}
-	]
+  model: "claude-opus-4-7",
+  max_tokens: 16000,
+  messages: [
+    {
+      role: "user",
+      content: [
+        {
+          type: "image",
+          source: { type: "url", url: "https://example.com/image.png" },
+        },
+        { type: "text", text: "Describe this image" },
+      ],
+    },
+  ],
 });
 ```
 
@@ -86,24 +84,20 @@ import fs from "fs";
 const imageData = fs.readFileSync("image.png").toString("base64");
 
 const response = await client.messages.create({
-	model: "claude-opus-4-7",
-	max_tokens: 16000,
-	messages: [
-		{
-			role: "user",
-			content: [
-				{
-					type: "image",
-					source: {
-						type: "base64",
-						media_type: "image/png",
-						data: imageData
-					}
-				},
-				{ type: "text", text: "What's in this image?" }
-			]
-		}
-	]
+  model: "claude-opus-4-7",
+  max_tokens: 16000,
+  messages: [
+    {
+      role: "user",
+      content: [
+        {
+          type: "image",
+          source: { type: "base64", media_type: "image/png", data: imageData },
+        },
+        { type: "text", text: "What's in this image?" },
+      ],
+    },
+  ],
 });
 ```
 
@@ -119,11 +113,11 @@ Use top-level `cache_control` to automatically cache the last cacheable block in
 
 ```typescript
 const response = await client.messages.create({
-	model: "claude-opus-4-7",
-	max_tokens: 16000,
-	cache_control: { type: "ephemeral" }, // auto-caches the last cacheable block
-	system: "You are an expert on this large document...",
-	messages: [{ role: "user", content: "Summarize the key points" }]
+  model: "claude-opus-4-7",
+  max_tokens: 16000,
+  cache_control: { type: "ephemeral" }, // auto-caches the last cacheable block
+  system: "You are an expert on this large document...",
+  messages: [{ role: "user", content: "Summarize the key points" }],
 });
 ```
 
@@ -133,30 +127,30 @@ For fine-grained control, add `cache_control` to specific content blocks:
 
 ```typescript
 const response = await client.messages.create({
-	model: "claude-opus-4-7",
-	max_tokens: 16000,
-	system: [
-		{
-			type: "text",
-			text: "You are an expert on this large document...",
-			cache_control: { type: "ephemeral" } // default TTL is 5 minutes
-		}
-	],
-	messages: [{ role: "user", content: "Summarize the key points" }]
+  model: "claude-opus-4-7",
+  max_tokens: 16000,
+  system: [
+    {
+      type: "text",
+      text: "You are an expert on this large document...",
+      cache_control: { type: "ephemeral" }, // default TTL is 5 minutes
+    },
+  ],
+  messages: [{ role: "user", content: "Summarize the key points" }],
 });
 
 // With explicit TTL (time-to-live)
 const response2 = await client.messages.create({
-	model: "claude-opus-4-7",
-	max_tokens: 16000,
-	system: [
-		{
-			type: "text",
-			text: "You are an expert on this large document...",
-			cache_control: { type: "ephemeral", ttl: "1h" } // 1 hour TTL
-		}
-	],
-	messages: [{ role: "user", content: "Summarize the key points" }]
+  model: "claude-opus-4-7",
+  max_tokens: 16000,
+  system: [
+    {
+      type: "text",
+      text: "You are an expert on this large document...",
+      cache_control: { type: "ephemeral", ttl: "1h" }, // 1 hour TTL
+    },
+  ],
+  messages: [{ role: "user", content: "Summarize the key points" }],
 });
 ```
 
@@ -164,8 +158,8 @@ const response2 = await client.messages.create({
 
 ```typescript
 console.log(response.usage.cache_creation_input_tokens); // tokens written to cache (~1.25x cost)
-console.log(response.usage.cache_read_input_tokens); // tokens served from cache (~0.1x cost)
-console.log(response.usage.input_tokens); // uncached tokens (full cost)
+console.log(response.usage.cache_read_input_tokens);     // tokens served from cache (~0.1x cost)
+console.log(response.usage.input_tokens);                // uncached tokens (full cost)
 ```
 
 If `cache_read_input_tokens` is zero across repeated identical-prefix requests, a silent invalidator is at work — `Date.now()` or a UUID in the system prompt, non-deterministic key ordering, or a varying tool set. See `shared/prompt-caching.md` for the full audit table.
@@ -180,21 +174,21 @@ If `cache_read_input_tokens` is zero across repeated identical-prefix requests, 
 ```typescript
 // Opus 4.7 / 4.6: adaptive thinking (recommended)
 const response = await client.messages.create({
-	model: "claude-opus-4-7",
-	max_tokens: 16000,
-	thinking: { type: "adaptive" },
-	output_config: { effort: "high" }, // low | medium | high | max
-	messages: [
-		{ role: "user", content: "Solve this math problem step by step..." }
-	]
+  model: "claude-opus-4-7",
+  max_tokens: 16000,
+  thinking: { type: "adaptive" },
+  output_config: { effort: "high" }, // low | medium | high | max
+  messages: [
+    { role: "user", content: "Solve this math problem step by step..." },
+  ],
 });
 
 for (const block of response.content) {
-	if (block.type === "thinking") {
-		console.log("Thinking:", block.thinking);
-	} else if (block.type === "text") {
-		console.log("Response:", block.text);
-	}
+  if (block.type === "thinking") {
+    console.log("Thinking:", block.thinking);
+  } else if (block.type === "text") {
+    console.log("Response:", block.text);
+  }
 }
 ```
 
@@ -232,15 +226,15 @@ The API is stateless — send the full conversation history each time. Use `Anth
 
 ```typescript
 const messages: Anthropic.MessageParam[] = [
-	{ role: "user", content: "My name is Alice." },
-	{ role: "assistant", content: "Hello Alice! Nice to meet you." },
-	{ role: "user", content: "What's my name?" }
+  { role: "user", content: "My name is Alice." },
+  { role: "assistant", content: "Hello Alice! Nice to meet you." },
+  { role: "user", content: "What's my name?" },
 ];
 
 const response = await client.messages.create({
-	model: "claude-opus-4-7",
-	max_tokens: 16000,
-	messages: messages
+  model: "claude-opus-4-7",
+  max_tokens: 16000,
+  messages: messages,
 });
 ```
 
@@ -263,25 +257,25 @@ const client = new Anthropic();
 const messages: Anthropic.Beta.BetaMessageParam[] = [];
 
 async function chat(userMessage: string): Promise<string> {
-	messages.push({ role: "user", content: userMessage });
+  messages.push({ role: "user", content: userMessage });
 
-	const response = await client.beta.messages.create({
-		betas: ["compact-2026-01-12"],
-		model: "claude-opus-4-7",
-		max_tokens: 16000,
-		messages,
-		context_management: {
-			edits: [{ type: "compact_20260112" }]
-		}
-	});
+  const response = await client.beta.messages.create({
+    betas: ["compact-2026-01-12"],
+    model: "claude-opus-4-7",
+    max_tokens: 16000,
+    messages,
+    context_management: {
+      edits: [{ type: "compact_20260112" }],
+    },
+  });
 
-	// Append full content — compaction blocks must be preserved
-	messages.push({ role: "assistant", content: response.content });
+  // Append full content — compaction blocks must be preserved
+  messages.push({ role: "assistant", content: response.content });
 
-	const textBlock = response.content.find(
-		(b): b is Anthropic.Beta.BetaTextBlock => b.type === "text"
-	);
-	return textBlock?.text ?? "";
+  const textBlock = response.content.find(
+    (b): b is Anthropic.Beta.BetaTextBlock => b.type === "text",
+  );
+  return textBlock?.text ?? "";
 }
 
 // Compaction triggers automatically when context grows large
@@ -314,11 +308,11 @@ The `stop_reason` field in the response indicates why the model stopped generati
 ```typescript
 // Automatic caching (simplest — caches the last cacheable block)
 const response = await client.messages.create({
-	model: "claude-opus-4-7",
-	max_tokens: 16000,
-	cache_control: { type: "ephemeral" },
-	system: largeDocumentText, // e.g., 50KB of context
-	messages: [{ role: "user", content: "Summarize the key points" }]
+  model: "claude-opus-4-7",
+  max_tokens: 16000,
+  cache_control: { type: "ephemeral" },
+  system: largeDocumentText, // e.g., 50KB of context
+  messages: [{ role: "user", content: "Summarize the key points" }],
 });
 
 // First request: full cost
@@ -329,9 +323,9 @@ const response = await client.messages.create({
 
 ```typescript
 const countResponse = await client.messages.countTokens({
-	model: "claude-opus-4-7",
-	messages: messages,
-	system: system
+  model: "claude-opus-4-7",
+  messages: messages,
+  system: system,
 });
 
 const estimatedInputCost = countResponse.input_tokens * 0.000005; // $5/1M tokens

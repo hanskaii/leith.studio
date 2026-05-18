@@ -1,20 +1,20 @@
 ---
 name: lifecycle/migrate-from-nextjs
 description: >-
-    Step-by-step migration from Next.js App Router to TanStack Start:
-    route definition conversion, API mapping, server function
-    conversion from Server Actions, middleware conversion, data
-    fetching pattern changes.
+  Step-by-step migration from Next.js App Router to TanStack Start:
+  route definition conversion, API mapping, server function
+  conversion from Server Actions, middleware conversion, data
+  fetching pattern changes.
 type: lifecycle
 library: tanstack-start
-library_version: "1.166.2"
+library_version: '1.166.2'
 requires:
-    - start-core
-    - react-start
+  - start-core
+  - react-start
 sources:
-    - TanStack/router:docs/start/framework/react/guide/server-functions.md
-    - TanStack/router:docs/start/framework/react/guide/middleware.md
-    - TanStack/router:docs/start/framework/react/guide/execution-model.md
+  - TanStack/router:docs/start/framework/react/guide/server-functions.md
+  - TanStack/router:docs/start/framework/react/guide/middleware.md
+  - TanStack/router:docs/start/framework/react/guide/execution-model.md
 ---
 
 # Migrate from Next.js App Router to TanStack Start
@@ -72,28 +72,28 @@ Replace `next.config.js` with:
 
 ```ts
 // vite.config.ts
-import { defineConfig } from "vite";
-import { tanstackStart } from "@tanstack/react-start/plugin/vite";
-import viteReact from "@vitejs/plugin-react";
+import { defineConfig } from 'vite'
+import { tanstackStart } from '@tanstack/react-start/plugin/vite'
+import viteReact from '@vitejs/plugin-react'
 
 export default defineConfig({
-	plugins: [
-		tanstackStart(), // MUST come before react()
-		viteReact()
-	]
-});
+  plugins: [
+    tanstackStart(), // MUST come before react()
+    viteReact(),
+  ],
+})
 ```
 
 Update `package.json`:
 
 ```json
 {
-	"type": "module",
-	"scripts": {
-		"dev": "vite dev",
-		"build": "vite build",
-		"start": "node .output/server/index.mjs"
-	}
+  "type": "module",
+  "scripts": {
+    "dev": "vite dev",
+    "build": "vite build",
+    "start": "node .output/server/index.mjs"
+  }
 }
 ```
 
@@ -101,15 +101,15 @@ Update `package.json`:
 
 ```tsx
 // src/router.tsx
-import { createRouter } from "@tanstack/react-router";
-import { routeTree } from "./routeTree.gen";
+import { createRouter } from '@tanstack/react-router'
+import { routeTree } from './routeTree.gen'
 
 export function getRouter() {
-	const router = createRouter({
-		routeTree,
-		scrollRestoration: true
-	});
-	return router;
+  const router = createRouter({
+    routeTree,
+    scrollRestoration: true,
+  })
+  return router
 }
 ```
 
@@ -119,13 +119,13 @@ Next.js:
 
 ```tsx
 // app/layout.tsx
-export const metadata = { title: "My App" };
+export const metadata = { title: 'My App' }
 export default function RootLayout({ children }) {
-	return (
-		<html>
-			<body>{children}</body>
-		</html>
-	);
+  return (
+    <html>
+      <body>{children}</body>
+    </html>
+  )
 }
 ```
 
@@ -133,40 +133,37 @@ TanStack Start:
 
 ```tsx
 // src/routes/__root.tsx
-import type { ReactNode } from "react";
+import type { ReactNode } from 'react'
 import {
-	Outlet,
-	createRootRoute,
-	HeadContent,
-	Scripts
-} from "@tanstack/react-router";
+  Outlet,
+  createRootRoute,
+  HeadContent,
+  Scripts,
+} from '@tanstack/react-router'
 
 export const Route = createRootRoute({
-	head: () => ({
-		meta: [
-			{ charSet: "utf-8" },
-			{
-				name: "viewport",
-				content: "width=device-width, initial-scale=1"
-			},
-			{ title: "My App" }
-		]
-	}),
-	component: RootComponent
-});
+  head: () => ({
+    meta: [
+      { charSet: 'utf-8' },
+      { name: 'viewport', content: 'width=device-width, initial-scale=1' },
+      { title: 'My App' },
+    ],
+  }),
+  component: RootComponent,
+})
 
 function RootComponent() {
-	return (
-		<html>
-			<head>
-				<HeadContent />
-			</head>
-			<body>
-				<Outlet />
-				<Scripts />
-			</body>
-		</html>
-	);
+  return (
+    <html>
+      <head>
+        <HeadContent />
+      </head>
+      <body>
+        <Outlet />
+        <Scripts />
+      </body>
+    </html>
+  )
 }
 ```
 
@@ -177,7 +174,7 @@ Next.js:
 ```tsx
 // app/posts/[id]/page.tsx
 export default function PostPage({ params }: { params: { id: string } }) {
-	// ...
+  // ...
 }
 ```
 
@@ -185,15 +182,15 @@ TanStack Start:
 
 ```tsx
 // src/routes/posts/$postId.tsx
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute } from '@tanstack/react-router'
 
-export const Route = createFileRoute("/posts/$postId")({
-	component: PostPage
-});
+export const Route = createFileRoute('/posts/$postId')({
+  component: PostPage,
+})
 
 function PostPage() {
-	const { postId } = Route.useParams();
-	// ...
+  const { postId } = Route.useParams()
+  // ...
 }
 ```
 
@@ -209,10 +206,10 @@ Next.js:
 
 ```tsx
 // app/actions.ts
-"use server";
+'use server'
 export async function createPost(formData: FormData) {
-	const title = formData.get("title") as string;
-	await db.posts.create({ title });
+  const title = formData.get('title') as string
+  await db.posts.create({ title })
 }
 ```
 
@@ -220,17 +217,17 @@ TanStack Start:
 
 ```tsx
 // src/utils/posts.functions.ts
-import { createServerFn } from "@tanstack/react-start";
+import { createServerFn } from '@tanstack/react-start'
 
-export const createPost = createServerFn({ method: "POST" })
-	.inputValidator((data) => {
-		if (!(data instanceof FormData)) throw new Error("Expected FormData");
-		return { title: data.get("title")?.toString() || "" };
-	})
-	.handler(async ({ data }) => {
-		await db.posts.create({ title: data.title });
-		return { success: true };
-	});
+export const createPost = createServerFn({ method: 'POST' })
+  .inputValidator((data) => {
+    if (!(data instanceof FormData)) throw new Error('Expected FormData')
+    return { title: data.get('title')?.toString() || '' }
+  })
+  .handler(async ({ data }) => {
+    await db.posts.create({ title: data.title })
+    return { success: true }
+  })
 ```
 
 ## Step 6: Convert Data Fetching
@@ -240,8 +237,8 @@ Next.js Server Component:
 ```tsx
 // app/posts/page.tsx (Server Component — server-only by default)
 export default async function PostsPage() {
-	const posts = await db.posts.findMany();
-	return <PostList posts={posts} />;
+  const posts = await db.posts.findMany()
+  return <PostList posts={posts} />
 }
 ```
 
@@ -249,21 +246,21 @@ TanStack Start:
 
 ```tsx
 // src/routes/posts.tsx
-import { createFileRoute } from "@tanstack/react-router";
-import { createServerFn } from "@tanstack/react-start";
+import { createFileRoute } from '@tanstack/react-router'
+import { createServerFn } from '@tanstack/react-start'
 
-const getPosts = createServerFn({ method: "GET" }).handler(async () => {
-	return db.posts.findMany();
-});
+const getPosts = createServerFn({ method: 'GET' }).handler(async () => {
+  return db.posts.findMany()
+})
 
-export const Route = createFileRoute("/posts")({
-	loader: () => getPosts(), // loader is isomorphic, getPosts runs on server
-	component: PostsPage
-});
+export const Route = createFileRoute('/posts')({
+  loader: () => getPosts(), // loader is isomorphic, getPosts runs on server
+  component: PostsPage,
+})
 
 function PostsPage() {
-	const posts = Route.useLoaderData();
-	return <PostList posts={posts} />;
+  const posts = Route.useLoaderData()
+  return <PostList posts={posts} />
 }
 ```
 
@@ -274,8 +271,8 @@ Next.js:
 ```ts
 // app/api/users/route.ts
 export async function GET() {
-	const users = await db.users.findMany();
-	return Response.json(users);
+  const users = await db.users.findMany()
+  return Response.json(users)
 }
 ```
 
@@ -283,18 +280,18 @@ TanStack Start:
 
 ```ts
 // src/routes/api/users.ts
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute } from '@tanstack/react-router'
 
-export const Route = createFileRoute("/api/users")({
-	server: {
-		handlers: {
-			GET: async () => {
-				const users = await db.users.findMany();
-				return Response.json(users);
-			}
-		}
-	}
-});
+export const Route = createFileRoute('/api/users')({
+  server: {
+    handlers: {
+      GET: async () => {
+        const users = await db.users.findMany()
+        return Response.json(users)
+      },
+    },
+  },
+})
 ```
 
 ## Step 8: Convert Navigation
@@ -302,17 +299,17 @@ export const Route = createFileRoute("/api/users")({
 Next.js:
 
 ```tsx
-import Link from "next/link";
-<Link href={`/posts/${post.id}`}>View Post</Link>;
+import Link from 'next/link'
+;<Link href={`/posts/${post.id}`}>View Post</Link>
 ```
 
 TanStack Start:
 
 ```tsx
-import { Link } from "@tanstack/react-router";
-<Link to="/posts/$postId" params={{ postId: post.id }}>
-	View Post
-</Link>;
+import { Link } from '@tanstack/react-router'
+;<Link to="/posts/$postId" params={{ postId: post.id }}>
+  View Post
+</Link>
 ```
 
 Never interpolate params into the `to` string. Use `params` prop.
@@ -324,30 +321,30 @@ Next.js:
 ```ts
 // middleware.ts
 export function middleware(request: NextRequest) {
-	const token = request.cookies.get("session");
-	if (!token) return NextResponse.redirect(new URL("/login", request.url));
+  const token = request.cookies.get('session')
+  if (!token) return NextResponse.redirect(new URL('/login', request.url))
 }
-export const config = { matcher: ["/dashboard/:path*"] };
+export const config = { matcher: ['/dashboard/:path*'] }
 ```
 
 TanStack Start:
 
 ```tsx
 // src/start.ts — must be manually created
-import { createStart, createMiddleware } from "@tanstack/react-start";
-import { redirect } from "@tanstack/react-router";
+import { createStart, createMiddleware } from '@tanstack/react-start'
+import { redirect } from '@tanstack/react-router'
 
 const authMiddleware = createMiddleware().server(async ({ next, request }) => {
-	const cookie = request.headers.get("cookie");
-	if (!cookie?.includes("session=")) {
-		throw redirect({ to: "/login" });
-	}
-	return next();
-});
+  const cookie = request.headers.get('cookie')
+  if (!cookie?.includes('session=')) {
+    throw redirect({ to: '/login' })
+  }
+  return next()
+})
 
 export const startInstance = createStart(() => ({
-	requestMiddleware: [authMiddleware]
-}));
+  requestMiddleware: [authMiddleware],
+}))
 ```
 
 ## Step 10: Convert Metadata/SEO
@@ -356,24 +353,24 @@ Next.js:
 
 ```tsx
 export const metadata = {
-	title: "Post Title",
-	description: "Post description"
-};
+  title: 'Post Title',
+  description: 'Post description',
+}
 ```
 
 TanStack Start:
 
 ```tsx
-export const Route = createFileRoute("/posts/$postId")({
-	loader: async ({ params }) => fetchPost(params.postId),
-	head: ({ loaderData }) => ({
-		meta: [
-			{ title: loaderData.title },
-			{ name: "description", content: loaderData.excerpt },
-			{ property: "og:title", content: loaderData.title }
-		]
-	})
-});
+export const Route = createFileRoute('/posts/$postId')({
+  loader: async ({ params }) => fetchPost(params.postId),
+  head: ({ loaderData }) => ({
+    meta: [
+      { title: loaderData.title },
+      { name: 'description', content: loaderData.excerpt },
+      { property: 'og:title', content: loaderData.title },
+    ],
+  }),
+})
 ```
 
 ## Post-Migration Checklist

@@ -4,18 +4,18 @@
 
 ```typescript
 const stream = client.messages.stream({
-	model: "claude-opus-4-7",
-	max_tokens: 64000,
-	messages: [{ role: "user", content: "Write a story" }]
+  model: "claude-opus-4-7",
+  max_tokens: 64000,
+  messages: [{ role: "user", content: "Write a story" }],
 });
 
 for await (const event of stream) {
-	if (
-		event.type === "content_block_delta" &&
-		event.delta.type === "text_delta"
-	) {
-		process.stdout.write(event.delta.text);
-	}
+  if (
+    event.type === "content_block_delta" &&
+    event.delta.type === "text_delta"
+  ) {
+    process.stdout.write(event.delta.text);
+  }
 }
 ```
 
@@ -27,35 +27,35 @@ for await (const event of stream) {
 
 ```typescript
 const stream = client.messages.stream({
-	model: "claude-opus-4-7",
-	max_tokens: 64000,
-	thinking: { type: "adaptive" },
-	messages: [{ role: "user", content: "Analyze this problem" }]
+  model: "claude-opus-4-7",
+  max_tokens: 64000,
+  thinking: { type: "adaptive" },
+  messages: [{ role: "user", content: "Analyze this problem" }],
 });
 
 for await (const event of stream) {
-	switch (event.type) {
-		case "content_block_start":
-			switch (event.content_block.type) {
-				case "thinking":
-					console.log("\n[Thinking...]");
-					break;
-				case "text":
-					console.log("\n[Response:]");
-					break;
-			}
-			break;
-		case "content_block_delta":
-			switch (event.delta.type) {
-				case "thinking_delta":
-					process.stdout.write(event.delta.thinking);
-					break;
-				case "text_delta":
-					process.stdout.write(event.delta.text);
-					break;
-			}
-			break;
-	}
+  switch (event.type) {
+    case "content_block_start":
+      switch (event.content_block.type) {
+        case "thinking":
+          console.log("\n[Thinking...]");
+          break;
+        case "text":
+          console.log("\n[Response:]");
+          break;
+      }
+      break;
+    case "content_block_delta":
+      switch (event.delta.type) {
+        case "thinking_delta":
+          process.stdout.write(event.delta.thinking);
+          break;
+        case "text_delta":
+          process.stdout.write(event.delta.text);
+          break;
+      }
+      break;
+  }
 }
 ```
 
@@ -73,41 +73,41 @@ import { z } from "zod";
 const client = new Anthropic();
 
 const getWeather = betaZodTool({
-	name: "get_weather",
-	description: "Get current weather for a location",
-	inputSchema: z.object({
-		location: z.string().describe("City and state, e.g., San Francisco, CA")
-	}),
-	run: async ({ location }) => `72°F and sunny in ${location}`
+  name: "get_weather",
+  description: "Get current weather for a location",
+  inputSchema: z.object({
+    location: z.string().describe("City and state, e.g., San Francisco, CA"),
+  }),
+  run: async ({ location }) => `72°F and sunny in ${location}`,
 });
 
 const runner = client.beta.messages.toolRunner({
-	model: "claude-opus-4-7",
-	max_tokens: 64000,
-	tools: [getWeather],
-	messages: [
-		{ role: "user", content: "What's the weather in Paris and London?" }
-	],
-	stream: true
+  model: "claude-opus-4-7",
+  max_tokens: 64000,
+  tools: [getWeather],
+  messages: [
+    { role: "user", content: "What's the weather in Paris and London?" },
+  ],
+  stream: true,
 });
 
 // Outer loop: each tool runner iteration
 for await (const messageStream of runner) {
-	// Inner loop: stream events for this iteration
-	for await (const event of messageStream) {
-		switch (event.type) {
-			case "content_block_delta":
-				switch (event.delta.type) {
-					case "text_delta":
-						process.stdout.write(event.delta.text);
-						break;
-					case "input_json_delta":
-						// Tool input being streamed
-						break;
-				}
-				break;
-		}
-	}
+  // Inner loop: stream events for this iteration
+  for await (const event of messageStream) {
+    switch (event.type) {
+      case "content_block_delta":
+        switch (event.delta.type) {
+          case "text_delta":
+            process.stdout.write(event.delta.text);
+            break;
+          case "input_json_delta":
+            // Tool input being streamed
+            break;
+        }
+        break;
+    }
+  }
 }
 ```
 
@@ -117,13 +117,13 @@ for await (const messageStream of runner) {
 
 ```typescript
 const stream = client.messages.stream({
-	model: "claude-opus-4-7",
-	max_tokens: 64000,
-	messages: [{ role: "user", content: "Hello" }]
+  model: "claude-opus-4-7",
+  max_tokens: 64000,
+  messages: [{ role: "user", content: "Hello" }],
 });
 
 for await (const event of stream) {
-	// Process events...
+  // Process events...
 }
 
 const finalMessage = await stream.finalMessage();

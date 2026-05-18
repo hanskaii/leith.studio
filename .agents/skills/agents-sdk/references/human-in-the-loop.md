@@ -6,19 +6,19 @@ Multiple patterns for adding human approval to agent actions.
 
 ## Decision Guide
 
-| Pattern                         | Best for                                    |
-| ------------------------------- | ------------------------------------------- |
-| Workflows `waitForApproval`     | Long-running background tasks               |
-| AI SDK `needsApproval` on tools | Chat tool calls requiring approval          |
-| Client tools (`onToolCall`)     | Tools that execute in the browser           |
-| MCP `elicitInput`               | Gathering structured input from MCP clients |
+| Pattern | Best for |
+|---------|----------|
+| Workflows `waitForApproval` | Long-running background tasks |
+| AI SDK `needsApproval` on tools | Chat tool calls requiring approval |
+| Client tools (`onToolCall`) | Tools that execute in the browser |
+| MCP `elicitInput` | Gathering structured input from MCP clients |
 
 ## Workflow Approvals
 
 ```typescript
 // In AgentWorkflow:
 const approved = await step.waitForEvent<{ approved: boolean }>("approval", {
-	timeout: "7d"
+  timeout: "7d"
 });
 if (!approved.approved) throw new Error("Rejected");
 
@@ -31,14 +31,12 @@ await this.rejectWorkflow(workflowId);
 
 ```typescript
 const tools = {
-	deleteItem: tool({
-		description: "Delete an item",
-		parameters: z.object({ id: z.string() }),
-		execute: async ({ id }) => {
-			/* delete */
-		},
-		needsApproval: true // or a function: (toolCall) => boolean
-	})
+  deleteItem: tool({
+    description: "Delete an item",
+    parameters: z.object({ id: z.string() }),
+    execute: async ({ id }) => { /* delete */ },
+    needsApproval: true  // or a function: (toolCall) => boolean
+  })
 };
 ```
 
@@ -46,13 +44,13 @@ Client handles approval:
 
 ```tsx
 const { addToolApprovalResponse, addToolOutput } = useAgentChat({
-	agent,
-	onToolCall: async ({ toolCall }) => {
-		if (confirm(`Allow ${toolCall.toolName}?`)) {
-			return { approve: true };
-		}
-		return { approve: false };
-	}
+  agent,
+  onToolCall: async ({ toolCall }) => {
+    if (confirm(`Allow ${toolCall.toolName}?`)) {
+      return { approve: true };
+    }
+    return { approve: false };
+  }
 });
 ```
 

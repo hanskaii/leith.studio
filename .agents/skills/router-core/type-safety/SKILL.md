@@ -1,20 +1,20 @@
 ---
 name: router-core/type-safety
 description: >-
-    Full type inference philosophy (never cast, never annotate inferred
-    values), Register module declaration, from narrowing on hooks and
-    Link, strict:false for shared components, getRouteApi for code-split
-    typed access, addChildren with object syntax for TS perf, LinkProps
-    and ValidateLinkOptions type utilities, as const satisfies pattern.
+  Full type inference philosophy (never cast, never annotate inferred
+  values), Register module declaration, from narrowing on hooks and
+  Link, strict:false for shared components, getRouteApi for code-split
+  typed access, addChildren with object syntax for TS perf, LinkProps
+  and ValidateLinkOptions type utilities, as const satisfies pattern.
 type: sub-skill
 library: tanstack-router
-library_version: "1.166.2"
+library_version: '1.166.2'
 requires:
-    - router-core
+  - router-core
 sources:
-    - TanStack/router:docs/router/guide/type-safety.md
-    - TanStack/router:docs/router/guide/type-utilities.md
-    - TanStack/router:docs/router/guide/render-optimizations.md
+  - TanStack/router:docs/router/guide/type-safety.md
+  - TanStack/router:docs/router/guide/type-utilities.md
+  - TanStack/router:docs/router/guide/render-optimizations.md
 ---
 
 # Type Safety
@@ -30,19 +30,19 @@ Without this, top-level exports like `Link`, `useNavigate`, `useSearch` have no 
 
 ```tsx
 // src/router.tsx
-import { createRouter } from "@tanstack/react-router";
-import { routeTree } from "./routeTree.gen";
+import { createRouter } from '@tanstack/react-router'
+import { routeTree } from './routeTree.gen'
 
-const router = createRouter({ routeTree });
+const router = createRouter({ routeTree })
 
 // THIS IS REQUIRED — the single type registration for the entire app
-declare module "@tanstack/react-router" {
-	interface Register {
-		router: typeof router;
-	}
+declare module '@tanstack/react-router' {
+  interface Register {
+    router: typeof router
+  }
 }
 
-export default router;
+export default router
 ```
 
 After registration, every `Link`, `useNavigate`, `useSearch`, `useParams` across the app is fully typed.
@@ -53,37 +53,37 @@ After registration, every `Link`, `useNavigate`, `useSearch`, `useParams` across
 
 ```tsx
 // src/routes/posts.$postId.tsx
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute } from '@tanstack/react-router'
 
-export const Route = createFileRoute("/posts/$postId")({
-	validateSearch: (search: Record<string, unknown>) => ({
-		page: Number(search.page ?? 1)
-	}),
-	loader: async ({ params }) => {
-		// params.postId is already typed as string — do not annotate
-		const post = await fetchPost(params.postId);
-		return { post };
-	},
-	component: PostComponent
-});
+export const Route = createFileRoute('/posts/$postId')({
+  validateSearch: (search: Record<string, unknown>) => ({
+    page: Number(search.page ?? 1),
+  }),
+  loader: async ({ params }) => {
+    // params.postId is already typed as string — do not annotate
+    const post = await fetchPost(params.postId)
+    return { post }
+  },
+  component: PostComponent,
+})
 
 function PostComponent() {
-	// ALL of these are fully inferred — do NOT add type annotations
-	const { postId } = Route.useParams();
-	//      ^? string
+  // ALL of these are fully inferred — do NOT add type annotations
+  const { postId } = Route.useParams()
+  //      ^? string
 
-	const { page } = Route.useSearch();
-	//      ^? number
+  const { page } = Route.useSearch()
+  //      ^? number
 
-	const { post } = Route.useLoaderData();
-	//      ^? { id: string; title: string; body: string }
+  const { post } = Route.useLoaderData()
+  //      ^? { id: string; title: string; body: string }
 
-	return (
-		<div>
-			<h1>{post.title}</h1>
-			<p>Page {page}</p>
-		</div>
-	);
+  return (
+    <div>
+      <h1>{post.title}</h1>
+      <p>Page {page}</p>
+    </div>
+  )
 }
 ```
 
@@ -91,41 +91,41 @@ function PostComponent() {
 
 ```tsx
 // src/routes/__root.tsx
-import { createRootRouteWithContext, Outlet } from "@tanstack/react-router";
+import { createRootRouteWithContext, Outlet } from '@tanstack/react-router'
 
 interface RouterContext {
-	auth: { userId: string; role: "admin" | "user" } | null;
+  auth: { userId: string; role: 'admin' | 'user' } | null
 }
 
 // Note: createRootRouteWithContext is a FACTORY — call it TWICE: ()()
 export const Route = createRootRouteWithContext<RouterContext>()({
-	component: () => <Outlet />
-});
+  component: () => <Outlet />,
+})
 ```
 
 ```tsx
 // src/routes/dashboard.tsx
-import { createFileRoute, redirect } from "@tanstack/react-router";
+import { createFileRoute, redirect } from '@tanstack/react-router'
 
-export const Route = createFileRoute("/dashboard")({
-	beforeLoad: ({ context }) => {
-		// context.auth is already typed as { userId: string; role: 'admin' | 'user' } | null
-		// NO annotation needed
-		if (!context.auth) throw redirect({ to: "/login" });
-		return { user: context.auth };
-	},
-	loader: ({ context }) => {
-		// context.user is typed as { userId: string; role: 'admin' | 'user' }
-		// This was added by beforeLoad above — fully inferred
-		return fetchDashboard(context.user.userId);
-	},
-	component: DashboardComponent
-});
+export const Route = createFileRoute('/dashboard')({
+  beforeLoad: ({ context }) => {
+    // context.auth is already typed as { userId: string; role: 'admin' | 'user' } | null
+    // NO annotation needed
+    if (!context.auth) throw redirect({ to: '/login' })
+    return { user: context.auth }
+  },
+  loader: ({ context }) => {
+    // context.user is typed as { userId: string; role: 'admin' | 'user' }
+    // This was added by beforeLoad above — fully inferred
+    return fetchDashboard(context.user.userId)
+  },
+  component: DashboardComponent,
+})
 
 function DashboardComponent() {
-	const data = Route.useLoaderData();
-	const { user } = Route.useRouteContext();
-	return <h1>Welcome {user.userId}</h1>;
+  const data = Route.useLoaderData()
+  const { user } = Route.useRouteContext()
+  return <h1>Welcome {user.userId}</h1>
 }
 ```
 
@@ -136,21 +136,21 @@ Without `from`, hooks return a union of ALL routes' types — slow for TypeScrip
 ### On Hooks
 
 ```tsx
-import { useSearch, useParams, useNavigate } from "@tanstack/react-router";
+import { useSearch, useParams, useNavigate } from '@tanstack/react-router'
 
 function PostSidebar() {
-	// WRONG — search is a union of ALL routes' search params
-	const search = useSearch();
+  // WRONG — search is a union of ALL routes' search params
+  const search = useSearch()
 
-	// CORRECT — search is narrowed to /posts/$postId's search params
-	const search = useSearch({ from: "/posts/$postId" });
-	//    ^? { page: number }
+  // CORRECT — search is narrowed to /posts/$postId's search params
+  const search = useSearch({ from: '/posts/$postId' })
+  //    ^? { page: number }
 
-	// CORRECT — params narrowed to this route
-	const { postId } = useParams({ from: "/posts/$postId" });
+  // CORRECT — params narrowed to this route
+  const { postId } = useParams({ from: '/posts/$postId' })
 
-	// CORRECT — navigate narrowed for relative paths
-	const navigate = useNavigate({ from: "/posts/$postId" });
+  // CORRECT — navigate narrowed for relative paths
+  const navigate = useNavigate({ from: '/posts/$postId' })
 }
 ```
 
@@ -174,12 +174,12 @@ import { Link } from '@tanstack/react-router'
 When a component is used across multiple routes, use `strict: false` instead of `from`:
 
 ```tsx
-import { useSearch } from "@tanstack/react-router";
+import { useSearch } from '@tanstack/react-router'
 
 function GlobalSearch() {
-	// Returns union of all routes' search params — no runtime error if route doesn't match
-	const search = useSearch({ strict: false });
-	return <span>Query: {search.q ?? ""}</span>;
+  // Returns union of all routes' search params — no runtime error if route doesn't match
+  const search = useSearch({ strict: false })
+  return <span>Query: {search.q ?? ''}</span>
 }
 ```
 
@@ -189,18 +189,18 @@ Use `getRouteApi` instead of importing `Route` to avoid pulling route config int
 
 ```tsx
 // src/routes/posts.lazy.tsx
-import { createLazyFileRoute, getRouteApi } from "@tanstack/react-router";
+import { createLazyFileRoute, getRouteApi } from '@tanstack/react-router'
 
-const routeApi = getRouteApi("/posts");
+const routeApi = getRouteApi('/posts')
 
-export const Route = createLazyFileRoute("/posts")({
-	component: PostsComponent
-});
+export const Route = createLazyFileRoute('/posts')({
+  component: PostsComponent,
+})
 
 function PostsComponent() {
-	const data = routeApi.useLoaderData();
-	const { page } = routeApi.useSearch();
-	return <div>Page {page}</div>;
+  const data = routeApi.useLoaderData()
+  const { page } = routeApi.useSearch()
+  return <div>Page {page}</div>
 }
 ```
 
@@ -211,15 +211,15 @@ function PostsComponent() {
 ```tsx
 // SLOWER — tuple syntax
 const routeTree = rootRoute.addChildren([
-	postsRoute.addChildren([postRoute, postsIndexRoute]),
-	indexRoute
-]);
+  postsRoute.addChildren([postRoute, postsIndexRoute]),
+  indexRoute,
+])
 
 // FASTER — object syntax (TS checks objects faster than large tuples)
 const routeTree = rootRoute.addChildren({
-	postsRoute: postsRoute.addChildren({ postRoute, postsIndexRoute }),
-	indexRoute
-});
+  postsRoute: postsRoute.addChildren({ postRoute, postsIndexRoute }),
+  indexRoute,
+})
 ```
 
 With file-based routing the route tree is generated, so this is handled for you.
@@ -230,19 +230,19 @@ When using external caches like TanStack Query, don't let the router infer compl
 
 ```tsx
 // SLOWER — TS infers the full ensureQueryData return type into the route tree
-export const Route = createFileRoute("/posts/$postId")({
-	loader: ({ context: { queryClient }, params: { postId } }) =>
-		queryClient.ensureQueryData(postQueryOptions(postId)),
-	component: PostComponent
-});
+export const Route = createFileRoute('/posts/$postId')({
+  loader: ({ context: { queryClient }, params: { postId } }) =>
+    queryClient.ensureQueryData(postQueryOptions(postId)),
+  component: PostComponent,
+})
 
 // FASTER — void return, inference stays out of the route tree
-export const Route = createFileRoute("/posts/$postId")({
-	loader: async ({ context: { queryClient }, params: { postId } }) => {
-		await queryClient.ensureQueryData(postQueryOptions(postId));
-	},
-	component: PostComponent
-});
+export const Route = createFileRoute('/posts/$postId')({
+  loader: async ({ context: { queryClient }, params: { postId } }) => {
+    await queryClient.ensureQueryData(postQueryOptions(postId))
+  },
+  component: PostComponent,
+})
 ```
 
 ### `as const satisfies` for Link Option Objects
@@ -250,32 +250,32 @@ export const Route = createFileRoute("/posts/$postId")({
 Never use `LinkProps` as a variable type — it's an enormous union:
 
 ```tsx
-import type { LinkProps, RegisteredRouter } from "@tanstack/react-router";
+import type { LinkProps, RegisteredRouter } from '@tanstack/react-router'
 
 // WRONG — LinkProps is a massive union, extremely slow TS check
-const wrongProps: LinkProps = { to: "/posts" };
+const wrongProps: LinkProps = { to: '/posts' }
 
 // CORRECT — infer a precise type, validate against LinkProps
-const goodProps = { to: "/posts" } as const satisfies LinkProps;
+const goodProps = { to: '/posts' } as const satisfies LinkProps
 
 // EVEN BETTER — narrow LinkProps with generic params
 const narrowedProps = {
-	to: "/posts"
-} as const satisfies LinkProps<RegisteredRouter, string, "/posts">;
+  to: '/posts',
+} as const satisfies LinkProps<RegisteredRouter, string, '/posts'>
 ```
 
 ### Type-Safe Link Option Arrays
 
 ```tsx
-import type { LinkProps } from "@tanstack/react-router";
+import type { LinkProps } from '@tanstack/react-router'
 
 export const navLinks = [
-	{ to: "/posts" },
-	{ to: "/posts/$postId", params: { postId: "1" } }
-] as const satisfies ReadonlyArray<LinkProps>;
+  { to: '/posts' },
+  { to: '/posts/$postId', params: { postId: '1' } },
+] as const satisfies ReadonlyArray<LinkProps>
 
 // Use the precise inferred type, not LinkProps directly
-export type NavLink = (typeof navLinks)[number];
+export type NavLink = (typeof navLinks)[number]
 ```
 
 ## Type Utilities for Generic Components
@@ -319,26 +319,26 @@ Same pattern as `ValidateLinkOptions` above, for `useNavigate` and `redirect`. D
 
 ```tsx
 import {
-	useNavigate,
-	type RegisteredRouter,
-	type ValidateNavigateOptions
-} from "@tanstack/react-router";
+  useNavigate,
+  type RegisteredRouter,
+  type ValidateNavigateOptions,
+} from '@tanstack/react-router'
 
 export function useDelayedNavigate<
-	TRouter extends RegisteredRouter = RegisteredRouter,
-	TOptions = unknown
+  TRouter extends RegisteredRouter = RegisteredRouter,
+  TOptions = unknown,
 >(
-	options: ValidateNavigateOptions<TRouter, TOptions>,
-	delayMs: number
-): () => void;
+  options: ValidateNavigateOptions<TRouter, TOptions>,
+  delayMs: number,
+): () => void
 export function useDelayedNavigate(
-	options: ValidateNavigateOptions,
-	delayMs: number
+  options: ValidateNavigateOptions,
+  delayMs: number,
 ) {
-	const navigate = useNavigate();
-	return () => {
-		setTimeout(() => navigate(options), delayMs);
-	};
+  const navigate = useNavigate()
+  return () => {
+    setTimeout(() => navigate(options), delayMs)
+  }
 }
 ```
 
@@ -350,16 +350,16 @@ Instead of accepting `LinkProps`, invert control so `Link` is narrowed at the ca
 
 ```tsx
 function Card(props: { title: string; renderLink: () => React.ReactNode }) {
-	return (
-		<div>
-			<h2>{props.title}</h2>
-			{props.renderLink()}
-		</div>
-	);
+  return (
+    <div>
+      <h2>{props.title}</h2>
+      {props.renderLink()}
+    </div>
+  )
 }
 
 // Link narrowed to exactly /posts — no union check
-<Card title="All Posts" renderLink={() => <Link to="/posts">View</Link>} />;
+;<Card title="All Posts" renderLink={() => <Link to="/posts">View</Link>} />
 ```
 
 ## Render Optimizations
@@ -368,9 +368,9 @@ function Card(props: { title: string; renderLink: () => React.ReactNode }) {
 
 ```tsx
 function PostTitle() {
-	// Only re-renders when page changes, not when other search params change
-	const page = Route.useSearch({ select: ({ page }) => page });
-	return <span>Page {page}</span>;
+  // Only re-renders when page changes, not when other search params change
+  const page = Route.useSearch({ select: ({ page }) => page })
+  return <span>Page {page}</span>
 }
 ```
 
@@ -380,15 +380,15 @@ Preserve referential identity across re-renders for search params:
 
 ```tsx
 const router = createRouter({
-	routeTree,
-	defaultStructuralSharing: true // Enable globally
-});
+  routeTree,
+  defaultStructuralSharing: true, // Enable globally
+})
 
 // Or per-hook
 const result = Route.useSearch({
-	select: (search) => ({ foo: search.foo, label: `Page ${search.foo}` }),
-	structuralSharing: true
-});
+  select: (search) => ({ foo: search.foo, label: `Page ${search.foo}` }),
+  structuralSharing: true,
+})
 ```
 
 Structural sharing only works with JSON-compatible data. TypeScript will error if you return class instances with `structuralSharing: true`.
@@ -399,28 +399,28 @@ Structural sharing only works with JSON-compatible data. TypeScript will error i
 
 ```tsx
 // WRONG — casting masks real type errors
-const search = useSearch({ from: "/posts" }) as { page: number };
+const search = useSearch({ from: '/posts' }) as { page: number }
 
 // WRONG — unnecessary annotation
-const params: { postId: string } = useParams({ from: "/posts/$postId" });
+const params: { postId: string } = useParams({ from: '/posts/$postId' })
 
 // WRONG — generic param on hook
-const data = useLoaderData<{ posts: Post[] }>({ from: "/posts" });
+const data = useLoaderData<{ posts: Post[] }>({ from: '/posts' })
 
 // CORRECT — let inference work
-const search = useSearch({ from: "/posts" });
-const params = useParams({ from: "/posts/$postId" });
-const data = useLoaderData({ from: "/posts" });
+const search = useSearch({ from: '/posts' })
+const params = useParams({ from: '/posts/$postId' })
+const data = useLoaderData({ from: '/posts' })
 ```
 
 ### 2. HIGH: Using un-narrowed `LinkProps` type
 
 ```tsx
 // WRONG — LinkProps is a massive union, causes severe TS slowdown
-const myProps: LinkProps = { to: "/posts" };
+const myProps: LinkProps = { to: '/posts' }
 
 // CORRECT — use as const satisfies for precise inference
-const myProps = { to: "/posts" } as const satisfies LinkProps;
+const myProps = { to: '/posts' } as const satisfies LinkProps
 ```
 
 ### 3. HIGH: Not narrowing `Link`/`useNavigate` with `from`
@@ -437,15 +437,15 @@ const myProps = { to: "/posts" } as const satisfies LinkProps;
 
 ```tsx
 // WRONG — Link/useNavigate have no autocomplete, all paths are untyped strings
-const router = createRouter({ routeTree });
+const router = createRouter({ routeTree })
 // (no declare module)
 
 // CORRECT — always register
-const router = createRouter({ routeTree });
-declare module "@tanstack/react-router" {
-	interface Register {
-		router: typeof router;
-	}
+const router = createRouter({ routeTree })
+declare module '@tanstack/react-router' {
+  interface Register {
+    router: typeof router
+  }
 }
 ```
 
@@ -455,20 +455,20 @@ Wrong-framework code looks plausible (it's React) but breaks the build or produc
 
 ```tsx
 // WRONG — react-router-dom and next/* are different libraries
-import { Link, useNavigate, useSearchParams } from "react-router-dom";
-import Link from "next/link";
-import { useRouter, useParams } from "next/navigation";
+import { Link, useNavigate, useSearchParams } from 'react-router-dom'
+import Link from 'next/link'
+import { useRouter, useParams } from 'next/navigation'
 
 // CORRECT — all routing exports come from @tanstack/react-router
 import {
-	Link,
-	Outlet,
-	useNavigate,
-	useRouter,
-	useLocation,
-	useParams,
-	redirect
-} from "@tanstack/react-router";
+  Link,
+  Outlet,
+  useNavigate,
+  useRouter,
+  useLocation,
+  useParams,
+  redirect,
+} from '@tanstack/react-router'
 ```
 
 ```tsx

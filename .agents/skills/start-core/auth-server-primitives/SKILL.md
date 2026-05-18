@@ -1,23 +1,23 @@
 ---
 name: start-core/auth-server-primitives
 description: >-
-    Server-side authentication primitives for TanStack Start: session
-    cookies (HttpOnly, Secure, SameSite, __Host- prefix), session
-    read/issue/destroy via createServerFn and middleware, OAuth
-    authorization-code flow with state and PKCE, password-reset
-    enumeration defense, CSRF for non-GET RPCs, rate limiting auth
-    endpoints, session rotation on privilege change. Pairs with
-    router-core/auth-and-guards for the routing side.
+  Server-side authentication primitives for TanStack Start: session
+  cookies (HttpOnly, Secure, SameSite, __Host- prefix), session
+  read/issue/destroy via createServerFn and middleware, OAuth
+  authorization-code flow with state and PKCE, password-reset
+  enumeration defense, CSRF for non-GET RPCs, rate limiting auth
+  endpoints, session rotation on privilege change. Pairs with
+  router-core/auth-and-guards for the routing side.
 type: sub-skill
 library: tanstack-start
-library_version: "1.166.2"
+library_version: '1.166.2'
 requires:
-    - start-core
-    - start-core/server-functions
-    - start-core/middleware
+  - start-core
+  - start-core/server-functions
+  - start-core/middleware
 sources:
-    - TanStack/router:docs/start/framework/react/guide/authentication-overview.md
-    - TanStack/router:docs/start/framework/react/guide/authentication-server-primitives.md
+  - TanStack/router:docs/start/framework/react/guide/authentication-overview.md
+  - TanStack/router:docs/start/framework/react/guide/authentication-server-primitives.md
 ---
 
 # Auth Server Primitives
@@ -35,44 +35,44 @@ The recommended session storage is an HTTP-only cookie holding either an opaque 
 ```tsx
 // src/server/session.ts
 import {
-	getRequestHeader,
-	setResponseHeader
-} from "@tanstack/react-start/server";
+  getRequestHeader,
+  setResponseHeader,
+} from '@tanstack/react-start/server'
 
-const SESSION_COOKIE = "__Host-session"; // __Host- prefix binds to the exact origin + path '/'
-const ONE_DAY = 60 * 60 * 24;
+const SESSION_COOKIE = '__Host-session' // __Host- prefix binds to the exact origin + path '/'
+const ONE_DAY = 60 * 60 * 24
 
 export function setSessionCookie(token: string) {
-	setResponseHeader(
-		"Set-Cookie",
-		[
-			`${SESSION_COOKIE}=${token}`,
-			`HttpOnly`, // not readable from JS — defeats XSS exfiltration
-			`Secure`, // HTTPS only (required for __Host- prefix)
-			`SameSite=Lax`, // sent on top-level navigations, blocks most CSRF
-			`Path=/`, // required for __Host- prefix
-			`Max-Age=${ONE_DAY}`
-		].join("; ")
-	);
+  setResponseHeader(
+    'Set-Cookie',
+    [
+      `${SESSION_COOKIE}=${token}`,
+      `HttpOnly`, // not readable from JS — defeats XSS exfiltration
+      `Secure`, // HTTPS only (required for __Host- prefix)
+      `SameSite=Lax`, // sent on top-level navigations, blocks most CSRF
+      `Path=/`, // required for __Host- prefix
+      `Max-Age=${ONE_DAY}`,
+    ].join('; '),
+  )
 }
 
 export function clearSessionCookie() {
-	setResponseHeader(
-		"Set-Cookie",
-		`${SESSION_COOKIE}=; HttpOnly; Secure; SameSite=Lax; Path=/; Max-Age=0`
-	);
+  setResponseHeader(
+    'Set-Cookie',
+    `${SESSION_COOKIE}=; HttpOnly; Secure; SameSite=Lax; Path=/; Max-Age=0`,
+  )
 }
 
 export function readSessionToken(): string | null {
-	const header = getRequestHeader("cookie");
-	if (!header) return null;
-	for (const part of header.split(/;\s*/)) {
-		// Split only on the FIRST '=' — signed/base64 values often contain '='.
-		const eq = part.indexOf("=");
-		if (eq === -1) continue;
-		if (part.slice(0, eq) === SESSION_COOKIE) return part.slice(eq + 1);
-	}
-	return null;
+  const header = getRequestHeader('cookie')
+  if (!header) return null
+  for (const part of header.split(/;\s*/)) {
+    // Split only on the FIRST '=' — signed/base64 values often contain '='.
+    const eq = part.indexOf('=')
+    if (eq === -1) continue
+    if (part.slice(0, eq) === SESSION_COOKIE) return part.slice(eq + 1)
+  }
+  return null
 }
 ```
 
@@ -91,32 +91,30 @@ Use middleware to centralize session loading so every protected handler sees a t
 
 ```tsx
 // src/server/auth-middleware.ts
-import { createMiddleware } from "@tanstack/react-start";
-import { readSessionToken } from "./session";
+import { createMiddleware } from '@tanstack/react-start'
+import { readSessionToken } from './session'
 
-export const authMiddleware = createMiddleware({ type: "function" }).server(
-	async ({ next }) => {
-		const token = readSessionToken();
-		const session = token ? await db.sessions.findValid(token) : null;
-		if (!session) throw new Error("Unauthorized");
-		return next({ context: { session } });
-	}
-);
+export const authMiddleware = createMiddleware({ type: 'function' }).server(
+  async ({ next }) => {
+    const token = readSessionToken()
+    const session = token ? await db.sessions.findValid(token) : null
+    if (!session) throw new Error('Unauthorized')
+    return next({ context: { session } })
+  },
+)
 ```
 
 Attach it to every server function that needs a logged-in user:
 
 ```tsx
-import { createServerFn } from "@tanstack/react-start";
-import { authMiddleware } from "~/server/auth-middleware";
+import { createServerFn } from '@tanstack/react-start'
+import { authMiddleware } from '~/server/auth-middleware'
 
-export const getMyOrders = createServerFn({ method: "GET" })
-	.middleware([authMiddleware])
-	.handler(async ({ context }) => {
-		return db.orders.findMany({
-			where: { userId: context.session.userId }
-		});
-	});
+export const getMyOrders = createServerFn({ method: 'GET' })
+  .middleware([authMiddleware])
+  .handler(async ({ context }) => {
+    return db.orders.findMany({ where: { userId: context.session.userId } })
+  })
 ```
 
 > **Route guards do not cover this.** A `createFileRoute('/_authenticated/orders')` with a `beforeLoad` redirect does NOT protect `getMyOrders` — the RPC is reachable via direct POST whether or not the user ever hits the route. Apply `authMiddleware` (or re-check inside `.handler()`) on every server function that needs auth.
@@ -125,50 +123,45 @@ export const getMyOrders = createServerFn({ method: "GET" })
 
 ```tsx
 // src/server/login.functions.ts
-import { createServerFn } from "@tanstack/react-start";
-import { z } from "zod";
-import { setSessionCookie } from "./session";
+import { createServerFn } from '@tanstack/react-start'
+import { z } from 'zod'
+import { setSessionCookie } from './session'
 
-export const login = createServerFn({ method: "POST" })
-	.inputValidator(
-		z.object({ email: z.string().email(), password: z.string() })
-	)
-	.handler(async ({ data }) => {
-		const user = await db.users.findByEmail(data.email);
-		// Always run verifyPasswordHash — even when the user doesn't exist —
-		// so the user-not-found branch takes the same time as wrong-password.
-		// DUMMY_PASSWORD_HASH is a hash of any throwaway password computed once
-		// at startup with the same algorithm/cost as real password hashes.
-		const hashToCheck = user?.passwordHash ?? DUMMY_PASSWORD_HASH;
-		const passwordMatches = await verifyPasswordHash(
-			hashToCheck,
-			data.password
-		);
-		const ok = user != null && passwordMatches;
-		if (!ok) throw new Error("Invalid email or password");
+export const login = createServerFn({ method: 'POST' })
+  .inputValidator(z.object({ email: z.string().email(), password: z.string() }))
+  .handler(async ({ data }) => {
+    const user = await db.users.findByEmail(data.email)
+    // Always run verifyPasswordHash — even when the user doesn't exist —
+    // so the user-not-found branch takes the same time as wrong-password.
+    // DUMMY_PASSWORD_HASH is a hash of any throwaway password computed once
+    // at startup with the same algorithm/cost as real password hashes.
+    const hashToCheck = user?.passwordHash ?? DUMMY_PASSWORD_HASH
+    const passwordMatches = await verifyPasswordHash(hashToCheck, data.password)
+    const ok = user != null && passwordMatches
+    if (!ok) throw new Error('Invalid email or password')
 
-		// ROTATE on privilege change: destroy any existing session, then issue fresh.
-		await db.sessions.revokeAllForUser(user.id);
-		const token = await db.sessions.create({ userId: user.id });
-		setSessionCookie(token);
-		return { ok: true };
-	});
+    // ROTATE on privilege change: destroy any existing session, then issue fresh.
+    await db.sessions.revokeAllForUser(user.id)
+    const token = await db.sessions.create({ userId: user.id })
+    setSessionCookie(token)
+    return { ok: true }
+  })
 ```
 
 ## Logout
 
 ```tsx
-import { createServerFn } from "@tanstack/react-start";
-import { authMiddleware } from "~/server/auth-middleware";
-import { clearSessionCookie } from "~/server/session";
+import { createServerFn } from '@tanstack/react-start'
+import { authMiddleware } from '~/server/auth-middleware'
+import { clearSessionCookie } from '~/server/session'
 
-export const logout = createServerFn({ method: "POST" })
-	.middleware([authMiddleware])
-	.handler(async ({ context }) => {
-		await db.sessions.revoke(context.session.id);
-		clearSessionCookie();
-		return { ok: true };
-	});
+export const logout = createServerFn({ method: 'POST' })
+  .middleware([authMiddleware])
+  .handler(async ({ context }) => {
+    await db.sessions.revoke(context.session.id)
+    clearSessionCookie()
+    return { ok: true }
+  })
 ```
 
 ## OAuth: state + PKCE
@@ -177,49 +170,49 @@ For OAuth authorization-code flow, generate a one-time `state` (CSRF defense) an
 
 ```tsx
 // src/server/oauth.functions.ts
-import { createServerFn } from "@tanstack/react-start";
-import { redirect } from "@tanstack/react-router";
+import { createServerFn } from '@tanstack/react-start'
+import { redirect } from '@tanstack/react-router'
 import {
-	getRequestHeader,
-	setResponseHeader
-} from "@tanstack/react-start/server";
-import crypto from "node:crypto";
+  getRequestHeader,
+  setResponseHeader,
+} from '@tanstack/react-start/server'
+import crypto from 'node:crypto'
 
-const OAUTH_STATE_COOKIE = "__Host-oauth"; // expires fast; one-shot
+const OAUTH_STATE_COOKIE = '__Host-oauth' // expires fast; one-shot
 
 function base64url(buf: Buffer) {
-	return buf
-		.toString("base64")
-		.replace(/=/g, "")
-		.replace(/\+/g, "-")
-		.replace(/\//g, "_");
+  return buf
+    .toString('base64')
+    .replace(/=/g, '')
+    .replace(/\+/g, '-')
+    .replace(/\//g, '_')
 }
 
-export const startOAuth = createServerFn({ method: "GET" }).handler(
-	async () => {
-		const state = base64url(crypto.randomBytes(32));
-		const verifier = base64url(crypto.randomBytes(32));
-		const challenge = base64url(
-			crypto.createHash("sha256").update(verifier).digest()
-		);
+export const startOAuth = createServerFn({ method: 'GET' }).handler(
+  async () => {
+    const state = base64url(crypto.randomBytes(32))
+    const verifier = base64url(crypto.randomBytes(32))
+    const challenge = base64url(
+      crypto.createHash('sha256').update(verifier).digest(),
+    )
 
-		setResponseHeader(
-			"Set-Cookie",
-			`${OAUTH_STATE_COOKIE}=${signed({ state, verifier })}; HttpOnly; Secure; SameSite=Lax; Path=/; Max-Age=600`
-		);
+    setResponseHeader(
+      'Set-Cookie',
+      `${OAUTH_STATE_COOKIE}=${signed({ state, verifier })}; HttpOnly; Secure; SameSite=Lax; Path=/; Max-Age=600`,
+    )
 
-		throw redirect({
-			href:
-				`https://provider.example/authorize` +
-				`?response_type=code` +
-				`&client_id=${process.env.OAUTH_CLIENT_ID}` +
-				`&redirect_uri=${encodeURIComponent(process.env.OAUTH_REDIRECT_URI!)}` +
-				`&state=${state}` +
-				`&code_challenge=${challenge}` +
-				`&code_challenge_method=S256`
-		});
-	}
-);
+    throw redirect({
+      href:
+        `https://provider.example/authorize` +
+        `?response_type=code` +
+        `&client_id=${process.env.OAUTH_CLIENT_ID}` +
+        `&redirect_uri=${encodeURIComponent(process.env.OAUTH_REDIRECT_URI!)}` +
+        `&state=${state}` +
+        `&code_challenge=${challenge}` +
+        `&code_challenge_method=S256`,
+    })
+  },
+)
 ```
 
 In the callback handler, **verify the cookie state matches the returned state** and exchange the code with the verifier. If state is missing or doesn't match, abort — the request did not originate from your `startOAuth`.
@@ -229,21 +222,21 @@ In the callback handler, **verify the cookie state matches the returned state** 
 When a user requests a reset, do not let the response shape or timing reveal whether the email is registered.
 
 ```tsx
-import { createServerFn } from "@tanstack/react-start";
-import { z } from "zod";
+import { createServerFn } from '@tanstack/react-start'
+import { z } from 'zod'
 
-export const requestPasswordReset = createServerFn({ method: "POST" })
-	.inputValidator(z.object({ email: z.string().email() }))
-	.handler(async ({ data }) => {
-		const user = await db.users.findByEmail(data.email);
-		if (user) {
-			const token = await db.passwordResets.issue(user.id);
-			await sendResetEmail(user.email, token);
-		}
-		// Always 200, always the same body, regardless of whether the user exists.
-		// The user is told to check their inbox; no confirmation either way.
-		return { ok: true };
-	});
+export const requestPasswordReset = createServerFn({ method: 'POST' })
+  .inputValidator(z.object({ email: z.string().email() }))
+  .handler(async ({ data }) => {
+    const user = await db.users.findByEmail(data.email)
+    if (user) {
+      const token = await db.passwordResets.issue(user.id)
+      await sendResetEmail(user.email, token)
+    }
+    // Always 200, always the same body, regardless of whether the user exists.
+    // The user is told to check their inbox; no confirmation either way.
+    return { ok: true }
+  })
 ```
 
 Do NOT:
@@ -260,21 +253,21 @@ Do NOT:
 2. **POST from a page on a sibling subdomain** — `SameSite=Lax` does NOT block this; verify the `Origin` header matches your app's origin in middleware.
 
 ```tsx
-import { createMiddleware } from "@tanstack/react-start";
-import { getRequest } from "@tanstack/react-start/server";
+import { createMiddleware } from '@tanstack/react-start'
+import { getRequest } from '@tanstack/react-start/server'
 
 export const csrfMiddleware = createMiddleware().server(async ({ next }) => {
-	const request = getRequest();
-	if (request.method !== "GET" && request.method !== "HEAD") {
-		const origin = request.headers.get("origin");
-		// Compare the FULL origin (scheme + host + port) — host alone lets
-		// http://example.com pass a check meant for https://example.com.
-		if (!origin || new URL(origin).origin !== process.env.APP_ORIGIN) {
-			throw new Error("Origin check failed");
-		}
-	}
-	return next();
-});
+  const request = getRequest()
+  if (request.method !== 'GET' && request.method !== 'HEAD') {
+    const origin = request.headers.get('origin')
+    // Compare the FULL origin (scheme + host + port) — host alone lets
+    // http://example.com pass a check meant for https://example.com.
+    if (!origin || new URL(origin).origin !== process.env.APP_ORIGIN) {
+      throw new Error('Origin check failed')
+    }
+  }
+  return next()
+})
 ```
 
 Attach this to global request middleware in `src/start.ts` so it covers every non-GET request, including server routes and SSR.
@@ -284,35 +277,35 @@ Attach this to global request middleware in `src/start.ts` so it covers every no
 A login endpoint without rate limiting is a credential-stuffing target. Limit per-IP (and ideally per-account) with a sliding window.
 
 ```tsx
-import { createMiddleware } from "@tanstack/react-start";
-import { getRequest } from "@tanstack/react-start/server";
+import { createMiddleware } from '@tanstack/react-start'
+import { getRequest } from '@tanstack/react-start/server'
 
 function rateLimitMiddleware(opts: {
-	key: string;
-	max: number;
-	windowMs: number;
+  key: string
+  max: number
+  windowMs: number
 }) {
-	return createMiddleware().server(async ({ next }) => {
-		const request = getRequest();
-		const ip =
-			request.headers.get("cf-connecting-ip") ??
-			request.headers.get("x-forwarded-for")?.split(",")[0] ??
-			"unknown";
-		const bucketKey = `rl:${opts.key}:${ip}`;
-		const allowed = await rateLimiter.consume(
-			bucketKey,
-			opts.max,
-			opts.windowMs
-		);
-		if (!allowed) throw new Error("Too many requests");
-		return next();
-	});
+  return createMiddleware().server(async ({ next }) => {
+    const request = getRequest()
+    const ip =
+      request.headers.get('cf-connecting-ip') ??
+      request.headers.get('x-forwarded-for')?.split(',')[0] ??
+      'unknown'
+    const bucketKey = `rl:${opts.key}:${ip}`
+    const allowed = await rateLimiter.consume(
+      bucketKey,
+      opts.max,
+      opts.windowMs,
+    )
+    if (!allowed) throw new Error('Too many requests')
+    return next()
+  })
 }
 
 // On the login server function:
-export const login = createServerFn({ method: "POST" }).middleware([
-	rateLimitMiddleware({ key: "login", max: 5, windowMs: 60_000 })
-]);
+export const login = createServerFn({ method: 'POST' }).middleware([
+  rateLimitMiddleware({ key: 'login', max: 5, windowMs: 60_000 }),
+])
 // ...
 ```
 
@@ -322,16 +315,16 @@ Whenever the user's privileges change — login, logout, role change, password c
 
 ```tsx
 // In the login handler (already shown above): destroy any pre-login session, then create a fresh one.
-await db.sessions.revokeAllForUser(user.id);
-const token = await db.sessions.create({ userId: user.id });
-setSessionCookie(token);
+await db.sessions.revokeAllForUser(user.id)
+const token = await db.sessions.create({ userId: user.id })
+setSessionCookie(token)
 ```
 
 ```tsx
 // On password change / role grant:
-await db.sessions.revokeAllForUser(user.id); // destroy existing
-const token = await db.sessions.create({ userId: user.id }); // issue fresh
-setSessionCookie(token);
+await db.sessions.revokeAllForUser(user.id) // destroy existing
+const token = await db.sessions.create({ userId: user.id }) // issue fresh
+setSessionCookie(token)
 ```
 
 ## Common Mistakes
@@ -340,23 +333,21 @@ setSessionCookie(token);
 
 ```tsx
 // WRONG — the RPC is callable directly via POST regardless of the route
-export const Route = createFileRoute("/_authenticated/orders")({
-	beforeLoad: ({ context }) => {
-		if (!context.auth.isAuthenticated) throw redirect({ to: "/login" });
-	}
-});
-const getMyOrders = createServerFn({ method: "GET" }).handler(async () => {
-	return db.orders.findMany(); // ← anyone can hit the RPC and get all orders
-});
+export const Route = createFileRoute('/_authenticated/orders')({
+  beforeLoad: ({ context }) => {
+    if (!context.auth.isAuthenticated) throw redirect({ to: '/login' })
+  },
+})
+const getMyOrders = createServerFn({ method: 'GET' }).handler(async () => {
+  return db.orders.findMany() // ← anyone can hit the RPC and get all orders
+})
 
 // CORRECT — auth enforced on the handler itself
-const getMyOrders = createServerFn({ method: "GET" })
-	.middleware([authMiddleware])
-	.handler(async ({ context }) => {
-		return db.orders.findMany({
-			where: { userId: context.session.userId }
-		});
-	});
+const getMyOrders = createServerFn({ method: 'GET' })
+  .middleware([authMiddleware])
+  .handler(async ({ context }) => {
+    return db.orders.findMany({ where: { userId: context.session.userId } })
+  })
 ```
 
 ### CRITICAL: Treating shape validation as authorization
@@ -365,25 +356,25 @@ A parsed UUID is _some_ workspace, not an _authorized_ workspace.
 
 ```tsx
 // WRONG — UUID is well-formed but the user may not be a member
-const getWorkspaceData = createServerFn({ method: "GET" })
-	.middleware([authMiddleware])
-	.inputValidator(z.object({ workspaceId: z.string().uuid() }))
-	.handler(async ({ context, data }) => {
-		return db.workspaces.findById(data.workspaceId); // missing membership check!
-	});
+const getWorkspaceData = createServerFn({ method: 'GET' })
+  .middleware([authMiddleware])
+  .inputValidator(z.object({ workspaceId: z.string().uuid() }))
+  .handler(async ({ context, data }) => {
+    return db.workspaces.findById(data.workspaceId) // missing membership check!
+  })
 
 // CORRECT — verify the session principal has access to that workspace
-const getWorkspaceData = createServerFn({ method: "GET" })
-	.middleware([authMiddleware])
-	.inputValidator(z.object({ workspaceId: z.string().uuid() }))
-	.handler(async ({ context, data }) => {
-		const member = await db.memberships.find({
-			userId: context.session.userId,
-			workspaceId: data.workspaceId
-		});
-		if (!member) throw new Error("Not a member of this workspace");
-		return db.workspaces.findById(data.workspaceId);
-	});
+const getWorkspaceData = createServerFn({ method: 'GET' })
+  .middleware([authMiddleware])
+  .inputValidator(z.object({ workspaceId: z.string().uuid() }))
+  .handler(async ({ context, data }) => {
+    const member = await db.memberships.find({
+      userId: context.session.userId,
+      workspaceId: data.workspaceId,
+    })
+    if (!member) throw new Error('Not a member of this workspace')
+    return db.workspaces.findById(data.workspaceId)
+  })
 ```
 
 ### HIGH: Returning different responses based on email existence
@@ -394,14 +385,14 @@ Already covered above — `requestPasswordReset` must return the same body regar
 
 ```tsx
 // WRONG — module-load time, before any request exists
-const SESSION_SECRET = process.env.SESSION_SECRET;
+const SESSION_SECRET = process.env.SESSION_SECRET
 export function signSession(payload) {
-	return sign(payload, SESSION_SECRET);
+  return sign(payload, SESSION_SECRET)
 }
 
 // CORRECT — read inside per-request callback
 export function signSession(payload) {
-	return sign(payload, process.env.SESSION_SECRET);
+  return sign(payload, process.env.SESSION_SECRET)
 }
 ```
 
