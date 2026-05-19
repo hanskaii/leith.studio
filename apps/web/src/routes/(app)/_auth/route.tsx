@@ -23,7 +23,7 @@ export const Route = createFileRoute("/(app)/_auth")({
 
 function AuthLayout() {
 	return (
-		<div className="auth-layout">
+		<div className="relative flex min-h-[100dvh] w-full flex-col bg-background font-sans text-foreground antialiased selection:bg-primary selection:text-primary-foreground">
 			<Outlet />
 		</div>
 	);

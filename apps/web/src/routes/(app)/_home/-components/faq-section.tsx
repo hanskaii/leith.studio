@@ -16,7 +16,7 @@ export function FaqSection() {
 				whileInView="visible"
 				viewport={{ once: true, margin: "-60px" }}
 				variants={stagger}
-				className="max-w-[1280px] mx-auto px-5 sm:px-8 py-20 grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-24"
+				className="max-w-[1280px] mx-auto px-5 sm:px-8 py-14 grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-20"
 			>
 				<div>
 					<motion.h2

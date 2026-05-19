@@ -23,7 +23,7 @@ export function AllAccessSection() {
 				whileInView="visible"
 				viewport={{ once: true, margin: "-60px" }}
 				variants={stagger}
-				className="max-w-[1280px] mx-auto px-5 sm:px-8 py-20 grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-24 items-start"
+				className="max-w-[1280px] mx-auto px-5 sm:px-8 py-14 grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-20 items-start"
 			>
 				<div>
 					<motion.h2
@@ -42,7 +42,7 @@ export function AllAccessSection() {
 				<motion.div
 					variants={fadeUp}
 					custom={2}
-					className="flex flex-col gap-6 lg:pt-16"
+					className="flex flex-col gap-5 lg:pt-10"
 				>
 					<p className="text-muted-foreground text-base leading-relaxed max-w-[40ch]">
 						Launch price{" "}

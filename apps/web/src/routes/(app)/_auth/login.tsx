@@ -1,7 +1,4 @@
-import { ArrowLeft01Icon } from "@hugeicons/core-free-icons";
-import { HugeiconsIcon } from "@hugeicons/react";
 import { createFileRoute, Link, useSearch } from "@tanstack/react-router";
-import { buttonVariants } from "@workspace/ui";
 import { z } from "zod";
 import { ThemeToggle } from "@/routes/-components/layouts/theme-toggle";
 import { LoginForm } from "./-components/login-form";
@@ -15,10 +12,10 @@ export const Route = createFileRoute("/(app)/_auth/login")({
 	component: LoginPage,
 	head: () => ({
 		meta: [
-			{ title: "Login - workspacen.in" },
+			{ title: "Sign in — Leith" },
 			{
 				name: "description",
-				content: "Sign in to your workspacen.in account."
+				content: "Sign in to your Leith account."
 			}
 		]
 	})
@@ -28,27 +25,27 @@ function LoginPage() {
 	const search = useSearch({ from: "/(app)/_auth/login" });
 
 	return (
-		<div className="relative w-full md:h-screen md:overflow-hidden">
-			<div className="relative mx-auto flex min-h-screen max-w-5xl flex-col justify-center px-4">
+		<div className="flex min-h-[100dvh] flex-col">
+			{/* Top bar */}
+			<header className="flex h-20 items-center justify-between border-b border-border/40 px-5 sm:px-8">
 				<Link
 					to="/"
-					className={`${buttonVariants({ variant: "ghost" })} absolute top-4 left-4`}
+					className="font-heading text-xl font-black tracking-tight text-foreground transition-opacity hover:opacity-70"
 				>
-					<HugeiconsIcon icon={ArrowLeft01Icon} strokeWidth={2} />
-					Home
+					leith
 				</Link>
+				<ThemeToggle />
+			</header>
 
-				<div className="absolute top-4 right-4">
-					<ThemeToggle />
-				</div>
-
-				<div className="mx-auto space-y-4 sm:w-sm ">
-					<div className="flex flex-col space-y-1">
-						<h1 className="font-bold text-2xl tracking-wide">
-							Sign In or Join Now!
+			{/* Centered form */}
+			<div className="flex flex-1 items-center justify-center px-5 py-16">
+				<div className="w-full max-w-sm space-y-8">
+					<div>
+						<h1 className="font-heading text-3xl font-bold tracking-tight text-foreground">
+							Sign in
 						</h1>
-						<p className="text-base text-muted-foreground">
-							login or create your account.
+						<p className="mt-2 text-sm text-muted-foreground">
+							Enter your email to continue.
 						</p>
 					</div>
 					<LoginForm redirectTo={search.redirect} />

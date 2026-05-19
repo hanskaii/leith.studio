@@ -4,7 +4,7 @@ import { ACCESS_URL } from "../-lib/home-data";
 export function FooterSection() {
 	return (
 		<footer className="w-full border-t border-border/40">
-			<div className="max-w-[1280px] mx-auto px-5 sm:px-8 py-10 grid grid-cols-2 sm:grid-cols-4 gap-6">
+			<div className="max-w-[1280px] mx-auto px-5 sm:px-8 py-7 grid grid-cols-2 sm:grid-cols-4 gap-6">
 				<div className="col-span-2 sm:col-span-1 flex flex-col gap-3">
 					<span className="font-heading font-black text-2xl tracking-tight text-primary">
 						leith
@@ -76,7 +76,7 @@ export function FooterSection() {
 				</p>
 			</div>
 
-			<div className="border-t border-border/40 px-5 sm:px-8 py-5 max-w-[1280px] mx-auto">
+			<div className="border-t border-border/40 px-5 sm:px-8 py-4 max-w-[1280px] mx-auto">
 				<p className="text-xs text-muted-foreground">
 					© 2025 Leith. All rights reserved.
 				</p>

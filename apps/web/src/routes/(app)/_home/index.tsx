@@ -11,7 +11,7 @@ export const Route = createFileRoute("/(app)/_home/")({
 
 function LandingPage() {
 	return (
-		<main className="flex flex-col flex-1 w-full pt-28">
+		<main className="flex flex-col flex-1 w-full pt-24">
 			<HeroSection />
 			<AssetGrid />
 			<AllAccessSection />

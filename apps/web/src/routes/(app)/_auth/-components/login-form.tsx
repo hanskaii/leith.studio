@@ -94,7 +94,6 @@ export function LoginForm({ redirectTo }: { redirectTo?: string }) {
 		}
 	});
 
-	// OTP form
 	const otpForm = useForm({
 		defaultValues: {
 			otp: ""
@@ -139,10 +138,12 @@ export function LoginForm({ redirectTo }: { redirectTo?: string }) {
 		<Fragment>
 			{/* Email Step */}
 			{step === "email" ? (
-				<div className="space-y-3">
+				<div className="space-y-4">
+					{/* Google */}
 					<Button
 						type="button"
-						className="relative flex w-full items-center justify-center space-x-2 border border-input bg-background text-foreground hover:bg-white hover:text-black"
+						variant="outline"
+						className="relative w-full"
 						onClick={() =>
 							socialSignInMutation.mutate({ provider: "google" })
 						}
@@ -151,8 +152,8 @@ export function LoginForm({ redirectTo }: { redirectTo?: string }) {
 						<svg
 							xmlns="http://www.w3.org/2000/svg"
 							viewBox="0 0 24 24"
-							width="24"
-							height="24"
+							width="18"
+							height="18"
 							aria-hidden="true"
 							role="img"
 						>
@@ -174,7 +175,7 @@ export function LoginForm({ redirectTo }: { redirectTo?: string }) {
 								d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
 							/>
 						</svg>
-						<span>Sign in with Google</span>
+						<span>Continue with Google</span>
 						{lastMethod === "google" && (
 							<Badge className="-top-3 -right-2 absolute text-[10px]">
 								Last used
@@ -182,6 +183,16 @@ export function LoginForm({ redirectTo }: { redirectTo?: string }) {
 						)}
 					</Button>
 
+					{/* OR divider */}
+					<div className="flex items-center gap-3">
+						<div className="h-px flex-1 bg-border" />
+						<span className="text-[11px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">
+							or
+						</span>
+						<div className="h-px flex-1 bg-border" />
+					</div>
+
+					{/* Email form */}
 					<form
 						onSubmit={(e) => {
 							e.preventDefault();
@@ -198,9 +209,7 @@ export function LoginForm({ redirectTo }: { redirectTo?: string }) {
 									return (
 										<Field data-invalid={isInvalid}>
 											<FieldLabel htmlFor={field.name}>
-												<FieldTitle className="font-medium font-mono text-foreground text-sm">
-													Email address
-												</FieldTitle>
+												<FieldTitle>Email</FieldTitle>
 											</FieldLabel>
 											<FieldContent>
 												<Input
@@ -217,16 +226,14 @@ export function LoginForm({ redirectTo }: { redirectTo?: string }) {
 													type="email"
 													placeholder="you@example.com"
 													autoComplete="email"
-													className="mb-2 h-10 border-border bg-background font-mono text-sm transition-colors focus:border-foreground focus:ring-1 focus:ring-foreground"
 													disabled={
 														sendOtpMutation.isPending
 													}
 												/>
-												<FieldDescription className="font-mono text-muted-foreground text-xs leading-relaxed">
+												<FieldDescription className="text-xs text-muted-foreground">
 													We'll send you a one-time
-													password
+													code.
 												</FieldDescription>
-
 												{isInvalid && (
 													<FieldError
 														errors={
@@ -243,7 +250,7 @@ export function LoginForm({ redirectTo }: { redirectTo?: string }) {
 
 							<Button
 								type="submit"
-								className="h-10 w-full border border-foreground bg-foreground font-medium font-mono text-background text-sm transition-colors hover:bg-background hover:text-foreground"
+								className="w-full"
 								disabled={sendOtpMutation.isPending}
 							>
 								{sendOtpMutation.isPending ? (
@@ -258,6 +265,7 @@ export function LoginForm({ redirectTo }: { redirectTo?: string }) {
 					</form>
 				</div>
 			) : null}
+
 			{/* OTP Step */}
 			{step === "otp" ? (
 				<form
@@ -268,10 +276,11 @@ export function LoginForm({ redirectTo }: { redirectTo?: string }) {
 					}}
 				>
 					<div className="space-y-4">
+						{/* Back */}
 						<button
 							type="button"
 							onClick={handleBack}
-							className="-ml-2 mb-2 flex items-center gap-2 rounded px-2 py-1.5 font-mono text-muted-foreground text-sm transition-colors hover:bg-muted hover:text-foreground"
+							className="-ml-1 mb-1 inline-flex items-center gap-1.5 rounded-md px-1 py-1 text-sm text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
 						>
 							<HugeiconsIcon
 								icon={ArrowLeft01Icon}
@@ -280,6 +289,16 @@ export function LoginForm({ redirectTo }: { redirectTo?: string }) {
 							/>
 							Back
 						</button>
+
+						{/* Email context */}
+						<div className="rounded-md border border-border/60 bg-muted px-4 py-3">
+							<p className="text-sm font-medium text-foreground">
+								Check your inbox
+							</p>
+							<p className="mt-0.5 text-xs text-muted-foreground">
+								Code sent to {email}
+							</p>
+						</div>
 
 						<otpForm.Field name="otp">
 							{(field) => {
@@ -290,7 +309,7 @@ export function LoginForm({ redirectTo }: { redirectTo?: string }) {
 								return (
 									<Field data-invalid={isInvalid}>
 										<FieldLabel htmlFor={field.name}>
-											<FieldTitle className="font-medium font-mono text-foreground text-sm">
+											<FieldTitle>
 												Verification code
 											</FieldTitle>
 										</FieldLabel>
@@ -313,7 +332,7 @@ export function LoginForm({ redirectTo }: { redirectTo?: string }) {
 												placeholder="000000"
 												autoComplete="one-time-code"
 												inputMode="numeric"
-												containerClassName="font-mono mx-auto w-full max-w-[16rem]"
+												containerClassName="mx-auto w-full max-w-[16rem]"
 											>
 												<InputOTPGroup>
 													<InputOTPSlot index={0} />
@@ -327,9 +346,9 @@ export function LoginForm({ redirectTo }: { redirectTo?: string }) {
 													<InputOTPSlot index={5} />
 												</InputOTPGroup>
 											</InputOTP>
-											<FieldDescription className="font-mono text-muted-foreground text-xs leading-relaxed">
+											<FieldDescription className="text-xs text-muted-foreground">
 												Enter the 6-digit code from your
-												email
+												email.
 											</FieldDescription>
 											{isInvalid && (
 												<FieldError
@@ -346,7 +365,7 @@ export function LoginForm({ redirectTo }: { redirectTo?: string }) {
 
 						<Button
 							type="submit"
-							className="h-10 w-full border border-foreground bg-foreground font-medium font-mono text-background text-sm transition-colors hover:bg-background hover:text-foreground"
+							className="w-full"
 							disabled={verifyOtpMutation.isPending}
 						>
 							{verifyOtpMutation.isPending ? (
@@ -355,7 +374,7 @@ export function LoginForm({ redirectTo }: { redirectTo?: string }) {
 									Verifying...
 								</>
 							) : (
-								"Verify & Sign in"
+								"Verify and sign in"
 							)}
 						</Button>
 
@@ -363,7 +382,7 @@ export function LoginForm({ redirectTo }: { redirectTo?: string }) {
 							type="button"
 							onClick={() => sendOtpMutation.mutate(email)}
 							disabled={sendOtpMutation.isPending}
-							className="w-full rounded py-2 text-center font-mono text-muted-foreground text-sm transition-colors hover:bg-muted hover:text-foreground disabled:opacity-50"
+							className="w-full py-2 text-center text-sm text-muted-foreground transition-colors hover:text-foreground disabled:opacity-50"
 						>
 							Didn't receive the code? Resend
 						</button>

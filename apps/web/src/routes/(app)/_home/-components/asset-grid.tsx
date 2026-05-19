@@ -7,7 +7,7 @@ export function AssetGrid() {
 	return (
 		<section
 			id="assets"
-			className="w-full max-w-[1280px] mx-auto px-5 sm:px-8 py-16"
+			className="w-full max-w-[1280px] mx-auto px-5 sm:px-8 py-10"
 		>
 			<motion.div
 				initial="hidden"
