@@ -19,12 +19,6 @@ export const Route = createFileRoute("/(app)/_app")({
 			staleTime: 0 // always fetch fresh for auth guard
 		});
 
-		// Feed is publicly accessible without login
-		const isFeedRoute = location.pathname.startsWith("/feed");
-		if (isFeedRoute) {
-			return { session: session ?? null };
-		}
-
 		if (!session?.user) {
 			throw redirect({
 				to: "/login",
