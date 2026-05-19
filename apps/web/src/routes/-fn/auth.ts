@@ -54,8 +54,6 @@ export interface AuthAccount {
 	updatedAt: string | Date;
 }
 
-// ─── Session & Auth ──────────────────────────────────────────────────────────
-
 export const getSessionFn = createServerFn({ method: "GET" }).handler(
 	async () => {
 		try {
@@ -164,8 +162,6 @@ export const accountsListOptions = () =>
 		queryFn: () => listAccountsFn()
 	});
 
-// ─── Uploads (Uses RPC Contract) ─────────────────────────────────────────────
-
 export const uploadAvatarFn = createServerFn({ method: "POST" })
 	.inputValidator((data: FormData) => data)
 	.handler(async ({ data }) => {
@@ -181,7 +177,7 @@ export const uploadAvatarFn = createServerFn({ method: "POST" })
 		}
 
 		const { data: result } = await res.json();
-		return result.url;
+		return result?.url;
 	});
 
 export const uploadImageFn = createServerFn({ method: "POST" })
@@ -199,10 +195,8 @@ export const uploadImageFn = createServerFn({ method: "POST" })
 		}
 
 		const { data: result } = await res.json();
-		return result.url;
+		return result?.url;
 	});
-
-// ─── API Keys ────────────────────────────────────────────────────────────────
 
 export const listApiKeysFn = createServerFn({ method: "GET" }).handler(
 	async () => {
@@ -245,22 +239,6 @@ export const listApiKeysQueryOptions = () =>
 		queryFn: () => listApiKeysFn()
 	});
 
-// ─── Billing ─────────────────────────────────────────────────────────────────
-
-export const listSubscriptionsFn = createServerFn({ method: "GET" })
-	.inputValidator((q: { limit?: number; page?: number }) => q)
-	.handler(async ({ data }) => {
-		const params = new URLSearchParams();
-		if (data?.limit != null) params.set("limit", String(data.limit));
-		if (data?.page != null) params.set("page", String(data.page));
-		const res = await getApi(
-			`/api/auth/dodopayments/customer/subscriptions/list?${params}`
-		);
-		if (!res.ok) return null;
-		const json = await res.json();
-		return json as { items: DodoSubscription[]; total: number };
-	});
-
 export const listPaymentsFn = createServerFn({ method: "GET" })
 	.inputValidator((q: { limit?: number; page?: number }) => q)
 	.handler(async ({ data }) => {
@@ -273,12 +251,6 @@ export const listPaymentsFn = createServerFn({ method: "GET" })
 		if (!res.ok) return null;
 		const json = await res.json();
 		return json as { items: DodoPayment[]; total: number };
-	});
-
-export const subscriptionsQueryOptions = (limit = 10, page = 1) =>
-	queryOptions({
-		queryKey: ["billing", "subscriptions", limit, page],
-		queryFn: () => listSubscriptionsFn({ data: { limit, page } })
 	});
 
 export const paymentsQueryOptions = (limit = 5, page = 1) =>

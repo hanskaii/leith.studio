@@ -10,12 +10,11 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as appRouteRouteImport } from './routes/(app)/route'
+import { Route as appHomeRouteRouteImport } from './routes/(app)/_home/route'
 import { Route as appAuthRouteRouteImport } from './routes/(app)/_auth/route'
 import { Route as appAppRouteRouteImport } from './routes/(app)/_app/route'
 import { Route as appAdminRouteRouteImport } from './routes/(app)/_admin/route'
 import { Route as appHomeIndexRouteImport } from './routes/(app)/_home/index'
-import { Route as appHomeUpgradeRouteImport } from './routes/(app)/_home/upgrade'
-import { Route as appHomeContactRouteImport } from './routes/(app)/_home/contact'
 import { Route as appAuthLoginRouteImport } from './routes/(app)/_auth/login'
 import { Route as appAppActivateRouteImport } from './routes/(app)/_app/activate'
 import { Route as appAppAccountRouteRouteImport } from './routes/(app)/_app/account/route'
@@ -39,6 +38,10 @@ const appRouteRoute = appRouteRouteImport.update({
   id: '/(app)',
   getParentRoute: () => rootRouteImport,
 } as any)
+const appHomeRouteRoute = appHomeRouteRouteImport.update({
+  id: '/_home',
+  getParentRoute: () => appRouteRoute,
+} as any)
 const appAuthRouteRoute = appAuthRouteRouteImport.update({
   id: '/_auth',
   getParentRoute: () => appRouteRoute,
@@ -52,19 +55,9 @@ const appAdminRouteRoute = appAdminRouteRouteImport.update({
   getParentRoute: () => appRouteRoute,
 } as any)
 const appHomeIndexRoute = appHomeIndexRouteImport.update({
-  id: '/_home/',
+  id: '/',
   path: '/',
-  getParentRoute: () => appRouteRoute,
-} as any)
-const appHomeUpgradeRoute = appHomeUpgradeRouteImport.update({
-  id: '/_home/upgrade',
-  path: '/upgrade',
-  getParentRoute: () => appRouteRoute,
-} as any)
-const appHomeContactRoute = appHomeContactRouteImport.update({
-  id: '/_home/contact',
-  path: '/contact',
-  getParentRoute: () => appRouteRoute,
+  getParentRoute: () => appHomeRouteRoute,
 } as any)
 const appAuthLoginRoute = appAuthLoginRouteImport.update({
   id: '/login',
@@ -102,15 +95,15 @@ const appAppChatIndexRoute = appAppChatIndexRouteImport.update({
   getParentRoute: () => appAppRouteRoute,
 } as any)
 const appHomeLegalsTermsRoute = appHomeLegalsTermsRouteImport.update({
-  id: '/_home/legals/terms',
+  id: '/legals/terms',
   path: '/legals/terms',
-  getParentRoute: () => appRouteRoute,
+  getParentRoute: () => appHomeRouteRoute,
 } as any)
 const appHomeLegalsPrivacyPolicyRoute =
   appHomeLegalsPrivacyPolicyRouteImport.update({
-    id: '/_home/legals/privacy-policy',
+    id: '/legals/privacy-policy',
     path: '/legals/privacy-policy',
-    getParentRoute: () => appRouteRoute,
+    getParentRoute: () => appHomeRouteRoute,
   } as any)
 const appAppFeedSlugRoute = appAppFeedSlugRouteImport.update({
   id: '/feed/$slug',
@@ -166,8 +159,6 @@ export interface FileRoutesByFullPath {
   '/account': typeof appAppAccountRouteRouteWithChildren
   '/activate': typeof appAppActivateRoute
   '/login': typeof appAuthLoginRoute
-  '/contact': typeof appHomeContactRoute
-  '/upgrade': typeof appHomeUpgradeRoute
   '/': typeof appHomeIndexRoute
   '/creator/$id': typeof appAppCreatorIdRoute
   '/feed/$slug': typeof appAppFeedSlugRoute
@@ -189,8 +180,6 @@ export interface FileRoutesByTo {
   '/account': typeof appAppAccountRouteRouteWithChildren
   '/activate': typeof appAppActivateRoute
   '/login': typeof appAuthLoginRoute
-  '/contact': typeof appHomeContactRoute
-  '/upgrade': typeof appHomeUpgradeRoute
   '/': typeof appHomeIndexRoute
   '/creator/$id': typeof appAppCreatorIdRoute
   '/feed/$slug': typeof appAppFeedSlugRoute
@@ -214,11 +203,10 @@ export interface FileRoutesById {
   '/(app)/_admin': typeof appAdminRouteRouteWithChildren
   '/(app)/_app': typeof appAppRouteRouteWithChildren
   '/(app)/_auth': typeof appAuthRouteRouteWithChildren
+  '/(app)/_home': typeof appHomeRouteRouteWithChildren
   '/(app)/_app/account': typeof appAppAccountRouteRouteWithChildren
   '/(app)/_app/activate': typeof appAppActivateRoute
   '/(app)/_auth/login': typeof appAuthLoginRoute
-  '/(app)/_home/contact': typeof appHomeContactRoute
-  '/(app)/_home/upgrade': typeof appHomeUpgradeRoute
   '/(app)/_home/': typeof appHomeIndexRoute
   '/(app)/_app/creator/$id': typeof appAppCreatorIdRoute
   '/(app)/_app/feed/$slug': typeof appAppFeedSlugRoute
@@ -242,8 +230,6 @@ export interface FileRouteTypes {
     | '/account'
     | '/activate'
     | '/login'
-    | '/contact'
-    | '/upgrade'
     | '/'
     | '/creator/$id'
     | '/feed/$slug'
@@ -265,8 +251,6 @@ export interface FileRouteTypes {
     | '/account'
     | '/activate'
     | '/login'
-    | '/contact'
-    | '/upgrade'
     | '/'
     | '/creator/$id'
     | '/feed/$slug'
@@ -289,11 +273,10 @@ export interface FileRouteTypes {
     | '/(app)/_admin'
     | '/(app)/_app'
     | '/(app)/_auth'
+    | '/(app)/_home'
     | '/(app)/_app/account'
     | '/(app)/_app/activate'
     | '/(app)/_auth/login'
-    | '/(app)/_home/contact'
-    | '/(app)/_home/upgrade'
     | '/(app)/_home/'
     | '/(app)/_app/creator/$id'
     | '/(app)/_app/feed/$slug'
@@ -325,6 +308,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof appRouteRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/(app)/_home': {
+      id: '/(app)/_home'
+      path: ''
+      fullPath: ''
+      preLoaderRoute: typeof appHomeRouteRouteImport
+      parentRoute: typeof appRouteRoute
+    }
     '/(app)/_auth': {
       id: '/(app)/_auth'
       path: ''
@@ -351,21 +341,7 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof appHomeIndexRouteImport
-      parentRoute: typeof appRouteRoute
-    }
-    '/(app)/_home/upgrade': {
-      id: '/(app)/_home/upgrade'
-      path: '/upgrade'
-      fullPath: '/upgrade'
-      preLoaderRoute: typeof appHomeUpgradeRouteImport
-      parentRoute: typeof appRouteRoute
-    }
-    '/(app)/_home/contact': {
-      id: '/(app)/_home/contact'
-      path: '/contact'
-      fullPath: '/contact'
-      preLoaderRoute: typeof appHomeContactRouteImport
-      parentRoute: typeof appRouteRoute
+      parentRoute: typeof appHomeRouteRoute
     }
     '/(app)/_auth/login': {
       id: '/(app)/_auth/login'
@@ -421,14 +397,14 @@ declare module '@tanstack/react-router' {
       path: '/legals/terms'
       fullPath: '/legals/terms'
       preLoaderRoute: typeof appHomeLegalsTermsRouteImport
-      parentRoute: typeof appRouteRoute
+      parentRoute: typeof appHomeRouteRoute
     }
     '/(app)/_home/legals/privacy-policy': {
       id: '/(app)/_home/legals/privacy-policy'
       path: '/legals/privacy-policy'
       fullPath: '/legals/privacy-policy'
       preLoaderRoute: typeof appHomeLegalsPrivacyPolicyRouteImport
-      parentRoute: typeof appRouteRoute
+      parentRoute: typeof appHomeRouteRoute
     }
     '/(app)/_app/feed/$slug': {
       id: '/(app)/_app/feed/$slug'
@@ -567,26 +543,34 @@ const appAuthRouteRouteWithChildren = appAuthRouteRoute._addFileChildren(
   appAuthRouteRouteChildren,
 )
 
+interface appHomeRouteRouteChildren {
+  appHomeIndexRoute: typeof appHomeIndexRoute
+  appHomeLegalsPrivacyPolicyRoute: typeof appHomeLegalsPrivacyPolicyRoute
+  appHomeLegalsTermsRoute: typeof appHomeLegalsTermsRoute
+}
+
+const appHomeRouteRouteChildren: appHomeRouteRouteChildren = {
+  appHomeIndexRoute: appHomeIndexRoute,
+  appHomeLegalsPrivacyPolicyRoute: appHomeLegalsPrivacyPolicyRoute,
+  appHomeLegalsTermsRoute: appHomeLegalsTermsRoute,
+}
+
+const appHomeRouteRouteWithChildren = appHomeRouteRoute._addFileChildren(
+  appHomeRouteRouteChildren,
+)
+
 interface appRouteRouteChildren {
   appAdminRouteRoute: typeof appAdminRouteRouteWithChildren
   appAppRouteRoute: typeof appAppRouteRouteWithChildren
   appAuthRouteRoute: typeof appAuthRouteRouteWithChildren
-  appHomeContactRoute: typeof appHomeContactRoute
-  appHomeUpgradeRoute: typeof appHomeUpgradeRoute
-  appHomeIndexRoute: typeof appHomeIndexRoute
-  appHomeLegalsPrivacyPolicyRoute: typeof appHomeLegalsPrivacyPolicyRoute
-  appHomeLegalsTermsRoute: typeof appHomeLegalsTermsRoute
+  appHomeRouteRoute: typeof appHomeRouteRouteWithChildren
 }
 
 const appRouteRouteChildren: appRouteRouteChildren = {
   appAdminRouteRoute: appAdminRouteRouteWithChildren,
   appAppRouteRoute: appAppRouteRouteWithChildren,
   appAuthRouteRoute: appAuthRouteRouteWithChildren,
-  appHomeContactRoute: appHomeContactRoute,
-  appHomeUpgradeRoute: appHomeUpgradeRoute,
-  appHomeIndexRoute: appHomeIndexRoute,
-  appHomeLegalsPrivacyPolicyRoute: appHomeLegalsPrivacyPolicyRoute,
-  appHomeLegalsTermsRoute: appHomeLegalsTermsRoute,
+  appHomeRouteRoute: appHomeRouteRouteWithChildren,
 }
 
 const appRouteRouteWithChildren = appRouteRoute._addFileChildren(

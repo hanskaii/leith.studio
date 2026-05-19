@@ -6,33 +6,36 @@ brand
 
 ## Users
 
-Working designers mid-project, researching AI image creation technique. They arrive with a specific question and limited patience. They want to absorb a breakdown fast, extract the useful parts, and get back to their work. They're not here to browse; they're here to level up on something specific. When they're not mid-project, they browse casually to stay current with what @Superoutman is making.
+Streamers and video creators (Twitch, YouTube, broader content creation) who need high-quality visual assets — video loops, animated backgrounds, cinematic overlays — for their streams and productions. They know what they want visually, they don't want to hunt across ten marketplaces, and they don't want a subscription. They arrive knowing the aesthetic: dark, cinematic, intentional. They want to preview it, trust it, buy it once, and move on.
+
+Secondary: motion designers, video editors, and digital producers who need ready-made cinematic loops as building blocks.
 
 ## Product Purpose
 
-Leith is a single-creator member-only platform where @Superoutman publishes AI image creation breakdowns, technique notes, and process walkthroughs. Members pay once (license key) and get permanent access to the full archive. The platform's personality is the product as much as the content itself: the creator's voice, taste, and slightly absurdist framing are inseparable from the value.
+Leith is a curated digital goods store selling dark cinematic video loops, animated backgrounds, and visual assets for streamers and creators. One all-access purchase unlocks the full library — every asset released now and in the future. No subscriptions, no per-asset pricing. The value proposition is the curation: every asset shares a coherent dark cinematic aesthetic, so buyers know exactly what they're getting into before they buy.
 
-Success looks like: a working designer reads a breakdown, immediately understands what to try, and tells a colleague "have you seen leith?"
+Success looks like: a streamer buys once, uses Leith assets across every production, and recommends it because it saved them hours hunting for something that actually looks good.
 
 ## Brand Personality
 
-Playful, precise, self-aware. Absurd but never chaotic. The design smiles at you; it doesn't yell. Post-cringe means the jokes land quietly, the weirdness is intentional, and nothing tries too hard.
+Confident, precise, cinematic. Leith doesn't explain itself — the previews do the talking. The brand is quiet but certain. It earns trust through quality of the assets, not marketing noise. Think: boutique, not bazaar. Curated, not comprehensive.
 
 ## Anti-references
 
-- **Hype streetwear energy**: Supreme-red, drop-culture aggression, type-as-assault. Leith is not loud. It doesn't need to be.
-- **Dark AI portal**: Neon on black, glowing orbs, Midjourney/Replicate landing page aesthetics. Leith is not a product pitch for AI itself.
-- **Generic SaaS**: shadcn default, cream background, purple accent, rounded card grids, "Elevate your workflow" copywriting.
-- **Newsletter minimalism**: Pure white, wide margins, Georgia serif, Substack-clone restraint. Too safe, no personality.
+- **Gaming bro energy**: RGB everything, aggressive type, Twitch-streamer-starter-pack aesthetics. Leith is for creators with taste, not for hype.
+- **Stock footage marketplace**: Grid of thumbnails, badge spam, "4K UHD ROYALTY FREE" in every label. No clutter, no shouting.
+- **Dark AI portal**: Neon on black, glowing orbs, particle effects as personality. The assets are cinematic — the UI doesn't need to perform it.
+- **Generic SaaS**: shadcn default, cream background, purple accent, "Elevate your workflow" copy. This is a product store, not a productivity tool.
+- **Subscription fatigue design**: Pricing tables, feature comparison grids, "Cancel anytime" anxiety. One price. Done.
 
 ## Design Principles
 
-1. **Legible weirdness**: Every quirky choice must make the content easier to absorb, not harder. Personality frames; it never competes.
-2. **Craft without the sermon**: AI image technique is serious craft. The platform treats it with precision but not solemnity. The creator winks; it doesn't lecture.
-3. **Zine logic, not magazine logic**: Asymmetric, human-scale, printed-matter warmth. Not polished to sterility, not rough for its own sake.
-4. **Speed reads fast**: Working designers mid-project have no patience for ceremony. Every layout decision must serve the person who's skimming for the one technique they need.
-5. **Earned specificity**: Weird proportions, unexpected color moments, unconventional hierarchy — only when they serve a purpose. Decoration that can be removed is decoration that should be removed.
+1. **The preview is the pitch**: Asset thumbnails and preview clips carry all the persuasion. UI gets out of the way. No decorative copy competing with what the user is actually evaluating.
+2. **Dark but not heavy**: The brand lives in the same dark cinematic register as the assets — but the UI must remain legible and calm, not oppressive. Space and restraint matter.
+3. **One decision at a time**: Browse, preview, buy. The flow is linear. Don't fragment attention with options, upsells, or secondary CTAs.
+4. **Quality signals over quantity signals**: Show fewer things, shown better. A tightly curated grid of 20 assets that look incredible beats 200 that look fine.
+5. **Earned specificity**: Unexpected design moments only when they reinforce quality perception. Nothing decorative for decoration's sake.
 
 ## Accessibility & Inclusion
 
-WCAG AA minimum. Keyboard navigable. No reduced-motion requirement specified, but avoid animations that serve no informational purpose.
+WCAG AA minimum. Keyboard navigable. Respect prefers-reduced-motion for all looping video previews.

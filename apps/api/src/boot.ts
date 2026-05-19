@@ -79,45 +79,13 @@ export const boot = () => {
 			`[Billing Sync] Payment succeeded: ${ctx.paymentId} for product ${plan.name} (User: ${userId})`
 		);
 
-		if (plan.type === "credits") {
-			const creditAmount = plan.creditAmount;
-			console.log(
-				`[Billing Sync] Granting ${creditAmount} credits to user ${userId}`
-			);
-			const user = await db.query.users.findFirst({
-				where: eq(users.id, userId)
-			});
-			await db
-				.update(users)
-				.set({
-					credits: (user?.credits || 0) + creditAmount
-				})
-				.where(eq(users.id, userId));
-		} else if (plan.interval === "one-time") {
+		if (plan.interval === "one-time") {
 			await db
 				.update(users)
 				.set({
 					subscriptionStatus: "lifetime"
 				})
 				.where(eq(users.id, userId));
-		}
-	});
-
-	Gate.after("credit.added", async (ctx) => {
-		const { db, payload } = ctx;
-		const dodoCustomerId = payload.data.customer_id;
-		const balanceAfter = payload.data.balance_after;
-
-		if (dodoCustomerId) {
-			console.log(
-				`[Billing Sync] Credits added. New balance for customer ${dodoCustomerId}: ${balanceAfter}`
-			);
-			await db
-				.update(users)
-				.set({
-					credits: parseInt(balanceAfter)
-				})
-				.where(eq(users.dodoCustomerId, dodoCustomerId));
 		}
 	});
 
