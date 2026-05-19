@@ -35,6 +35,7 @@ import {
 	uploadImageFn,
 	uploadAssetFn
 } from "@/routes/-fn/creator";
+import { formatFileSize } from "./-lib/format";
 
 export const Route = createFileRoute("/(app)/_app/creator/$id")({
 	beforeLoad: async ({ context }) => {
@@ -62,11 +63,6 @@ const PostSchema = z.object({
 	isLoop: z.boolean(),
 	access: z.enum(["free", "premium"])
 });
-
-function formatFileSize(bytes: number): string {
-	if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(0)} KB`;
-	return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
-}
 
 function PostEditorPage() {
 	const { id } = Route.useParams();

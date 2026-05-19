@@ -2,7 +2,17 @@ import { createFileRoute, redirect, useNavigate } from "@tanstack/react-router";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useForm } from "@tanstack/react-form";
 import { z } from "zod";
-import { toast } from "@workspace/ui";
+import {
+	Button,
+	Spinner,
+	Input,
+	Field,
+	FieldLabel,
+	FieldTitle,
+	FieldContent,
+	FieldError,
+	toast
+} from "@workspace/ui";
 import { activateLicenseFn } from "@/routes/-fn/license";
 import { sessionsOptions } from "@/routes/-fn/auth";
 
@@ -52,31 +62,12 @@ function ActivatePage() {
 	});
 
 	return (
-		<div
-			className="flex flex-col items-center justify-center min-h-[60vh] px-6"
-			style={{ background: "oklch(0.97 0.008 80)" }}
-		>
+		<div className="flex flex-col items-center justify-center min-h-[60vh] px-6">
 			<div className="w-full max-w-sm">
-				<h1
-					className="mb-2"
-					style={{
-						fontFamily: "var(--font-heading)",
-						fontWeight: 600,
-						fontSize: "1.75rem",
-						lineHeight: 1.1,
-						letterSpacing: "-0.02em",
-						color: "oklch(0.15 0.008 60)"
-					}}
-				>
+				<h1 className="font-heading font-semibold text-[1.75rem] leading-[1.1] tracking-[-0.02em] text-foreground mb-2">
 					Activate your access
 				</h1>
-				<p
-					className="mb-8 text-sm leading-relaxed"
-					style={{
-						color: "oklch(0.50 0.010 60)",
-						fontFamily: "var(--font-sans)"
-					}}
-				>
+				<p className="mb-8 text-sm leading-relaxed text-muted-foreground">
 					Enter your license key to unlock the full archive.
 				</p>
 
@@ -93,93 +84,45 @@ function ActivatePage() {
 								field.state.meta.isTouched &&
 								!field.state.meta.isValid;
 							return (
-								<div className="flex flex-col gap-1.5">
-									<label
-										htmlFor="key"
-										className="text-xs font-medium"
-										style={{
-											color: "oklch(0.15 0.008 60)",
-											fontFamily: "var(--font-sans)",
-											letterSpacing: "0.01em"
-										}}
-									>
-										License key
-									</label>
-									<input
-										id="key"
-										type="text"
-										placeholder="XXXX-XXXX-XXXX-XXXX"
-										value={field.state.value}
-										onBlur={field.handleBlur}
-										onChange={(e) =>
-											field.handleChange(e.target.value)
-										}
-										disabled={mutation.isPending}
-										className="w-full px-3 py-2 text-sm rounded-md border outline-none transition-all disabled:opacity-50"
-										style={{
-											borderColor: isInvalid
-												? "oklch(0.577 0.245 27.325)"
-												: "oklch(0.88 0.008 80)",
-											background: "oklch(0.97 0.008 80)",
-											color: "oklch(0.15 0.008 60)",
-											fontFamily: "var(--font-sans)"
-										}}
-									/>
-									{isInvalid &&
-										field.state.meta.errors.length > 0 && (
-											<p
-												className="text-xs"
-												style={{
-													color: "oklch(0.577 0.245 27.325)",
-													fontFamily:
-														"var(--font-sans)"
-												}}
-											>
-												{field.state.meta.errors[0]?.toString()}
-											</p>
+								<Field data-invalid={isInvalid}>
+									<FieldLabel htmlFor={field.name}>
+										<FieldTitle>License key</FieldTitle>
+									</FieldLabel>
+									<FieldContent>
+										<Input
+											id={field.name}
+											type="text"
+											placeholder="XXXX-XXXX-XXXX-XXXX"
+											value={field.state.value}
+											onBlur={field.handleBlur}
+											onChange={(e) =>
+												field.handleChange(
+													e.target.value
+												)
+											}
+											disabled={mutation.isPending}
+										/>
+										{isInvalid && (
+											<FieldError
+												errors={field.state.meta.errors}
+											/>
 										)}
-								</div>
+									</FieldContent>
+								</Field>
 							);
 						}}
 					</form.Field>
 
-					<button
+					<Button
 						type="submit"
 						disabled={mutation.isPending}
-						className="w-full px-5 py-2.5 rounded-md text-sm font-medium transition-all disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-						style={{
-							background: "oklch(0.62 0.14 47)",
-							color: "oklch(0.97 0.008 80)",
-							fontFamily: "var(--font-sans)"
-						}}
+						className="w-full"
 					>
-						{mutation.isPending ? (
-							<>
-								<svg
-									className="animate-spin h-4 w-4"
-									viewBox="0 0 24 24"
-									fill="none"
-								>
-									<circle
-										className="opacity-25"
-										cx="12"
-										cy="12"
-										r="10"
-										stroke="currentColor"
-										strokeWidth="4"
-									/>
-									<path
-										className="opacity-75"
-										fill="currentColor"
-										d="M4 12a8 8 0 018-8v8z"
-									/>
-								</svg>
-								Activating...
-							</>
-						) : (
-							"Activate access"
-						)}
-					</button>
+						{mutation.isPending && <Spinner />}
+						{mutation.isPending
+							? "Activating..."
+							: "Activate access"}
+					</Button>
 				</form>
 			</div>
 		</div>

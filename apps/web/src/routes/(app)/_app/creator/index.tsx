@@ -13,6 +13,10 @@ import {
 	updatePostFn,
 	type CreatorPost
 } from "@/routes/-fn/creator";
+import { formatDate } from "./-lib/format";
+import { StatusBadge } from "./-components/status-badge";
+import { DeleteConfirmDialog } from "./-components/delete-confirm-dialog";
+import { TableSkeleton } from "./-components/table-skeleton";
 
 export const Route = createFileRoute("/(app)/_app/creator/")({
 	beforeLoad: async ({ context }) => {
@@ -25,107 +29,6 @@ export const Route = createFileRoute("/(app)/_app/creator/")({
 	},
 	component: CreatorDashboardPage
 });
-
-function formatDate(d: string | number | Date | null | undefined): string {
-	if (!d) return "—";
-	return new Date(d).toLocaleDateString("en-US", {
-		month: "short",
-		day: "numeric",
-		year: "numeric"
-	});
-}
-
-function StatusBadge({ status }: { status: string }) {
-	const isPublished = status === "published";
-	return (
-		<span
-			className="rounded px-2 py-0.5 text-xs font-medium"
-			style={{
-				background: isPublished
-					? "oklch(0.85 0.09 145 / 0.15)"
-					: "oklch(0.92 0.006 80)",
-				color: isPublished
-					? "oklch(0.45 0.12 145)"
-					: "oklch(0.50 0.010 60)",
-				fontFamily: "var(--font-sans)"
-			}}
-		>
-			{status}
-		</span>
-	);
-}
-
-function DeleteConfirmDialog({
-	post,
-	onConfirm,
-	onCancel,
-	isPending
-}: {
-	post: CreatorPost;
-	onConfirm: () => void;
-	onCancel: () => void;
-	isPending: boolean;
-}) {
-	return (
-		<div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30">
-			<div
-				className="rounded-md border p-6 w-full max-w-sm shadow-lg"
-				style={{
-					background: "oklch(0.97 0.008 80)",
-					borderColor: "oklch(0.88 0.008 80)"
-				}}
-			>
-				<h3
-					className="mb-2"
-					style={{
-						fontFamily: "var(--font-heading)",
-						fontWeight: 600,
-						fontSize: "1.125rem",
-						letterSpacing: "-0.01em",
-						color: "oklch(0.15 0.008 60)"
-					}}
-				>
-					Delete post?
-				</h3>
-				<p
-					className="text-sm mb-6"
-					style={{
-						color: "oklch(0.50 0.010 60)",
-						fontFamily: "var(--font-sans)"
-					}}
-				>
-					"{post.title}" will be permanently deleted. This can't be
-					undone.
-				</p>
-				<div className="flex gap-3 justify-end">
-					<button
-						onClick={onCancel}
-						className="px-4 py-2 rounded-md text-sm border transition-all"
-						style={{
-							borderColor: "oklch(0.88 0.008 80)",
-							color: "oklch(0.15 0.008 60)",
-							fontFamily: "var(--font-sans)"
-						}}
-					>
-						Cancel
-					</button>
-					<button
-						onClick={onConfirm}
-						disabled={isPending}
-						className="px-4 py-2 rounded-md text-sm font-medium transition-all disabled:opacity-60"
-						style={{
-							background: "oklch(0.577 0.245 27.325)",
-							color: "oklch(0.97 0.008 80)",
-							fontFamily: "var(--font-sans)"
-						}}
-					>
-						{isPending ? "Deleting..." : "Delete"}
-					</button>
-				</div>
-			</div>
-		</div>
-	);
-}
 
 function PostsTable() {
 	const queryClient = useQueryClient();
@@ -338,36 +241,6 @@ function PostsTable() {
 				</table>
 			</div>
 		</>
-	);
-}
-
-function TableSkeleton() {
-	return (
-		<div
-			className="rounded-md border overflow-hidden"
-			style={{ borderColor: "oklch(0.88 0.008 80)" }}
-		>
-			{Array.from({ length: 4 }).map((_, i) => (
-				<div
-					key={i}
-					className="flex items-center gap-4 px-4 py-4 border-b"
-					style={{ borderColor: "oklch(0.92 0.006 80)" }}
-				>
-					<div
-						className="h-4 rounded flex-1"
-						style={{ background: "oklch(0.92 0.006 80)" }}
-					/>
-					<div
-						className="h-4 rounded w-16"
-						style={{ background: "oklch(0.92 0.006 80)" }}
-					/>
-					<div
-						className="h-4 rounded w-24"
-						style={{ background: "oklch(0.92 0.006 80)" }}
-					/>
-				</div>
-			))}
-		</div>
 	);
 }
 
