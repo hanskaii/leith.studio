@@ -1,8 +1,7 @@
-import { createFileRoute, redirect, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { Suspense, useMemo } from "react";
 import { z } from "zod";
-import { Gate } from "@workspace/core";
 import { postsQueryOptions } from "@/routes/-fn/posts";
 import { PostCard, PostCardSkeleton } from "./-components/post-card";
 
@@ -13,14 +12,6 @@ const feedSearchSchema = z.object({
 
 export const Route = createFileRoute("/(app)/_app/feed/")({
 	validateSearch: (s) => feedSearchSchema.parse(s),
-	beforeLoad: async ({ context }) => {
-		const result = await Gate.can("content.read", {
-			actor: context.session.user
-		});
-		if (!result.allowed) {
-			throw redirect({ to: "/activate" });
-		}
-	},
 	component: FeedPage
 });
 

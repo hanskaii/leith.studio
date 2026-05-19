@@ -1,7 +1,10 @@
+import { useState } from "react";
 import { Link } from "@tanstack/react-router";
 import type { PostsData } from "@/routes/-fn/posts";
 
 type Post = PostsData["items"][number];
+
+const VIDEO_FORMATS = new Set(["mp4", "webm"]);
 
 function formatDate(d: string | number | Date | null | undefined): string {
 	if (!d) return "";
@@ -14,6 +17,12 @@ function formatDate(d: string | number | Date | null | undefined): string {
 }
 
 export function PostCard({ post }: { post: Post }) {
+	const [isHovered, setIsHovered] = useState(false);
+	const format = (post as any).format as string | undefined;
+	const fileUrl = (post as any).fileUrl as string | null | undefined;
+	const isVideo = !!format && VIDEO_FORMATS.has(format);
+	const hasCover = (post as any).coverThumb || post.coverImage;
+
 	return (
 		<Link
 			to="/feed/$slug"
@@ -27,16 +36,33 @@ export function PostCard({ post }: { post: Post }) {
 					background: "oklch(0.97 0.008 80)"
 				}}
 			>
-				{post.coverImage && (
+				{hasCover && (
 					<div
-						className="aspect-[16/9] overflow-hidden"
+						className="aspect-[16/9] overflow-hidden relative"
 						style={{ borderRadius: "0.375rem 0.375rem 0 0" }}
+						onPointerEnter={() => setIsHovered(true)}
+						onPointerLeave={() => setIsHovered(false)}
 					>
-						<img
-							src={post.coverImage}
-							alt={post.title}
-							className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-[1.02]"
-						/>
+						{isHovered && isVideo && fileUrl ? (
+							<video
+								autoPlay
+								muted
+								loop
+								playsInline
+								src={fileUrl}
+								className="w-full h-full object-cover"
+							/>
+						) : (
+							<img
+								src={
+									(post as any).coverThumb ??
+									post.coverImage ??
+									""
+								}
+								alt={post.title}
+								className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-[1.02]"
+							/>
+						)}
 					</div>
 				)}
 

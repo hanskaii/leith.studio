@@ -90,7 +90,7 @@ export const uploadImageFn = createServerFn({ method: "POST" })
 				form: data
 			} as any);
 			const json = await res.json();
-			return (json as any).data as { url: string };
+			return (json as any).data as { url: string; thumbUrl: string };
 		})
 	);
 

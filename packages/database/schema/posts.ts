@@ -11,6 +11,7 @@ export const posts = sqliteTable(
 		title: text("title").notNull(),
 		body: text("body").notNull(),
 		coverImage: text("cover_image"),
+		coverThumb: text("cover_thumb"),
 		tags: text("tags", { mode: "json" })
 			.$type<string[]>()
 			.notNull()

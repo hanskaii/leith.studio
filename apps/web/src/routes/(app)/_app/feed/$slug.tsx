@@ -1,11 +1,10 @@
-import { createFileRoute, Link, redirect } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import {
 	useSuspenseQuery,
 	useMutation,
 	useQueryClient
 } from "@tanstack/react-query";
 import { Suspense } from "react";
-import { Gate } from "@workspace/core";
 import { toast } from "@workspace/ui";
 import { EditorContent, useEditor } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
@@ -21,14 +20,6 @@ const postSearchSchema = z.object({
 
 export const Route = createFileRoute("/(app)/_app/feed/$slug")({
 	validateSearch: (s) => postSearchSchema.parse(s),
-	beforeLoad: async ({ context }) => {
-		const result = await Gate.can("content.read", {
-			actor: context.session.user
-		});
-		if (!result.allowed) {
-			throw redirect({ to: "/activate" });
-		}
-	},
 	component: PostPage
 });
 
@@ -255,17 +246,32 @@ function PostContent({ slug }: { slug: string }) {
 	if (!post) return null;
 
 	const hasAsset = !!(post as any).format;
+	const postFormat = (post as any).format as string | undefined;
+	const fileUrl = (post as any).fileUrl as string | null | undefined;
+	const isVideo = !!postFormat && ["mp4", "webm"].includes(postFormat);
 
 	return (
 		<article className="max-w-[68ch] mx-auto">
-			{post.coverImage && (
-				<div className="w-full aspect-[16/9] rounded-md overflow-hidden mb-8">
-					<img
-						src={post.coverImage}
-						alt={post.title}
-						className="w-full h-full object-cover"
-					/>
-				</div>
+			{isVideo && fileUrl ? (
+				<video
+					autoPlay
+					muted
+					loop
+					playsInline
+					controls
+					src={fileUrl}
+					className="w-full aspect-[16/9] rounded-md overflow-hidden object-cover mb-8"
+				/>
+			) : (
+				post.coverImage && (
+					<div className="w-full aspect-[16/9] rounded-md overflow-hidden mb-8">
+						<img
+							src={post.coverImage}
+							alt={post.title}
+							className="w-full h-full object-cover"
+						/>
+					</div>
+				)
 			)}
 
 			<header className="mb-8">

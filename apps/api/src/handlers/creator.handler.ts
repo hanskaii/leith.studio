@@ -8,13 +8,8 @@ import { ApiResponse } from "../helpers/response.helper";
 import { authMiddleware } from "../middleware/auth.middleware";
 import { protect } from "../middleware/protect.middleware";
 import { uniqueSlug } from "../lib/slug";
+import { UploadService } from "../services/upload.service";
 import type { HonoEnv } from "../types/hono.types";
-
-const ALLOWED_IMAGE_TYPES: Record<string, string> = {
-	"image/jpeg": "jpg",
-	"image/png": "png",
-	"image/webp": "webp"
-};
 
 const ALLOWED_ASSET_TYPES: Record<string, string> = {
 	"image/jpeg": "jpg",
@@ -24,7 +19,6 @@ const ALLOWED_ASSET_TYPES: Record<string, string> = {
 	"video/webm": "webm"
 };
 
-const MAX_IMAGE_SIZE = 5 * 1024 * 1024; // 5 MB
 const MAX_ASSET_SIZE = 200 * 1024 * 1024; // 200 MB
 
 const AssetMetaSchema = z.object({
@@ -42,6 +36,7 @@ const CreatePostSchema = z
 		title: z.string().min(1),
 		body: z.string().min(1),
 		coverImage: z.string().optional(),
+		coverThumb: z.string().nullable().optional(),
 		tags: z.array(z.string()).optional().default([])
 	})
 	.merge(AssetMetaSchema);
@@ -51,6 +46,7 @@ const UpdatePostSchema = z
 		title: z.string().min(1).optional(),
 		body: z.string().min(1).optional(),
 		coverImage: z.string().nullable().optional(),
+		coverThumb: z.string().nullable().optional(),
 		tags: z.array(z.string()).optional(),
 		status: z.enum(["draft", "published"]).optional()
 	})
@@ -64,6 +60,8 @@ const creatorHandler = new Hono<HonoEnv>()
 				id: posts.id,
 				slug: posts.slug,
 				title: posts.title,
+				coverImage: posts.coverImage,
+				coverThumb: posts.coverThumb,
 				status: posts.status,
 				publishedAt: posts.publishedAt,
 				createdAt: posts.createdAt,
@@ -93,6 +91,7 @@ const creatorHandler = new Hono<HonoEnv>()
 				title: data.title,
 				body: data.body,
 				coverImage: data.coverImage ?? null,
+				coverThumb: data.coverThumb ?? null,
 				tags: data.tags,
 				status: "draft" as const,
 				publishedAt: null,
@@ -154,6 +153,8 @@ const creatorHandler = new Hono<HonoEnv>()
 			if (data.body !== undefined) updates.body = data.body;
 			if (data.coverImage !== undefined)
 				updates.coverImage = data.coverImage;
+			if (data.coverThumb !== undefined)
+				updates.coverThumb = data.coverThumb;
 			if (data.tags !== undefined) updates.tags = data.tags;
 			if (data.status !== undefined) {
 				updates.status = data.status;
@@ -225,6 +226,7 @@ const creatorHandler = new Hono<HonoEnv>()
 					title: posts.title,
 					body: posts.body,
 					coverImage: posts.coverImage,
+					coverThumb: posts.coverThumb,
 					tags: posts.tags,
 					status: posts.status,
 					publishedAt: posts.publishedAt,
@@ -272,26 +274,20 @@ const creatorHandler = new Hono<HonoEnv>()
 		if (!(file instanceof File)) {
 			throw ApiError.badRequest("A file is required.");
 		}
-		if (file.size > MAX_IMAGE_SIZE) {
-			throw ApiError.badRequest("File must be under 5MB.");
-		}
-		if (!ALLOWED_IMAGE_TYPES[file.type]) {
-			throw ApiError.badRequest(
-				"Only JPEG, PNG, and WebP images are supported."
-			);
-		}
 
-		const ext = ALLOWED_IMAGE_TYPES[file.type];
-		const key = `content/${crypto.randomUUID()}.${ext}`;
-		const buffer = await file.arrayBuffer();
-
-		await c.env.STORAGE.put(key, buffer, {
-			httpMetadata: { contentType: file.type }
-		});
-
+		const user = c.get("user");
 		const origin = new URL(c.req.url).origin;
-		const url = `${origin}/api/files/${key}`;
-		return ApiResponse.ok(c, "Image uploaded", { url });
+		const uploadService = new UploadService(c.env);
+
+		try {
+			const result = await uploadService.uploadImage(user, file, origin);
+			return ApiResponse.ok(c, "Image uploaded", result);
+		} catch (err: any) {
+			if (err.status === 400) {
+				throw ApiError.badRequest(err.message);
+			}
+			throw err;
+		}
 	})
 	.post(
 		"/upload-asset",

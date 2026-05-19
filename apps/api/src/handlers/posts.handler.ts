@@ -30,10 +30,11 @@ const postsHandler = new Hono<HonoEnv>()
 		]);
 		return ApiResponse.ok(c, "Stats", { postCount: postCount?.count ?? 0 });
 	})
-	.get("/", authMiddleware, protect("content.read"), async (c) => {
+	.get("/", async (c) => {
 		const db = c.get("db");
 		const page = Number(c.req.query("page") ?? "1");
 		const tag = c.req.query("tag");
+		const origin = new URL(c.req.url).origin;
 
 		const [items, [total]] = await Promise.all([
 			db
@@ -42,12 +43,14 @@ const postsHandler = new Hono<HonoEnv>()
 					slug: posts.slug,
 					title: posts.title,
 					coverImage: posts.coverImage,
+					coverThumb: posts.coverThumb,
 					tags: posts.tags,
 					publishedAt: posts.publishedAt,
 					format: postMetadata.format,
 					resolution: postMetadata.resolution,
 					isLoop: postMetadata.isLoop,
 					access: postMetadata.access,
+					fileKey: postMetadata.fileKey,
 					downloadCount: sql<number>`(SELECT COUNT(*) FROM ${postStats} WHERE ${postStats.postId} = ${posts.id})`
 				})
 				.from(posts)
@@ -63,9 +66,14 @@ const postsHandler = new Hono<HonoEnv>()
 				.where(eq(posts.status, "published"))
 		]);
 
-		const filtered = tag
+		const raw = tag
 			? items.filter((p) => Array.isArray(p.tags) && p.tags.includes(tag))
 			: items;
+
+		const filtered = raw.map(({ fileKey, ...item }) => ({
+			...item,
+			fileUrl: fileKey ? `${origin}/api/files/${fileKey}` : null
+		}));
 
 		return ApiResponse.ok(c, "Posts", {
 			items: filtered,
@@ -74,17 +82,19 @@ const postsHandler = new Hono<HonoEnv>()
 			pageSize: PAGE_SIZE
 		});
 	})
-	.get("/:slug", authMiddleware, protect("content.read"), async (c) => {
+	.get("/:slug", async (c) => {
 		const db = c.get("db");
 		const slug = c.req.param("slug");
+		const origin = new URL(c.req.url).origin;
 
-		const [post] = await db
+		const [row] = await db
 			.select({
 				id: posts.id,
 				slug: posts.slug,
 				title: posts.title,
 				body: posts.body,
 				coverImage: posts.coverImage,
+				coverThumb: posts.coverThumb,
 				tags: posts.tags,
 				status: posts.status,
 				publishedAt: posts.publishedAt,
@@ -95,6 +105,7 @@ const postsHandler = new Hono<HonoEnv>()
 				duration: postMetadata.duration,
 				isLoop: postMetadata.isLoop,
 				fileSize: postMetadata.fileSize,
+				fileKey: postMetadata.fileKey,
 				access: postMetadata.access,
 				downloadCount: sql<number>`(SELECT COUNT(*) FROM ${postStats} WHERE ${postStats.postId} = ${posts.id})`
 			})
@@ -102,9 +113,12 @@ const postsHandler = new Hono<HonoEnv>()
 			.innerJoin(postMetadata, eq(posts.id, postMetadata.postId))
 			.where(and(eq(posts.slug, slug), eq(posts.status, "published")));
 
-		if (!post) throw ApiError.notFound("Post not found");
+		if (!row) throw ApiError.notFound("Post not found");
 
-		return ApiResponse.ok(c, "Post", post);
+		const { fileKey, ...post } = row;
+		const fileUrl = fileKey ? `${origin}/api/files/${fileKey}` : null;
+
+		return ApiResponse.ok(c, "Post", { ...post, fileUrl });
 	})
 	.get("/:slug/download", authMiddleware, async (c) => {
 		const db = c.get("db");

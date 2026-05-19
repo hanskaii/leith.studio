@@ -52,6 +52,7 @@ const PostSchema = z.object({
 	title: z.string().min(1, "Title is required"),
 	tags: z.string(),
 	coverImage: z.string().nullable(),
+	coverThumb: z.string().nullable(),
 	fileKey: z.string().nullable(),
 	fileName: z.string().nullable(),
 	fileSize: z.number().nullable(),
@@ -139,6 +140,9 @@ function PostEditorPage() {
 			coverImage: ((existing as any)?.coverImage ?? null) as
 				| string
 				| null,
+			coverThumb: ((existing as any)?.coverThumb ?? null) as
+				| string
+				| null,
 			fileKey: ((existing as any)?.fileKey ?? null) as string | null,
 			fileName: null as string | null,
 			fileSize: ((existing as any)?.fileSize ?? null) as number | null,
@@ -185,6 +189,7 @@ function PostEditorPage() {
 							body,
 							tags,
 							coverImage: value.coverImage ?? undefined,
+							coverThumb: value.coverThumb ?? undefined,
 							...assetFields
 						}
 					}
@@ -199,6 +204,7 @@ function PostEditorPage() {
 								body,
 								tags,
 								coverImage: value.coverImage,
+								coverThumb: value.coverThumb,
 								...assetFields
 							}
 						}
@@ -238,6 +244,7 @@ function PostEditorPage() {
 			formData.append("file", file);
 			const result = await uploadImageFn({ data: formData });
 			form.setFieldValue("coverImage", result?.url ?? null);
+			form.setFieldValue("coverThumb", result?.thumbUrl ?? null);
 			toast.success("Cover uploaded");
 		} catch (err: any) {
 			toast.error(err?.message || "Upload failed");
