@@ -26,7 +26,7 @@ try {
 import { drizzle as proxyDrizzle } from "drizzle-orm/sqlite-proxy";
 import * as schema from "../schema";
 import { getD1DBPath } from "../utils/d1";
-import { seedUsers } from "./seeds";
+import { seedUsers, seedPosts, seedPostStats } from "./seeds";
 
 function createRemoteCallback() {
 	const { CLOUDFLARE_ACCOUNT_ID, CLOUDFLARE_DATABASE_ID, CLOUDFLARE_TOKEN } =
@@ -108,6 +108,10 @@ async function runSeeder() {
 
 	try {
 		await seedUsers(db);
+		console.log();
+		await seedPosts(db);
+		console.log();
+		await seedPostStats(db);
 		console.log("\n✅ Database seeding completed successfully!");
 	} catch (error) {
 		console.error("\n❌ Error seeding database:", error);
