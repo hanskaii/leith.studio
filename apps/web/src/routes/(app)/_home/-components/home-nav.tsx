@@ -49,15 +49,16 @@ export function HomeNav() {
 
 					{/* Center nav */}
 					<nav className="hidden items-center gap-7 sm:flex absolute left-1/2 -translate-x-1/2">
-						<a
-							href="#assets"
+						<Link
+							to="/feed"
+							search={{ page: 1 }}
 							className="flex items-center gap-1.5 text-[12px] font-semibold uppercase tracking-[0.1em] text-muted-foreground hover:text-foreground transition-colors"
 						>
 							Assets
 							<span className="tabular-nums text-[10px] font-semibold text-muted-foreground/50">
 								{ASSETS.length}
 							</span>
-						</a>
+						</Link>
 						<a
 							href="#access"
 							className="text-[12px] font-semibold uppercase tracking-[0.1em] text-muted-foreground hover:text-foreground transition-colors"

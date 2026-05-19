@@ -1,9 +1,14 @@
+import { Link } from "@tanstack/react-router";
 import { Badge } from "@workspace/ui";
 import type { Asset } from "../-lib/home-data";
 
 export function AssetCard({ asset }: { asset: Asset }) {
 	return (
-		<div className="group relative overflow-hidden rounded-lg border border-border/50 bg-card">
+		<Link
+			to="/feed/$slug"
+			params={{ slug: asset.slug }}
+			className="group relative block overflow-hidden rounded-lg border border-border/50 bg-card"
+		>
 			<div className="relative overflow-hidden bg-muted aspect-[14/9]">
 				<img
 					src={asset.thumb}
@@ -45,6 +50,6 @@ export function AssetCard({ asset }: { asset: Asset }) {
 					</div>
 				</div>
 			</div>
-		</div>
+		</Link>
 	);
 }

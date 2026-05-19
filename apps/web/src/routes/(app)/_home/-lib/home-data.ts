@@ -3,6 +3,7 @@ export const ACCESS_URL = "/activate";
 export const ASSETS = [
 	{
 		id: "1",
+		slug: "void-ambience",
 		title: "Void Layer",
 		tag: "Loop",
 		format: "MP4",
@@ -11,6 +12,7 @@ export const ASSETS = [
 	},
 	{
 		id: "2",
+		slug: "ember-drift",
 		title: "Ember Drift",
 		tag: "Background",
 		format: "MP4",
@@ -19,6 +21,7 @@ export const ASSETS = [
 	},
 	{
 		id: "3",
+		slug: "smoke-curtain",
 		title: "Ash Cascade",
 		tag: "Overlay",
 		format: "WEBM",
@@ -27,6 +30,7 @@ export const ASSETS = [
 	},
 	{
 		id: "4",
+		slug: "storm-transition",
 		title: "Depth Pull",
 		tag: "Transition",
 		format: "MP4",
@@ -35,6 +39,7 @@ export const ASSETS = [
 	},
 	{
 		id: "5",
+		slug: "blood-moon-loop",
 		title: "Smoke Altar",
 		tag: "Loop",
 		format: "MP4",
@@ -43,6 +48,7 @@ export const ASSETS = [
 	},
 	{
 		id: "6",
+		slug: "dark-forest",
 		title: "Coal Rising",
 		tag: "Background",
 		format: "WEBM",
@@ -51,6 +57,7 @@ export const ASSETS = [
 	},
 	{
 		id: "7",
+		slug: "shattered-glass",
 		title: "Mirror Dark",
 		tag: "Overlay",
 		format: "MP4",
@@ -59,6 +66,7 @@ export const ASSETS = [
 	},
 	{
 		id: "8",
+		slug: "noir-rain-loop",
 		title: "Flare Terminal",
 		tag: "Loop",
 		format: "MP4",

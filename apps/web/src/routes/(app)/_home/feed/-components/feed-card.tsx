@@ -2,7 +2,13 @@ import { useState } from "react";
 import { Link } from "@tanstack/react-router";
 import type { FeedAsset } from "../-lib/feed-data";
 
-export function FeedCard({ asset }: { asset: FeedAsset }) {
+export function FeedCard({
+	asset,
+	aspect = "aspect-[16/9]"
+}: {
+	asset: FeedAsset;
+	aspect?: string;
+}) {
 	const [hovered, setHovered] = useState(false);
 	const isVideo = asset.type === "video";
 
@@ -13,7 +19,7 @@ export function FeedCard({ asset }: { asset: FeedAsset }) {
 			className="group block"
 		>
 			<div
-				className="relative aspect-[16/9] overflow-hidden rounded-md bg-muted"
+				className={`relative ${aspect} overflow-hidden rounded-md bg-muted`}
 				onPointerEnter={() => setHovered(true)}
 				onPointerLeave={() => setHovered(false)}
 			>
