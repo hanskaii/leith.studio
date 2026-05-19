@@ -1,7 +1,7 @@
 import { motion } from "framer-motion";
 import { ASSETS, ACCESS_URL } from "../-lib/home-data";
 import { fadeUp, stagger } from "../-lib/motion-variants";
-import { AssetCard } from "./asset-card";
+import { FeedCard } from "../feed/-components/feed-card";
 
 export function AssetGrid() {
 	return (
@@ -38,7 +38,7 @@ export function AssetGrid() {
 				<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
 					{ASSETS.map((asset, i) => (
 						<motion.div key={asset.id} variants={fadeUp} custom={i}>
-							<AssetCard asset={asset} />
+							<FeedCard asset={asset} />
 						</motion.div>
 					))}
 				</div>

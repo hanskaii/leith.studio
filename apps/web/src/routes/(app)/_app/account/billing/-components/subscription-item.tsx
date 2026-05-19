@@ -5,7 +5,8 @@ import {
 } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { StatusBadge } from "./status-badge";
-import { formatDate, formatAmount } from "./format-utils";
+import { formatDate } from "@/routes/-lib/format";
+import { formatAmount } from "./format-utils";
 
 export function SubscriptionItem({ sub }: { sub: any }) {
 	return (

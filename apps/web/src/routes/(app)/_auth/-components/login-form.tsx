@@ -250,6 +250,7 @@ export function LoginForm({ redirectTo }: { redirectTo?: string }) {
 
 							<Button
 								type="submit"
+								size="xl"
 								className="w-full"
 								disabled={sendOtpMutation.isPending}
 							>

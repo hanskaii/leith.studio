@@ -13,10 +13,9 @@ import {
 	updatePostFn,
 	type CreatorPost
 } from "@/routes/-fn/creator";
-import { formatDate } from "./-lib/format";
-import { StatusBadge } from "./-components/status-badge";
 import { DeleteConfirmDialog } from "./-components/delete-confirm-dialog";
 import { TableSkeleton } from "./-components/table-skeleton";
+import { PostRow } from "./-components/post-row";
 
 export const Route = createFileRoute("/(app)/_app/creator/")({
 	beforeLoad: async ({ context }) => {
@@ -110,114 +109,15 @@ function PostsTable() {
 					</thead>
 					<tbody>
 						{posts?.map((post) => (
-							<tr
+							<PostRow
 								key={post.id}
-								style={{
-									borderBottom:
-										"1px solid oklch(0.92 0.006 80)"
-								}}
-							>
-								<td
-									className="px-4 py-3"
-									style={{
-										color: "oklch(0.15 0.008 60)",
-										maxWidth: "300px"
-									}}
-								>
-									<span className="block truncate font-medium">
-										{post.title}
-									</span>
-									<span
-										className="text-xs"
-										style={{
-											color: "oklch(0.50 0.010 60)"
-										}}
-									>
-										/{post.slug}
-									</span>
-								</td>
-								<td className="px-4 py-3">
-									<StatusBadge status={post.status} />
-								</td>
-								<td
-									className="px-4 py-3 text-xs"
-									style={{ color: "oklch(0.50 0.010 60)" }}
-								>
-									{formatDate(post.publishedAt)}
-								</td>
-								<td className="px-4 py-3">
-									<div className="flex items-center gap-2">
-										<Link
-											to="/creator/$id"
-											params={{ id: post.id }}
-											className="text-xs px-2.5 py-1 rounded border transition-all hover:border-[oklch(0.62_0.14_47)]"
-											style={{
-												borderColor:
-													"oklch(0.88 0.008 80)",
-												color: "oklch(0.15 0.008 60)"
-											}}
-										>
-											Edit
-										</Link>
-										{post.status === "draft" ? (
-											<button
-												onClick={() =>
-													publishMutation.mutate({
-														id: post.id,
-														status: "published"
-													})
-												}
-												disabled={
-													publishMutation.isPending
-												}
-												className="text-xs px-2.5 py-1 rounded transition-all disabled:opacity-50"
-												style={{
-													background:
-														"oklch(0.62 0.14 47)",
-													color: "oklch(0.97 0.008 80)"
-												}}
-											>
-												Publish
-											</button>
-										) : (
-											<button
-												onClick={() =>
-													publishMutation.mutate({
-														id: post.id,
-														status: "draft"
-													})
-												}
-												disabled={
-													publishMutation.isPending
-												}
-												className="text-xs px-2.5 py-1 rounded border transition-all disabled:opacity-50"
-												style={{
-													borderColor:
-														"oklch(0.88 0.008 80)",
-													color: "oklch(0.50 0.010 60)"
-												}}
-											>
-												Unpublish
-											</button>
-										)}
-										{post.status === "draft" && (
-											<button
-												onClick={() =>
-													setDeleteTarget(post)
-												}
-												className="text-xs px-2.5 py-1 rounded border transition-all hover:border-[oklch(0.577_0.245_27.325)] hover:text-[oklch(0.577_0.245_27.325)]"
-												style={{
-													borderColor:
-														"oklch(0.88 0.008 80)",
-													color: "oklch(0.50 0.010 60)"
-												}}
-											>
-												Delete
-											</button>
-										)}
-									</div>
-								</td>
-							</tr>
+								post={post}
+								onPublish={(id, status) =>
+									publishMutation.mutate({ id, status })
+								}
+								onDelete={setDeleteTarget}
+								isUpdating={publishMutation.isPending}
+							/>
 						))}
 						{!posts?.length && (
 							<tr>
