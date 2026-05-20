@@ -72,6 +72,26 @@
 			"name": "video-processing",
 			"binding": "VIDEO_PROCESSING_WORKFLOW",
 			"class_name": "VideoProcessingWorkflow"
+		},
+		{
+			"name": "vio-image",
+			"binding": "VIO_IMAGE_WORKFLOW",
+			"class_name": "VioImageWorkflow"
+		},
+		{
+			"name": "vio-video",
+			"binding": "VIO_VIDEO_WORKFLOW",
+			"class_name": "VioVideoWorkflow"
+		},
+		{
+			"name": "vio-upscale",
+			"binding": "VIO_UPSCALE_WORKFLOW",
+			"class_name": "VioUpscaleWorkflow"
+		},
+		{
+			"name": "vio-motion-control",
+			"binding": "VIO_MOTION_CONTROL_WORKFLOW",
+			"class_name": "VioMotionControlWorkflow"
 		}
 	],
 	"containers": [

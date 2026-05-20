@@ -110,8 +110,12 @@ app.onError((err, c) => {
 });
 
 export { ChatAgent };
-export { VideoProcessingWorkflow } from './workflows/video-processing.workflow'
-export { MediaContainer } from './containers/media.container'
+export { VideoProcessingWorkflow } from "./workflows/video-processing.workflow";
+export { VioImageWorkflow } from "./workflows/vio-image.workflow";
+export { VioVideoWorkflow } from "./workflows/vio-video.workflow";
+export { VioUpscaleWorkflow } from "./workflows/vio-upscale.workflow";
+export { VioMotionControlWorkflow } from "./workflows/vio-motion-control.workflow";
+export { MediaContainer } from "./containers/media.container";
 export type { AppType } from "./contract";
 
 export default {
