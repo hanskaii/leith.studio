@@ -25,6 +25,11 @@ export const EnvSchema = z.object({
 		.string()
 		.min(1, "DODO_PAYMENTS_WEBHOOK_SECRET is required"),
 
+	// Vio Studio
+	VIO_API_KEY: z
+		.string()
+		.startsWith("vio_sk_", "VIO_API_KEY must start with vio_sk_"),
+
 	// App
 	APP_NAME: z.string().min(1, "APP_NAME is required"),
 	APP_ENV: z.enum(["development", "staging", "production"])
