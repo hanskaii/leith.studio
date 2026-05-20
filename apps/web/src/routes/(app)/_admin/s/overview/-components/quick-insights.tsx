@@ -32,7 +32,9 @@ export function QuickInsights({
 				</div>
 				<div className="flex items-center justify-between text-xs">
 					<span className="text-muted-foreground">Admins</span>
-					<span className="font-semibold tabular-nums">{adminCount}</span>
+					<span className="font-semibold tabular-nums">
+						{adminCount}
+					</span>
 				</div>
 				<div className="flex items-center justify-between text-xs">
 					<span className="text-muted-foreground">Banned</span>
@@ -48,7 +50,9 @@ export function QuickInsights({
 				</div>
 				<div className="flex items-center justify-between text-xs">
 					<span className="text-muted-foreground">This week</span>
-					<span className="font-semibold tabular-nums">{thisWeek}</span>
+					<span className="font-semibold tabular-nums">
+						{thisWeek}
+					</span>
 				</div>
 			</div>
 		</div>

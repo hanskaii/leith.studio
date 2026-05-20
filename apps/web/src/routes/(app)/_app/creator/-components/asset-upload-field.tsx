@@ -1,5 +1,12 @@
 import { useRef } from "react";
-import { Button, Spinner, Field, FieldLabel, FieldTitle, FieldContent } from "@workspace/ui";
+import {
+	Button,
+	Spinner,
+	Field,
+	FieldLabel,
+	FieldTitle,
+	FieldContent
+} from "@workspace/ui";
 import { formatFileSize } from "../-lib/format";
 
 type Props = {
@@ -18,7 +25,9 @@ export function AssetUploadField({ form, isUploading, onUpload }: Props) {
 					<FieldLabel>
 						<FieldTitle>
 							Asset file{" "}
-							<span style={{ color: "oklch(0.62 0.14 47)" }}>*</span>
+							<span style={{ color: "oklch(0.62 0.14 47)" }}>
+								*
+							</span>
 						</FieldTitle>
 					</FieldLabel>
 					<FieldContent>
@@ -34,10 +43,12 @@ export function AssetUploadField({ form, isUploading, onUpload }: Props) {
 												className="text-sm font-medium truncate max-w-[200px]"
 												style={{
 													color: "oklch(0.15 0.008 60)",
-													fontFamily: "var(--font-sans)"
+													fontFamily:
+														"var(--font-sans)"
 												}}
 											>
-												{f.state.value ?? "Asset uploaded"}
+												{f.state.value ??
+													"Asset uploaded"}
 											</span>
 										)}
 									</form.Field>
@@ -48,10 +59,13 @@ export function AssetUploadField({ form, isUploading, onUpload }: Props) {
 													className="text-xs"
 													style={{
 														color: "oklch(0.50 0.010 60)",
-														fontFamily: "var(--font-sans)"
+														fontFamily:
+															"var(--font-sans)"
 													}}
 												>
-													{formatFileSize(f.state.value)}
+													{formatFileSize(
+														f.state.value
+													)}
 												</span>
 											) : null
 										}
@@ -77,7 +91,9 @@ export function AssetUploadField({ form, isUploading, onUpload }: Props) {
 								onClick={() => assetInputRef.current?.click()}
 								disabled={isUploading}
 								className="h-24 w-full border-dashed border-2"
-								style={{ borderColor: "oklch(0.62 0.14 47 / 0.4)" }}
+								style={{
+									borderColor: "oklch(0.62 0.14 47 / 0.4)"
+								}}
 							>
 								{isUploading ? (
 									<>

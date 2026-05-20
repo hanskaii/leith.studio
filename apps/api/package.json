@@ -13,6 +13,7 @@
 		"@better-auth/api-key": "^1.6.5",
 		"@cf-wasm/photon": "^0.3.5",
 		"@cloudflare/ai-chat": "^0.4.4",
+		"@cloudflare/containers": "^0.3.4",
 		"@hono/zod-validator": "^0.7.6",
 		"@workspace/auth": "workspace:*",
 		"@workspace/config": "workspace:*",

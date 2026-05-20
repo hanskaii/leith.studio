@@ -1,5 +1,12 @@
 import { useRef } from "react";
-import { Button, Spinner, Field, FieldLabel, FieldTitle, FieldContent } from "@workspace/ui";
+import {
+	Button,
+	Spinner,
+	Field,
+	FieldLabel,
+	FieldTitle,
+	FieldContent
+} from "@workspace/ui";
 
 type Props = {
 	form: any;
@@ -32,7 +39,8 @@ export function CoverUploadField({ form, isUploading, onUpload }: Props) {
 									onClick={() => field.handleChange(null)}
 									className="absolute top-2 right-2"
 									style={{
-										background: "oklch(0.15 0.008 60 / 0.7)",
+										background:
+											"oklch(0.15 0.008 60 / 0.7)",
 										color: "oklch(0.97 0.008 80)"
 									}}
 								>

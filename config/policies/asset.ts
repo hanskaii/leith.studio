@@ -9,9 +9,12 @@ interface AssetDownloadContext extends BasePolicyContext {
 export const AssetPolicy = {
 	download: definePolicy<AssetDownloadContext, "asset.download">(
 		"asset.download",
-		combine(authorize("asset:download:free"), (ctx) => {
-			if (ctx.resource.access === "free") return allow();
-			return authorize("asset:download:premium")(ctx);
-		})
+		combine(
+			authorize("asset:download:free"),
+			(ctx: AssetDownloadContext) => {
+				if (ctx.resource.access === "free") return allow();
+				return authorize("asset:download:premium")(ctx);
+			}
+		)
 	)
 };

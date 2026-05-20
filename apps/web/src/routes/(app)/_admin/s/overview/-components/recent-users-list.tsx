@@ -12,7 +12,9 @@ export function RecentUsersList({ users }: Props) {
 			<div className="flex items-center justify-between px-5 py-4 border-b border-border">
 				<div>
 					<p className="text-sm font-semibold">Recent Users</p>
-					<p className="text-xs text-muted-foreground">Latest signups</p>
+					<p className="text-xs text-muted-foreground">
+						Latest signups
+					</p>
 				</div>
 				<span className="text-xs text-muted-foreground">Last 5</span>
 			</div>
@@ -23,7 +25,9 @@ export function RecentUsersList({ users }: Props) {
 						icon={UserMultiple02Icon}
 						className="size-8 text-muted-foreground/30"
 					/>
-					<p className="text-sm text-muted-foreground">No users yet</p>
+					<p className="text-sm text-muted-foreground">
+						No users yet
+					</p>
 				</div>
 			) : (
 				<div className="divide-y divide-border">

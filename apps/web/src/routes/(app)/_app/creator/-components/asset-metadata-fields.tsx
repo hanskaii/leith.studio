@@ -52,7 +52,9 @@ export function AssetMetadataFields({ form, isPending }: Props) {
 									</SelectTrigger>
 									<SelectContent>
 										<SelectItem value="mp4">MP4</SelectItem>
-										<SelectItem value="webm">WebM</SelectItem>
+										<SelectItem value="webm">
+											WebM
+										</SelectItem>
 										<SelectItem value="png">PNG</SelectItem>
 										<SelectItem value="jpg">JPG</SelectItem>
 									</SelectContent>
@@ -73,7 +75,9 @@ export function AssetMetadataFields({ form, isPending }: Props) {
 									id={field.name}
 									value={field.state.value}
 									onBlur={field.handleBlur}
-									onChange={(e) => field.handleChange(e.target.value)}
+									onChange={(e) =>
+										field.handleChange(e.target.value)
+									}
 									disabled={isPending}
 									placeholder="1920×1080"
 								/>
@@ -92,7 +96,9 @@ export function AssetMetadataFields({ form, isPending }: Props) {
 									Duration{" "}
 									<span
 										className="font-normal"
-										style={{ color: "oklch(0.50 0.010 60)" }}
+										style={{
+											color: "oklch(0.50 0.010 60)"
+										}}
 									>
 										(seconds)
 									</span>
@@ -104,7 +110,9 @@ export function AssetMetadataFields({ form, isPending }: Props) {
 									type="number"
 									value={field.state.value as string}
 									onBlur={field.handleBlur}
-									onChange={(e) => field.handleChange(e.target.value)}
+									onChange={(e) =>
+										field.handleChange(e.target.value)
+									}
 									disabled={isPending}
 									placeholder="30"
 									min={0}
@@ -124,7 +132,9 @@ export function AssetMetadataFields({ form, isPending }: Props) {
 								<Select
 									value={field.state.value}
 									onValueChange={(v) =>
-										field.handleChange(v as "free" | "premium")
+										field.handleChange(
+											v as "free" | "premium"
+										)
 									}
 									disabled={isPending}
 								>
@@ -132,8 +142,12 @@ export function AssetMetadataFields({ form, isPending }: Props) {
 										<SelectValue />
 									</SelectTrigger>
 									<SelectContent>
-										<SelectItem value="premium">Premium</SelectItem>
-										<SelectItem value="free">Free</SelectItem>
+										<SelectItem value="premium">
+											Premium
+										</SelectItem>
+										<SelectItem value="free">
+											Free
+										</SelectItem>
 									</SelectContent>
 								</Select>
 							</FieldContent>
@@ -149,7 +163,9 @@ export function AssetMetadataFields({ form, isPending }: Props) {
 							type="checkbox"
 							checked={field.state.value}
 							onBlur={field.handleBlur}
-							onChange={(e) => field.handleChange(e.target.checked)}
+							onChange={(e) =>
+								field.handleChange(e.target.checked)
+							}
 							disabled={isPending}
 							className="rounded"
 						/>

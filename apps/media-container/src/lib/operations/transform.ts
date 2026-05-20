@@ -19,21 +19,21 @@ import {
 	VideoSample,
 	AudioSample,
 	VideoSampleSink,
-	FilePathSource
-} from "mediabunny";
-import type {
+	FilePathSource,
+	ReadableStreamSource,
+	BufferTarget,
 	ConversionVideoOptions,
 	ConversionAudioOptions,
-	Quality
+	Quality,
+	VideoSamplePixelFormat
 } from "mediabunny";
-import { ReadableStreamSource, BufferTarget } from "@mediabunny/server";
 import type {
 	Transform,
 	OutputFormat,
 	TransformResult,
 	QualityLevel,
 	WatermarkPosition
-} from "../types";
+} from "../types.js";
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
@@ -65,13 +65,13 @@ function resolveOutputFormat(format: OutputFormat) {
 	return map[format]();
 }
 
-function find<T extends Transform>(
+function find<K extends Transform["type"]>(
 	pipeline: Transform[],
-	type: T["type"]
-): Extract<Transform, { type: T["type"] }> | undefined {
+	type: K
+): Extract<Transform, { type: K }> | undefined {
 	return pipeline.find(
-		(t): t is Extract<Transform, { type: T["type"] }> => t.type === type
-	);
+		(t): t is Extract<Transform, { type: K }> => t.type === type
+	) as any;
 }
 
 // ─── Watermark helpers ────────────────────────────────────────────────────────
@@ -197,33 +197,18 @@ export async function transform(
 	pipeline: Transform[],
 	outputFormat: OutputFormat = "mp4"
 ): Promise<TransformResult> {
-	const resizeStep = find<{ type: "resize" }>(pipeline, "resize");
-	const rotateStep = find<{ type: "rotate" }>(pipeline, "rotate");
-	const cropStep = find<{ type: "crop" }>(pipeline, "crop");
-	const clipStep = find<{ type: "clip" }>(pipeline, "clip");
-	const framerateStep = find<{ type: "framerate" }>(pipeline, "framerate");
-	const videoCodecStep = find<{ type: "video-codec" }>(
-		pipeline,
-		"video-codec"
-	);
-	const colorFilter = find<{ type: "color-filter" }>(
-		pipeline,
-		"color-filter"
-	);
-	const watermarkStep = find<{ type: "watermark" }>(pipeline, "watermark");
-	const audioChStep = find<{ type: "audio-channels" }>(
-		pipeline,
-		"audio-channels"
-	);
-	const audioSrStep = find<{ type: "audio-samplerate" }>(
-		pipeline,
-		"audio-samplerate"
-	);
-	const audioCodecStep = find<{ type: "audio-codec" }>(
-		pipeline,
-		"audio-codec"
-	);
-	const volumeStep = find<{ type: "volume" }>(pipeline, "volume");
+	const resizeStep = find(pipeline, "resize");
+	const rotateStep = find(pipeline, "rotate");
+	const cropStep = find(pipeline, "crop");
+	const clipStep = find(pipeline, "clip");
+	const framerateStep = find(pipeline, "framerate");
+	const videoCodecStep = find(pipeline, "video-codec");
+	const colorFilter = find(pipeline, "color-filter");
+	const watermarkStep = find(pipeline, "watermark");
+	const audioChStep = find(pipeline, "audio-channels");
+	const audioSrStep = find(pipeline, "audio-samplerate");
+	const audioCodecStep = find(pipeline, "audio-codec");
+	const volumeStep = find(pipeline, "volume");
 	const stripVideo = pipeline.some((t) => t.type === "strip-video");
 	const stripAudio = pipeline.some((t) => t.type === "strip-audio");
 
@@ -383,5 +368,10 @@ export async function transform(
 
 	await conversion.execute();
 
-	return { buffer: conversion.output.target.buffer, format: outputFormat };
+	const buffer = (conversion.output.target as BufferTarget).buffer;
+	if (!buffer) {
+		throw new Error("Conversion generated an empty buffer");
+	}
+
+	return { buffer, format: outputFormat };
 }

@@ -1,6 +1,6 @@
-import { Container } from 'cloudflare:workers'
+import { Container } from "@cloudflare/containers";
 
 export class MediaContainer extends Container {
-  defaultPort = 8080
-  sleepAfter = '10m'
+	defaultPort = 8080;
+	sleepAfter = "10m";
 }

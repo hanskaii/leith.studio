@@ -17,7 +17,10 @@ export function SearchDialog() {
 
 	const handleSelect = (tag: string) => {
 		closeSearch();
-		navigate({ to: "/feed", search: { page: 1, tag, type: "all", sort: "newest" } });
+		navigate({
+			to: "/feed",
+			search: { page: 1, tag, type: "all", sort: "newest" }
+		});
 	};
 
 	return (

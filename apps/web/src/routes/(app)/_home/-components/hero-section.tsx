@@ -30,7 +30,10 @@ export function HeroSection() {
 						<a href={ACCESS_URL}>Get All Access · $49</a>
 					</Button>
 					<Button size="xl" variant="outline" asChild>
-						<Link to="/feed" search={{ page: 1, type: "all", sort: "newest" }}>
+						<Link
+							to="/feed"
+							search={{ page: 1, type: "all", sort: "newest" }}
+						>
 							Browse free →
 						</Link>
 					</Button>

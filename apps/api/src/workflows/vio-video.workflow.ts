@@ -14,7 +14,7 @@ export type VioVideoParams = GenerateVideoParams & {
 	extendPrompt?: string;
 };
 
-function sleepDuration(attempt: number): string {
+function sleepDuration(attempt: number): any {
 	if (attempt < 5) return "3 seconds";
 	if (attempt < 15) return "5 seconds";
 	return "10 seconds";

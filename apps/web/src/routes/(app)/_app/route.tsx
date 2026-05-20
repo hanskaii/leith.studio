@@ -28,14 +28,6 @@ export const Route = createFileRoute("/(app)/_app")({
 			});
 		}
 
-		// Account and activation routes are always accessible
-		const isAccountRoute = location.pathname.startsWith("/account");
-		const isActivateRoute = location.pathname === "/activate";
-		if (!isAccountRoute && !isActivateRoute) {
-			const result = await Gate.can("app.use", { actor: session.user });
-			if (!result.allowed) throw redirect({ to: "/upgrade" });
-		}
-
 		return { session };
 	},
 	component: LayoutComponent

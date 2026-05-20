@@ -4,8 +4,8 @@ import { createReadStream } from "node:fs";
 import { mkdir, writeFile, access } from "node:fs/promises";
 import path from "node:path";
 import { Readable } from "node:stream";
-import { transform } from "@workspace/media";
-import type { ProcessItem } from "@workspace/media";
+import { transform } from "./lib/index.js";
+import type { ProcessItem } from "./lib/index.js";
 
 const MOUNT = "/mnt/r2";
 
