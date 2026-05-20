@@ -1,0 +1,1 @@
+ALTER TABLE `post_metadata` ADD `preview_key` text;

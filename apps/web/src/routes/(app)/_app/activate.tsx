@@ -46,7 +46,7 @@ function ActivatePage() {
 				toast.success("Access granted!");
 			}
 			queryClient.invalidateQueries({ queryKey: ["session"] });
-			navigate({ to: "/feed" });
+			navigate({ to: "/feed", search: { page: 1, type: "all", sort: "newest" } });
 		},
 		onError: (err: any) => {
 			toast.error(err?.message || "Invalid license key.");

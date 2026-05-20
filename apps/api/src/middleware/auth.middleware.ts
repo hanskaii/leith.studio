@@ -1,7 +1,6 @@
 import { createMiddleware } from "hono/factory";
 import { AuthService } from "../services/auth.service";
 import { ApiError } from "../helpers/errors.helper";
-import { database } from "@workspace/database";
 import type { User, Session } from "@workspace/auth";
 import type { HonoEnv } from "../types/hono.types";
 
@@ -15,7 +14,6 @@ export const authMiddleware = createMiddleware<HonoEnv>(async (c, next) => {
 
 	c.set("user", user as User);
 	c.set("session", session as Session);
-	c.set("db", database(c.env.DATABASE));
 
 	await next();
 });

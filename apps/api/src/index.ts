@@ -24,6 +24,7 @@ import { routeAgentRequest } from "agents";
 
 import { authMiddleware } from "./middleware/auth.middleware";
 import { protect } from "./middleware/protect.middleware";
+import { dbMiddleware } from "./middleware/db.middleware";
 import { boot } from "./boot";
 
 boot();
@@ -43,6 +44,9 @@ app.use(
 		credentials: true
 	})
 );
+
+// Set db on every request
+app.use("*", dbMiddleware);
 
 // Auth routes (better-auth)
 app.route("/", authHandler);
@@ -106,6 +110,8 @@ app.onError((err, c) => {
 });
 
 export { ChatAgent };
+export { VideoProcessingWorkflow } from './workflows/video-processing.workflow'
+export { MediaContainer } from './containers/media.container'
 export type { AppType } from "./contract";
 
 export default {

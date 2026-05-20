@@ -8,7 +8,8 @@ export type FeedAsset = {
 	format: string;
 	resolution: string;
 	coverThumb: string;
-	fileUrl?: string;
+	previewUrl?: string;
+	clipUrl?: string;
 	popularity: number;
 	publishedAt: string;
 };

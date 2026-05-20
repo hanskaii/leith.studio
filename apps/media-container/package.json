@@ -1,0 +1,19 @@
+{
+  "name": "media-container",
+  "type": "module",
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/index.js"
+  },
+  "dependencies": {
+    "@hono/node-server": "latest",
+    "hono": "latest",
+    "mediabunny": "latest",
+    "@mediabunny/server": "latest",
+    "@aws-sdk/client-s3": "latest",
+    "@workspace/media": "workspace:*"
+  },
+  "devDependencies": {
+    "typescript": "latest"
+  }
+}

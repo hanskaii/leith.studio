@@ -23,7 +23,7 @@ export const Route = createFileRoute("/(app)/_app/creator/")({
 			actor: context.session.user
 		});
 		if (!result.allowed) {
-			throw redirect({ to: "/feed" });
+			throw redirect({ to: "/feed", search: { page: 1, type: "all", sort: "newest" } });
 		}
 	},
 	component: CreatorDashboardPage

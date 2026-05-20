@@ -5,7 +5,7 @@ export const appConfig = {
 	version: "1.0.0",
 	supportEmail: "support@leith.so",
 
-	authDefaultRedirect: "/feed",
+	authDefaultRedirect: "/",
 
 	payments: [
 		{

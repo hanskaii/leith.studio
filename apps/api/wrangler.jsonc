@@ -1,6 +1,6 @@
 {
 	"$schema": "node_modules/wrangler/config-schema.json",
-	"name": "tanflare-api",
+	"name": "leith-api",
 	"main": "src/index.ts",
 	"compatibility_date": "2025-09-02",
 	"compatibility_flags": ["nodejs_compat"],
@@ -13,7 +13,7 @@
 	"d1_databases": [
 		{
 			"binding": "DATABASE",
-			"database_name": "tanflare",
+			"database_name": "leith",
 			"database_id": "c8ea511b-1cfd-46e2-ba78-0ed1e441bd7e",
 			"migrations_dir": "../../packages/db/drizzle"
 		}
@@ -27,7 +27,7 @@
 	"r2_buckets": [
 		{
 			"binding": "STORAGE",
-			"bucket_name": "tanflare"
+			"bucket_name": "leith"
 		}
 	],
 	"ai": {
@@ -36,19 +36,26 @@
 	"vars": {
 		// Production values — for local dev, override via apps/api/.dev.vars
 		"APP_ENV": "production",
-		"APP_NAME": "tanflare",
-		"BETTER_AUTH_URL": "https://tanflare-api.inurhuda00-526.workers.dev",
-		"CORS_ORIGIN": "https://tanflare-web.inurhuda00-526.workers.dev",
-		"VITE_URL": "https://tanflare-web.inurhuda00-526.workers.dev",
+		"APP_NAME": "leith",
+		"BETTER_AUTH_URL": "https://leith-api.inurhuda00-526.workers.dev",
+		"CORS_ORIGIN": "https://leith-web.inurhuda00-526.workers.dev",
+		"VITE_URL": "https://leith-web.inurhuda00-526.workers.dev",
 		"SESSION_DOMAIN": "inurhuda00-526.workers.dev",
 		"RESEND_FROM_EMAIL": "no-reply@mixetape.com",
-		"R2_BUCKET_NAME": "tanflare"
+		"R2_BUCKET_NAME": "leith",
+		"R2_ENDPOINT": "https://<ACCOUNT_ID>.r2.cloudflarestorage.com",
+		"R2_ACCESS_KEY_ID": "",
+		"R2_SECRET_ACCESS_KEY": ""
 	},
 	"durable_objects": {
 		"bindings": [
 			{
 				"name": "chat-agent",
 				"class_name": "ChatAgent"
+			},
+			{
+				"name": "MEDIA_CONTAINER",
+				"class_name": "MediaContainer"
 			}
 		]
 	},
@@ -56,6 +63,23 @@
 		{
 			"tag": "v2",
 			"new_sqlite_classes": ["ChatAgent"]
+		},
+		{
+			"tag": "v3",
+			"new_classes": ["MediaContainer"]
+		}
+	],
+	"workflows": [
+		{
+			"name": "video-processing",
+			"binding": "VIDEO_PROCESSING_WORKFLOW",
+			"class_name": "VideoProcessingWorkflow"
+		}
+	],
+	"containers": [
+		{
+			"class_name": "MediaContainer",
+			"image": "./apps/media-container"
 		}
 	]
 }

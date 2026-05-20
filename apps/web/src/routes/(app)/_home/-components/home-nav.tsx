@@ -2,7 +2,6 @@ import { Link } from "@tanstack/react-router";
 import { authClient } from "@/auth/client";
 import { useEffect, useState } from "react";
 import { ThemeToggle } from "@/routes/-components/layouts/theme-toggle";
-import { ASSETS } from "../-lib/home-data";
 
 const ANNOUNCEMENT = "All Access: lifetime price ending soon. Lock it in.";
 const ACCESS_URL = "/activate";
@@ -51,13 +50,10 @@ export function HomeNav() {
 					<nav className="hidden items-center gap-7 sm:flex absolute left-1/2 -translate-x-1/2">
 						<Link
 							to="/feed"
-							search={{ page: 1 }}
-							className="flex items-center gap-1.5 text-[12px] font-semibold uppercase tracking-[0.1em] text-muted-foreground hover:text-foreground transition-colors"
+							search={{ page: 1, type: "all", sort: "newest" }}
+							className="text-[12px] font-semibold uppercase tracking-[0.1em] text-muted-foreground hover:text-foreground transition-colors"
 						>
 							Assets
-							<span className="tabular-nums text-[10px] font-semibold text-muted-foreground/50">
-								{ASSETS.length}
-							</span>
 						</Link>
 						<a
 							href="#access"

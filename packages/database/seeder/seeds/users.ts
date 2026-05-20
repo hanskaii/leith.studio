@@ -39,9 +39,9 @@ export async function seedUsers(db: DrizzleD1Database<typeof schema> | any) {
 			banReason: null,
 			banExpires: null,
 			dodoCustomerId: "cust_alice_seed",
-			subscriptionStatus: "active",
+			subscriptionStatus: "lifetime",
 			subscriptionId: "sub_alice_seed",
-			subscriptionPlanId: "pdt_pro_replace_me",
+			subscriptionPlanId: "pdt_allaccess_replace_me",
 			credits: 0,
 			createdAt: daysAgo(30),
 			updatedAt: daysAgo(0)
@@ -131,7 +131,7 @@ export async function seedUsers(db: DrizzleD1Database<typeof schema> | any) {
 		.insert(schema.apiKeys)
 		.values({
 			id: "ak_admin_seed",
-			key: "tanflare_admin_test_key",
+			key: "leith_admin_test_key",
 			referenceId: "user_admin_seed",
 			name: "Admin Dev Key",
 			createdAt: daysAgo(90),
@@ -141,7 +141,7 @@ export async function seedUsers(db: DrizzleD1Database<typeof schema> | any) {
 
 	console.log(`✓ Seeded ${usersData.length} users with auth records`);
 	console.log(
-		"  admin@example.com     → admin (API Key: tanflare_admin_test_key)"
+		"  admin@example.com     → admin (API Key: leith_admin_test_key)"
 	);
 	console.log("  alice@example.com     → pro subscriber");
 	console.log("  bob@example.com       → free user");

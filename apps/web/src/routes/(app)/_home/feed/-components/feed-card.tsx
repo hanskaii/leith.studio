@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { Link } from "@tanstack/react-router";
 import type { FeedAsset } from "../-lib/feed-data";
 
@@ -10,7 +10,27 @@ export function FeedCard({
 	aspect?: string;
 }) {
 	const [hovered, setHovered] = useState(false);
+	const videoRef = useRef<HTMLVideoElement>(null);
 	const isVideo = asset.type === "video";
+	const hasClip = isVideo && !!asset.clipUrl;
+
+	function handlePointerEnter() {
+		setHovered(true);
+		if (videoRef.current) {
+			videoRef.current.currentTime = 0;
+			videoRef.current.play().catch(() => {});
+		}
+	}
+
+	function handlePointerLeave() {
+		setHovered(false);
+		if (videoRef.current) {
+			videoRef.current.pause();
+			videoRef.current.currentTime = 0;
+		}
+	}
+
+	// clipUrl is the short 10s hover clip; previewUrl is used on the detail page player
 
 	return (
 		<Link
@@ -20,23 +40,32 @@ export function FeedCard({
 		>
 			<div
 				className={`relative ${aspect} overflow-hidden rounded-md bg-muted`}
-				onPointerEnter={() => setHovered(true)}
-				onPointerLeave={() => setHovered(false)}
+				onPointerEnter={handlePointerEnter}
+				onPointerLeave={handlePointerLeave}
 			>
-				{hovered && isVideo && asset.fileUrl ? (
+				{/* Thumbnail — always rendered */}
+				<img
+					src={asset.coverThumb}
+					alt={asset.title}
+					className={`absolute inset-0 h-full w-full object-cover transition-[transform,opacity] duration-500 ${
+						hovered && hasClip
+							? "opacity-0 scale-[1.04]"
+							: "opacity-100 group-hover:scale-[1.04]"
+					}`}
+				/>
+
+				{/* Hover clip — 10s short clip, shown on hover only */}
+				{hasClip && (
 					<video
-						autoPlay
+						ref={videoRef}
 						muted
 						loop
 						playsInline
-						src={asset.fileUrl}
-						className="absolute inset-0 h-full w-full object-cover"
-					/>
-				) : (
-					<img
-						src={asset.coverThumb}
-						alt={asset.title}
-						className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.04]"
+						preload="none"
+						src={asset.clipUrl}
+						className={`absolute inset-0 h-full w-full object-cover transition-opacity duration-300 ${
+							hovered ? "opacity-100" : "opacity-0"
+						}`}
 					/>
 				)}
 

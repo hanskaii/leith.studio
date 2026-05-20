@@ -9,9 +9,7 @@ import {
 	CommandList
 } from "@workspace/ui";
 import { ModalContext } from "@/routes/-components/providers/modal-provider";
-import { ASSETS } from "../-lib/home-data";
-
-const ASSET_TAGS = [...new Set(ASSETS.map((a) => a.tag))] as string[];
+import { FEED_TAGS } from "../feed/-lib/feed-data";
 
 export function SearchDialog() {
 	const { searchOpen, closeSearch } = useContext(ModalContext);
@@ -19,7 +17,7 @@ export function SearchDialog() {
 
 	const handleSelect = (tag: string) => {
 		closeSearch();
-		navigate({ to: "/feed", search: { page: 1, tag } });
+		navigate({ to: "/feed", search: { page: 1, tag, type: "all", sort: "newest" } });
 	};
 
 	return (
@@ -34,7 +32,7 @@ export function SearchDialog() {
 					heading="Browse by tag"
 					className="[&_[cmdk-group-heading]]:text-[10px] [&_[cmdk-group-heading]]:tracking-[0.12em] [&_[cmdk-group-heading]]:uppercase"
 				>
-					{ASSET_TAGS.map((tag) => (
+					{FEED_TAGS.map((tag) => (
 						<CommandItem
 							key={tag}
 							value={tag}

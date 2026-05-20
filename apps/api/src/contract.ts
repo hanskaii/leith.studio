@@ -2,6 +2,7 @@ import { Hono } from "hono";
 import type { HonoEnv } from "./types/hono.types";
 import uploadHandler from "./handlers/upload.handler";
 import postsHandler from "./handlers/posts.handler";
+import filesHandler from "./handlers/files.handler";
 import creatorHandler from "./handlers/creator.handler";
 import licenseHandler from "./handlers/license.handler";
 
@@ -20,6 +21,7 @@ import licenseHandler from "./handlers/license.handler";
 const contract = new Hono<HonoEnv>()
 	.route("/api/upload", uploadHandler)
 	.route("/api/v1/posts", postsHandler)
+	.route("/api/files", filesHandler)
 	.route("/api/v1/creator", creatorHandler)
 	.route("/api/v1/license", licenseHandler);
 

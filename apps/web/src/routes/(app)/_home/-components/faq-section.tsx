@@ -1,4 +1,3 @@
-import { motion } from "framer-motion";
 import {
 	Accordion,
 	AccordionContent,
@@ -6,38 +5,23 @@ import {
 	AccordionTrigger
 } from "@workspace/ui";
 import { FAQ_ITEMS } from "../-lib/home-data";
-import { fadeUp, stagger } from "../-lib/motion-variants";
 
 export function FaqSection() {
 	return (
 		<section id="faq" className="w-full border-t border-border/40">
-			<motion.div
-				initial="hidden"
-				whileInView="visible"
-				viewport={{ once: true, margin: "-60px" }}
-				variants={stagger}
-				className="max-w-[1280px] mx-auto px-5 sm:px-8 py-14 grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-20"
-			>
+			<div className="max-w-[1280px] mx-auto px-5 sm:px-8 py-14 grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-20">
 				<div>
-					<motion.h2
-						variants={fadeUp}
-						custom={1}
-						className="font-heading text-4xl sm:text-5xl font-bold tracking-tight leading-[1.06] text-foreground"
-					>
+					<h2 className="font-heading text-4xl sm:text-5xl font-bold tracking-tight leading-[1.06] text-foreground">
 						Everything
 						<br />
 						explained.
-					</motion.h2>
-					<motion.p
-						variants={fadeUp}
-						custom={2}
-						className="mt-5 text-sm text-muted-foreground leading-relaxed max-w-[32ch]"
-					>
+					</h2>
+					<p className="mt-5 text-sm text-muted-foreground leading-relaxed max-w-[32ch]">
 						Five things worth knowing before you buy.
-					</motion.p>
+					</p>
 				</div>
 
-				<motion.div variants={fadeUp} custom={1}>
+				<div>
 					<Accordion type="single" collapsible className="w-full">
 						{FAQ_ITEMS.map((item, i) => (
 							<AccordionItem key={i} value={`item-${i}`}>
@@ -50,8 +34,8 @@ export function FaqSection() {
 							</AccordionItem>
 						))}
 					</Accordion>
-				</motion.div>
-			</motion.div>
+				</div>
+			</div>
 		</section>
 	);
 }

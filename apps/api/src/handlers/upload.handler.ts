@@ -1,6 +1,9 @@
 import { Hono } from "hono";
 import { zValidator } from "@hono/zod-validator";
 import { z } from "zod";
+import { eq } from "drizzle-orm";
+import { postMetadata } from "@workspace/database";
+import { Gate } from "@workspace/core";
 import { ApiError } from "../helpers/errors.helper";
 import { ApiResponse } from "../helpers/response.helper";
 import { authMiddleware } from "../middleware/auth.middleware";
@@ -9,6 +12,12 @@ import type { HonoEnv } from "../types/hono.types";
 
 const FileSchema = z.object({
 	file: z.instanceof(File)
+});
+
+const AssetUploadSchema = z.object({
+	file: z.instanceof(File),
+	postId: z.string().min(1),
+	slug: z.string().min(1)
 });
 
 const uploadHandler = new Hono<HonoEnv>()
@@ -46,6 +55,38 @@ const uploadHandler = new Hono<HonoEnv>()
 			} catch (error: any) {
 				throw ApiError.badRequest(error.message ?? "Upload failed");
 			}
+		}
+	)
+	.post(
+		"/asset",
+		authMiddleware,
+		zValidator("form", AssetUploadSchema),
+		async (c) => {
+			const user = c.get("user");
+			const db = c.get("db");
+			const { file, postId, slug } = c.req.valid("form");
+
+			await Gate.assert("upload.asset", { actor: user });
+
+			const ext = file.name.split(".").pop() ?? "mp4";
+			const fileKey = `assets/${slug}.${ext}`;
+
+			await c.env.STORAGE.put(fileKey, await file.arrayBuffer(), {
+				httpMetadata: { contentType: file.type }
+			});
+
+			await db
+				.update(postMetadata)
+				.set({ fileKey })
+				.where(eq(postMetadata.postId, postId));
+
+			await c.env.VIDEO_PROCESSING_WORKFLOW.create({
+				params: { postId, slug, fileKey }
+			});
+
+			return ApiResponse.ok(c, "Asset uploaded and processing started", {
+				fileKey
+			});
 		}
 	)
 	.get("/files/*", async (c) => {

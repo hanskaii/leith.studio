@@ -1,141 +1,180 @@
+import { Suspense } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { useSuspenseQuery } from "@tanstack/react-query";
 import { ArrowLeft01Icon, Download01Icon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
-import { Button, toast } from "@workspace/ui";
-import { FEED_ASSETS } from "./-lib/feed-data";
+import { Button } from "@workspace/ui";
+import { postQueryOptions, postsQueryOptions, toFeedAsset } from "@/routes/-fn/posts";
 import { FooterSection } from "../-components/footer-section";
-import { FeedCard } from "./-components/feed-card";
+import { FeedCard, FeedCardSkeleton } from "./-components/feed-card";
 
 export const Route = createFileRoute("/(app)/_home/feed/$slug")({
 	component: AssetPage
 });
 
-function AssetPage() {
-	const { slug } = Route.useParams();
-	const asset = FEED_ASSETS.find((a) => a.slug === slug);
-
-	if (!asset) {
-		return (
-			<>
-				<main className="flex min-h-[50dvh] items-center justify-center px-4 pt-24">
-					<div className="text-center">
-						<p className="text-sm text-muted-foreground">
-							Asset not found.
-						</p>
-						<Link
-							to="/feed"
-							search={{ page: 1 }}
-							className="mt-3 inline-block text-sm text-primary hover:underline underline-offset-4"
-						>
-							← Back to feed
-						</Link>
+function AssetDetailSkeleton() {
+	return (
+		<main className="px-4 sm:px-6 pb-24 pt-24">
+			<div className="mx-auto max-w-4xl animate-pulse">
+				<div className="mb-8 h-4 w-32 rounded bg-muted" />
+				<div className="mb-10 aspect-[16/9] rounded-lg bg-muted" />
+				<div className="grid gap-10 lg:grid-cols-[1fr_224px]">
+					<div className="space-y-3">
+						<div className="h-3 w-20 rounded bg-muted" />
+						<div className="h-8 w-2/3 rounded bg-muted" />
+						<div className="h-4 w-1/3 rounded bg-muted" />
 					</div>
-				</main>
-				<FooterSection />
-			</>
-		);
-	}
-
-	const isVideo = asset.type === "video";
-
-	const sameTag = FEED_ASSETS.filter(
-		(a) => a.id !== asset.id && a.tag === asset.tag
+					<div className="space-y-3">
+						<div className="h-10 rounded bg-muted" />
+						<div className="h-32 rounded bg-muted" />
+					</div>
+				</div>
+			</div>
+		</main>
 	);
-	const others = FEED_ASSETS.filter(
-		(a) => a.id !== asset.id && a.tag !== asset.tag
+}
+
+function RelatedPostsSkeleton() {
+	return (
+		<div className="mt-16 border-t border-border/40 pt-10">
+			<div className="mb-6 h-5 w-32 rounded bg-muted animate-pulse" />
+			<div className="grid gap-x-5 gap-y-7 sm:grid-cols-2 lg:grid-cols-3">
+				{Array.from({ length: 3 }).map((_, i) => (
+					<FeedCardSkeleton key={i} />
+				))}
+			</div>
+		</div>
 	);
-	const related = [...sameTag, ...others].slice(0, 3);
+}
+
+function RelatedPosts({ tag, currentId }: { tag: string; currentId: string }) {
+	const { data } = useSuspenseQuery(postsQueryOptions(1));
+	const items = data?.items ?? [];
+
+	const sameTag = items.filter(
+		(p) => p.id !== currentId && Array.isArray(p.tags) && p.tags.includes(tag)
+	);
+	const others = items.filter(
+		(p) =>
+			p.id !== currentId &&
+			!(Array.isArray(p.tags) && p.tags.includes(tag))
+	);
+	const related = [...sameTag, ...others].slice(0, 3).map(toFeedAsset);
+
+	if (related.length === 0) return null;
+
+	return (
+		<div className="mt-16 border-t border-border/40 pt-10">
+			<p className="mb-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+				More like this
+			</p>
+			<h2 className="mb-6 font-heading font-bold text-xl tracking-tight text-foreground">
+				{tag} assets
+			</h2>
+			<div className="grid gap-x-5 gap-y-7 sm:grid-cols-2 lg:grid-cols-3">
+				{related.map((a) => (
+					<FeedCard key={a.id} asset={a} aspect="aspect-[14/9]" />
+				))}
+			</div>
+		</div>
+	);
+}
+
+function AssetDetail() {
+	const { slug } = Route.useParams();
+	const { data: post } = useSuspenseQuery(postQueryOptions(slug));
+
+	if (!post) return null;
+
+	const isVideo =
+		post.format === "mp4" || post.format === "webm";
+	const tag = Array.isArray(post.tags) ? (post.tags[0] ?? "") : "";
 
 	const specs = [
-		{ label: "Format", value: asset.format.toUpperCase() },
-		{ label: "Resolution", value: asset.resolution },
+		{ label: "Format", value: post.format.toUpperCase() },
+		{ label: "Resolution", value: post.resolution },
 		{ label: "Type", value: isVideo ? "Video loop" : "Still image" },
 		{
 			label: "Access",
-			value: asset.access === "free" ? "Free" : "All Access"
+			value: post.access === "free" ? "Free" : "All Access"
 		}
 	];
 
 	return (
-		<>
-			<main className="px-4 sm:px-6 pb-24 pt-24">
-				<div className="mx-auto max-w-4xl">
-					{/* Breadcrumb */}
-					<nav className="mb-8 flex items-center gap-1.5 text-sm text-muted-foreground">
-						<Link
-							to="/feed"
-							search={{ page: 1 }}
-							className="inline-flex items-center gap-1.5 transition-colors hover:text-foreground"
-						>
-							<HugeiconsIcon
-								icon={ArrowLeft01Icon}
-								className="h-3.5 w-3.5"
-								strokeWidth={2}
-							/>
-							Feed
-						</Link>
-						<span className="text-border/80">/</span>
-						<span className="text-foreground/60">{asset.tag}</span>
-					</nav>
+		<main className="px-4 sm:px-6 pb-24 pt-24">
+			<div className="mx-auto max-w-4xl">
+				{/* Breadcrumb */}
+				<nav className="mb-8 flex items-center gap-1.5 text-sm text-muted-foreground">
+					<Link
+						to="/feed"
+						search={{ page: 1, type: "all", sort: "newest" }}
+						className="inline-flex items-center gap-1.5 transition-colors hover:text-foreground"
+					>
+						<HugeiconsIcon
+							icon={ArrowLeft01Icon}
+							className="h-3.5 w-3.5"
+							strokeWidth={2}
+						/>
+						Feed
+					</Link>
+					<span className="text-border/80">/</span>
+					<span className="text-foreground/60">{tag}</span>
+				</nav>
 
-					{/* Media */}
-					<div className="mb-10 aspect-[16/9] overflow-hidden rounded-lg bg-muted">
-						{isVideo && asset.fileUrl ? (
-							<video
-								autoPlay
-								muted
-								loop
-								playsInline
-								controls
-								src={asset.fileUrl}
-								className="h-full w-full object-cover"
-							/>
-						) : (
-							<img
-								src={asset.coverThumb}
-								alt={asset.title}
-								className="h-full w-full object-cover"
-								loading="eager"
-							/>
-						)}
-					</div>
+				{/* Media */}
+				<div className="mb-10 aspect-[16/9] overflow-hidden rounded-lg bg-muted">
+					{isVideo && post.previewUrl ? (
+						<video
+							autoPlay
+							muted
+							loop
+							playsInline
+							controls
+							src={post.previewUrl}
+							className="h-full w-full object-cover"
+						/>
+					) : (
+						<img
+							src={post.coverThumb ?? ""}
+							alt={post.title}
+							className="h-full w-full object-cover"
+							loading="eager"
+						/>
+					)}
+				</div>
 
-					{/* Two-column */}
-					<div className="grid gap-10 lg:grid-cols-[1fr_224px]">
-						{/* Left: identity */}
-						<div>
-							<div className="mb-3 flex flex-wrap items-center gap-2">
-								<span className="rounded border border-border px-2 py-0.5 text-[11px] font-semibold uppercase tracking-[0.06em] text-muted-foreground">
-									{asset.tag}
+				{/* Two-column */}
+				<div className="grid gap-10 lg:grid-cols-[1fr_224px]">
+					{/* Left: identity */}
+					<div>
+						<div className="mb-3 flex flex-wrap items-center gap-2">
+							<span className="rounded border border-border px-2 py-0.5 text-[11px] font-semibold uppercase tracking-[0.06em] text-muted-foreground">
+								{tag}
+							</span>
+							{post.access !== "free" && (
+								<span className="rounded bg-primary px-2 py-0.5 text-[11px] font-bold uppercase tracking-[0.08em] text-primary-foreground">
+									All Access
 								</span>
-								{asset.access === "members" && (
-									<span className="rounded bg-primary px-2 py-0.5 text-[11px] font-bold uppercase tracking-[0.08em] text-primary-foreground">
-										All Access
-									</span>
-								)}
-							</div>
-
-							<h1 className="font-heading font-bold text-[1.75rem] leading-[1.05] tracking-[-0.025em] text-foreground">
-								{asset.title}
-							</h1>
-
-							<p className="mt-2.5 text-sm text-muted-foreground">
-								{asset.format.toUpperCase()} ·{" "}
-								{asset.resolution} ·{" "}
-								{isVideo ? "Seamless loop" : "Still image"}
-							</p>
+							)}
 						</div>
 
-						{/* Right: action + specs */}
-						<div className="flex flex-col gap-5">
-							{asset.access === "free" ? (
-								<Button
-									className="w-full gap-2"
-									onClick={() =>
-										toast.success(
-											"Preparing your download…"
-										)
-									}
+						<h1 className="font-heading font-bold text-[1.75rem] leading-[1.05] tracking-[-0.025em] text-foreground">
+							{post.title}
+						</h1>
+
+						<p className="mt-2.5 text-sm text-muted-foreground">
+							{post.format.toUpperCase()} · {post.resolution} ·{" "}
+							{isVideo ? "Seamless loop" : "Still image"}
+						</p>
+					</div>
+
+					{/* Right: action + specs */}
+					<div className="flex flex-col gap-5">
+						{post.access === "free" ? (
+							<Button asChild className="w-full gap-2">
+								<a
+									href={`/api/v1/posts/${slug}/download`}
+									download
 								>
 									<HugeiconsIcon
 										icon={Download01Icon}
@@ -143,66 +182,60 @@ function AssetPage() {
 										strokeWidth={2}
 									/>
 									Download — Free
+								</a>
+							</Button>
+						) : (
+							<div className="flex flex-col gap-1.5">
+								<Button asChild className="w-full">
+									<Link to="/activate">Get All Access</Link>
 								</Button>
-							) : (
-								<div className="flex flex-col gap-1.5">
-									<Button asChild className="w-full">
-										<a href="/activate">Get All Access</a>
-									</Button>
-									<p className="text-center text-[11px] text-muted-foreground">
-										Included in All Access
-									</p>
-								</div>
-							)}
-
-							{/* Spec rows */}
-							<div>
-								<p className="mb-2 text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground/50">
-									Specifications
+								<p className="text-center text-[11px] text-muted-foreground">
+									Included in All Access
 								</p>
-								{specs.map((row, i) => (
-									<div
-										key={row.label}
-										className={`flex items-center justify-between py-2 ${
-											i < specs.length - 1
-												? "border-b border-border/40"
-												: ""
-										}`}
-									>
-										<span className="text-xs text-muted-foreground">
-											{row.label}
-										</span>
-										<span className="text-xs font-semibold text-foreground">
-											{row.value}
-										</span>
-									</div>
-								))}
 							</div>
+						)}
+
+						{/* Spec rows */}
+						<div>
+							<p className="mb-2 text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground/50">
+								Specifications
+							</p>
+							{specs.map((row, i) => (
+								<div
+									key={row.label}
+									className={`flex items-center justify-between py-2 ${
+										i < specs.length - 1
+											? "border-b border-border/40"
+											: ""
+									}`}
+								>
+									<span className="text-xs text-muted-foreground">
+										{row.label}
+									</span>
+									<span className="text-xs font-semibold text-foreground">
+										{row.value}
+									</span>
+								</div>
+							))}
 						</div>
 					</div>
-
-					{/* Related */}
-					{related.length > 0 && (
-						<div className="mt-16 border-t border-border/40 pt-10">
-							<p className="mb-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
-								More like this
-							</p>
-							<h2 className="mb-6 font-heading font-bold text-xl tracking-tight text-foreground">
-								{asset.tag} assets
-							</h2>
-							<div className="grid gap-x-5 gap-y-7 sm:grid-cols-2 lg:grid-cols-3">
-								{related.map((a) => (
-									<FeedCard
-										key={a.id}
-										asset={a}
-										aspect="aspect-[14/9]"
-									/>
-								))}
-							</div>
-						</div>
-					)}
 				</div>
-			</main>
+
+				{/* Related */}
+				<Suspense fallback={<RelatedPostsSkeleton />}>
+					<RelatedPosts tag={tag} currentId={post.id} />
+				</Suspense>
+			</div>
+		</main>
+	);
+}
+
+function AssetPage() {
+	return (
+		<>
+			<Suspense fallback={<AssetDetailSkeleton />}>
+				<AssetDetail />
+			</Suspense>
 			<FooterSection />
 		</>
 	);

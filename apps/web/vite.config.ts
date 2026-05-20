@@ -30,7 +30,8 @@ const config = defineConfig({
 			persistState: {
 				path: "../../.wrangler/state"
 			},
-			inspectorPort: 9231
+			inspectorPort: 9231,
+			auxiliaryWorkers: [{ configPath: "../api/wrangler.jsonc" }]
 		}),
 		// this is the plugin that enables path aliases
 		viteTsConfigPaths({

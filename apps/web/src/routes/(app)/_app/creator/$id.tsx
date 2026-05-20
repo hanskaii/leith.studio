@@ -40,7 +40,7 @@ export const Route = createFileRoute("/(app)/_app/creator/$id")({
 			actor: context.session.user
 		});
 		if (!result.allowed) {
-			throw redirect({ to: "/feed", search: { page: 1 } });
+			throw redirect({ to: "/feed", search: { page: 1, type: "all", sort: "newest" } });
 		}
 	},
 	component: PostEditorPage

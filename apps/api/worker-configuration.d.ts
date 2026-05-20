@@ -11,8 +11,8 @@ declare namespace Cloudflare {
 		STORAGE: R2Bucket;
 		DATABASE: D1Database;
 		AI: Ai;
-		VITE_URL: "https://tanflare-web.inurhuda00-526.workers.dev";
-		R2_BUCKET_NAME: "tanflare";
+		VITE_URL: "https://leith-web.inurhuda00-526.workers.dev";
+		R2_BUCKET_NAME: "leith";
 		APP_NAME: string;
 		APP_URL: string;
 		APP_ENV: string;

@@ -2,6 +2,7 @@ import { queryOptions } from "@tanstack/react-query";
 import { createServerFn } from "@tanstack/react-start";
 import { createApiClient, fetchApiWithAuth } from "@/routes/-fn/api-client";
 import { handleError } from "@/routes/-fn/handle-error";
+import type { FeedAsset } from "@/routes/(app)/_home/feed/-lib/feed-data";
 
 export const getPostsFn = createServerFn({ method: "GET" })
 	.inputValidator((input: { page?: number; tag?: string }) => input)
@@ -63,6 +64,40 @@ export const postStatsQueryOptions = () =>
 		queryKey: ["post-stats"],
 		queryFn: () => getPostStatsFn()
 	});
+
+const VIDEO_FORMATS = new Set(["mp4", "webm"]);
+
+export function toFeedAsset(item: {
+	id: string;
+	slug: string;
+	title: string;
+	coverThumb: string | null;
+	tags: string[];
+	format: string;
+	resolution: string;
+	access: string;
+	isLoop: number;
+	downloadCount: number;
+	publishedAt: string | null;
+	previewUrl?: string | null;
+	clipUrl?: string | null;
+}): FeedAsset {
+	return {
+		id: item.id,
+		slug: item.slug,
+		title: item.title,
+		tag: item.tags[0] ?? "",
+		type: VIDEO_FORMATS.has(item.format) ? "video" : "image",
+		access: item.access === "free" ? "free" : "members",
+		format: item.format,
+		resolution: item.resolution,
+		coverThumb: item.coverThumb ?? "",
+		previewUrl: item.previewUrl ?? undefined,
+		clipUrl: item.clipUrl ?? undefined,
+		popularity: item.downloadCount,
+		publishedAt: item.publishedAt ?? ""
+	};
+}
 
 export const downloadAssetFn = createServerFn({ method: "GET" })
 	.inputValidator((input: { data: string }) => input)

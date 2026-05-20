@@ -1,0 +1,10 @@
+{
+  "name": "@workspace/media",
+  "version": "0.0.1",
+  "type": "module",
+  "main": "./src/index.ts",
+  "dependencies": {
+    "mediabunny": "latest",
+    "@mediabunny/server": "latest"
+  }
+}

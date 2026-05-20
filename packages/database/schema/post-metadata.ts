@@ -10,8 +10,15 @@ export const postMetadata = sqliteTable("post_metadata", {
 	duration: integer("duration"),
 	isLoop: integer("is_loop").notNull().default(0),
 	fileKey: text("file_key").notNull(),
+	previewKey: text("preview_key"),
+	clipKey: text("clip_key"),
 	fileSize: integer("file_size").notNull(),
 	access: text("access", { enum: ["free", "premium"] })
 		.notNull()
-		.default("premium")
+		.default("premium"),
+	processingStatus: text("processing_status", {
+		enum: ["pending", "processing", "ready", "failed"]
+	})
+		.notNull()
+		.default("pending")
 });

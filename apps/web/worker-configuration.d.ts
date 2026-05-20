@@ -6,7 +6,7 @@ declare namespace Cloudflare {
 		VITE_API_URL: string;
 		VITE_URL: string;
 		INTERNAL_SECRET: string;
-		API_SERVICE: Fetcher /* tanflare-api */;
+		API_SERVICE: Fetcher /* leith-api */;
 	}
 }
 interface CloudflareBindings extends Cloudflare.Env {}

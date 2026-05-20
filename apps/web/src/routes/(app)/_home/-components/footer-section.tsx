@@ -19,7 +19,7 @@ export function FooterSection() {
 					</span>
 					<Link
 						to="/feed"
-						search={{ page: 1 }}
+						search={{ page: 1, type: "all", sort: "newest" }}
 						className="text-sm text-muted-foreground hover:text-foreground transition-colors"
 					>
 						Browse

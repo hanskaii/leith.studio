@@ -1,0 +1,30 @@
+[package]
+name = "media-processor"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+tokio = { version = "1", features = [
+	"rt",
+	"rt-multi-thread",
+	"net",
+	"process",
+	"fs",
+	"io-util",
+	"sync",
+	"macros",
+	"signal"
+] }
+hyper = { version = "1", features = ["http1", "server"] }
+hyper-util = { version = "0.1", features = ["tokio"] }
+http-body-util = "0.1"
+anyhow = "1"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+
+[profile.release]
+opt-level = "z"
+lto = true
+codegen-units = 1
+strip = true
+panic = "abort"

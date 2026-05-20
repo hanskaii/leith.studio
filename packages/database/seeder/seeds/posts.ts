@@ -209,7 +209,7 @@ export async function seedPosts(db: DrizzleD1Database<typeof schema> | any) {
 		}
 	];
 
-	// format / resolution / fileKey / fileSize / access / duration / isLoop
+	// format / resolution / fileKey / previewKey / clipKey / fileSize / access / duration / isLoop / processingStatus
 	const metadataData = [
 		{
 			postId: "post_noir_rain",
@@ -218,8 +218,11 @@ export async function seedPosts(db: DrizzleD1Database<typeof schema> | any) {
 			duration: 30,
 			isLoop: 1,
 			fileKey: "assets/noir-rain-loop.mp4",
+			previewKey: "previews/noir-rain-loop-480p.mp4",
+			clipKey: "clips/noir-rain-loop-clip.mp4",
 			fileSize: Math.round(180 * MB),
-			access: "free" as const
+			access: "free" as const,
+			processingStatus: "ready" as const
 		},
 		{
 			postId: "post_obsidian_fog",
@@ -228,8 +231,11 @@ export async function seedPosts(db: DrizzleD1Database<typeof schema> | any) {
 			duration: 60,
 			isLoop: 1,
 			fileKey: "assets/obsidian-fog.mp4",
+			previewKey: "previews/obsidian-fog-480p.mp4",
+			clipKey: "clips/obsidian-fog-clip.mp4",
 			fileSize: Math.round(340 * MB),
-			access: "premium" as const
+			access: "premium" as const,
+			processingStatus: "ready" as const
 		},
 		{
 			postId: "post_ember_drift",
@@ -238,8 +244,11 @@ export async function seedPosts(db: DrizzleD1Database<typeof schema> | any) {
 			duration: 20,
 			isLoop: 1,
 			fileKey: "assets/ember-drift.mp4",
+			previewKey: "previews/ember-drift-480p.mp4",
+			clipKey: "clips/ember-drift-clip.mp4",
 			fileSize: Math.round(95 * MB),
-			access: "premium" as const
+			access: "premium" as const,
+			processingStatus: "ready" as const
 		},
 		{
 			postId: "post_shattered_glass",
@@ -248,8 +257,11 @@ export async function seedPosts(db: DrizzleD1Database<typeof schema> | any) {
 			duration: 5,
 			isLoop: 0,
 			fileKey: "assets/shattered-glass.webm",
+			previewKey: "previews/shattered-glass-480p.mp4",
+			clipKey: "clips/shattered-glass-clip.mp4",
 			fileSize: Math.round(210 * MB),
-			access: "premium" as const
+			access: "premium" as const,
+			processingStatus: "ready" as const
 		},
 		{
 			postId: "post_deep_space",
@@ -258,8 +270,11 @@ export async function seedPosts(db: DrizzleD1Database<typeof schema> | any) {
 			duration: null,
 			isLoop: 0,
 			fileKey: "assets/deep-space.jpg",
+			previewKey: null,
+			clipKey: null,
 			fileSize: Math.round(18 * MB),
-			access: "free" as const
+			access: "free" as const,
+			processingStatus: "ready" as const
 		},
 		{
 			postId: "post_neon_city",
@@ -268,8 +283,11 @@ export async function seedPosts(db: DrizzleD1Database<typeof schema> | any) {
 			duration: null,
 			isLoop: 0,
 			fileKey: "assets/neon-city-night.jpg",
+			previewKey: null,
+			clipKey: null,
 			fileSize: Math.round(22 * MB),
-			access: "free" as const
+			access: "free" as const,
+			processingStatus: "ready" as const
 		},
 		{
 			postId: "post_storm_transition",
@@ -278,8 +296,11 @@ export async function seedPosts(db: DrizzleD1Database<typeof schema> | any) {
 			duration: 3,
 			isLoop: 0,
 			fileKey: "assets/storm-transition.mp4",
+			previewKey: "previews/storm-transition-480p.mp4",
+			clipKey: "clips/storm-transition-clip.mp4",
 			fileSize: Math.round(45 * MB),
-			access: "premium" as const
+			access: "premium" as const,
+			processingStatus: "ready" as const
 		},
 		{
 			postId: "post_blood_moon",
@@ -288,8 +309,11 @@ export async function seedPosts(db: DrizzleD1Database<typeof schema> | any) {
 			duration: 45,
 			isLoop: 1,
 			fileKey: "assets/blood-moon-loop.mp4",
+			previewKey: "previews/blood-moon-loop-480p.mp4",
+			clipKey: "clips/blood-moon-loop-clip.mp4",
 			fileSize: Math.round(260 * MB),
-			access: "premium" as const
+			access: "premium" as const,
+			processingStatus: "ready" as const
 		},
 		{
 			postId: "post_dark_forest",
@@ -298,8 +322,11 @@ export async function seedPosts(db: DrizzleD1Database<typeof schema> | any) {
 			duration: null,
 			isLoop: 0,
 			fileKey: "assets/dark-forest.jpg",
+			previewKey: null,
+			clipKey: null,
 			fileSize: Math.round(12 * MB),
-			access: "premium" as const
+			access: "premium" as const,
+			processingStatus: "ready" as const
 		},
 		{
 			postId: "post_smoke_curtain",
@@ -308,8 +335,11 @@ export async function seedPosts(db: DrizzleD1Database<typeof schema> | any) {
 			duration: 10,
 			isLoop: 1,
 			fileKey: "assets/smoke-curtain.webm",
+			previewKey: "previews/smoke-curtain-480p.mp4",
+			clipKey: "clips/smoke-curtain-clip.mp4",
 			fileSize: Math.round(75 * MB),
-			access: "free" as const
+			access: "free" as const,
+			processingStatus: "ready" as const
 		},
 		{
 			postId: "post_void_ambience",
@@ -318,8 +348,11 @@ export async function seedPosts(db: DrizzleD1Database<typeof schema> | any) {
 			duration: 120,
 			isLoop: 1,
 			fileKey: "assets/void-ambience.mp4",
+			previewKey: "previews/void-ambience-480p.mp4",
+			clipKey: "clips/void-ambience-clip.mp4",
 			fileSize: Math.round(480 * MB),
-			access: "premium" as const
+			access: "premium" as const,
+			processingStatus: "ready" as const
 		},
 		{
 			postId: "post_glitch_wipe",
@@ -328,8 +361,11 @@ export async function seedPosts(db: DrizzleD1Database<typeof schema> | any) {
 			duration: 2,
 			isLoop: 0,
 			fileKey: "assets/glitch-wipe.mp4",
+			previewKey: "previews/glitch-wipe-480p.mp4",
+			clipKey: "clips/glitch-wipe-clip.mp4",
 			fileSize: Math.round(30 * MB),
-			access: "premium" as const
+			access: "premium" as const,
+			processingStatus: "ready" as const
 		}
 	];
 

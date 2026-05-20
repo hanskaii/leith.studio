@@ -1,4 +1,3 @@
-import { motion } from "framer-motion";
 import { Button } from "@workspace/ui";
 import {
 	ArrowRightIcon,
@@ -6,7 +5,6 @@ import {
 } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { ACCESS_URL } from "../-lib/home-data";
-import { fadeUp, stagger } from "../-lib/motion-variants";
 
 const INCLUSIONS = [
 	"140+ assets, immediately",
@@ -18,32 +16,18 @@ const INCLUSIONS = [
 export function AllAccessSection() {
 	return (
 		<section id="access" className="w-full border-t border-border/40">
-			<motion.div
-				initial="hidden"
-				whileInView="visible"
-				viewport={{ once: true, margin: "-60px" }}
-				variants={stagger}
-				className="max-w-[1280px] mx-auto px-5 sm:px-8 py-14 grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-20 items-start"
-			>
+			<div className="max-w-[1280px] mx-auto px-5 sm:px-8 py-14 grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-20 items-start">
 				<div>
-					<motion.h2
-						variants={fadeUp}
-						custom={1}
-						className="font-heading text-5xl lg:text-[4rem] font-bold tracking-tight leading-[1.04] text-foreground"
-					>
+					<h2 className="font-heading text-5xl lg:text-[4rem] font-bold tracking-tight leading-[1.04] text-foreground">
 						All Access.
 						<br />
 						The full Leith
 						<br />
 						library. Forever.
-					</motion.h2>
+					</h2>
 				</div>
 
-				<motion.div
-					variants={fadeUp}
-					custom={2}
-					className="flex flex-col gap-5 lg:pt-10"
-				>
+				<div className="flex flex-col gap-5 lg:pt-10">
 					<p className="text-muted-foreground text-base leading-relaxed max-w-[40ch]">
 						Launch price{" "}
 						<span className="font-semibold text-primary">
@@ -82,8 +66,8 @@ export function AllAccessSection() {
 							</a>
 						</Button>
 					</div>
-				</motion.div>
-			</motion.div>
+				</div>
+			</div>
 		</section>
 	);
 }
