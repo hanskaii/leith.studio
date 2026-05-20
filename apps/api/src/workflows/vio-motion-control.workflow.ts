@@ -1,5 +1,9 @@
 import { WorkflowEntrypoint } from "cloudflare:workers";
-import type { WorkflowEvent, WorkflowStep } from "cloudflare:workers";
+import type {
+	WorkflowEvent,
+	WorkflowStep,
+	WorkflowSleepDuration
+} from "cloudflare:workers";
 import { VioService } from "../services/vio.service";
 import type { MotionControlParams, Generation } from "../services/vio.service";
 import type { HonoEnv } from "../types/hono.types";
@@ -8,7 +12,7 @@ type Env = HonoEnv["Bindings"];
 
 export type VioMotionControlParams = MotionControlParams;
 
-function sleepDuration(attempt: number): string {
+function sleepDuration(attempt: number): WorkflowSleepDuration {
 	if (attempt < 5) return "5 seconds";
 	if (attempt < 20) return "10 seconds";
 	return "15 seconds";

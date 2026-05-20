@@ -1,5 +1,9 @@
 import { WorkflowEntrypoint } from "cloudflare:workers";
-import type { WorkflowEvent, WorkflowStep } from "cloudflare:workers";
+import type {
+	WorkflowEvent,
+	WorkflowStep,
+	WorkflowSleepDuration
+} from "cloudflare:workers";
 import { VioService } from "../services/vio.service";
 import type { HonoEnv } from "../types/hono.types";
 import {
@@ -22,13 +26,13 @@ export type TopicGenerationParams = {
 	videoPromptTemplate: string;
 };
 
-function imageSleepDuration(attempt: number): string {
+function imageSleepDuration(attempt: number): WorkflowSleepDuration {
 	if (attempt < 5) return "5 seconds";
 	if (attempt < 15) return "10 seconds";
 	return "15 seconds";
 }
 
-function videoSleepDuration(attempt: number): string {
+function videoSleepDuration(attempt: number): WorkflowSleepDuration {
 	if (attempt < 5) return "10 seconds";
 	if (attempt < 20) return "15 seconds";
 	return "20 seconds";

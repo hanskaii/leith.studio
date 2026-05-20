@@ -1,5 +1,9 @@
 import { WorkflowEntrypoint } from "cloudflare:workers";
-import type { WorkflowEvent, WorkflowStep } from "cloudflare:workers";
+import type {
+	WorkflowEvent,
+	WorkflowStep,
+	WorkflowSleepDuration
+} from "cloudflare:workers";
 import { VioService } from "../services/vio.service";
 import type {
 	GenerateImageParams,
@@ -15,7 +19,7 @@ export type VioImageParams = GenerateImageParams & {
 	autoUpscale?: boolean;
 };
 
-function sleepDuration(attempt: number): string {
+function sleepDuration(attempt: number): WorkflowSleepDuration {
 	if (attempt < 5) return "3 seconds";
 	if (attempt < 15) return "5 seconds";
 	return "10 seconds";
