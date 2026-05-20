@@ -4,7 +4,11 @@ import { useSuspenseQuery } from "@tanstack/react-query";
 import { ArrowLeft01Icon, Download01Icon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { Button } from "@workspace/ui";
-import { postQueryOptions, postsQueryOptions, toFeedAsset } from "@/routes/-fn/posts";
+import {
+	postQueryOptions,
+	postsQueryOptions,
+	toFeedAsset
+} from "@/routes/-fn/posts";
 import { FooterSection } from "../-components/footer-section";
 import { FeedCard, FeedCardSkeleton } from "./-components/feed-card";
 
@@ -52,7 +56,8 @@ function RelatedPosts({ tag, currentId }: { tag: string; currentId: string }) {
 	const items = data?.items ?? [];
 
 	const sameTag = items.filter(
-		(p) => p.id !== currentId && Array.isArray(p.tags) && p.tags.includes(tag)
+		(p) =>
+			p.id !== currentId && Array.isArray(p.tags) && p.tags.includes(tag)
 	);
 	const others = items.filter(
 		(p) =>
@@ -86,14 +91,22 @@ function AssetDetail() {
 
 	if (!post) return null;
 
-	const isVideo =
-		post.format === "mp4" || post.format === "webm";
+	const VIDEO_FORMATS = new Set(["mp4", "webm"]);
+	const AUDIO_FORMATS = new Set(["mp3", "wav", "ogg", "aac"]);
+	const isVideo = VIDEO_FORMATS.has(post.format);
+	const isAudio = AUDIO_FORMATS.has(post.format);
 	const tag = Array.isArray(post.tags) ? (post.tags[0] ?? "") : "";
+
+	const assetTypeLabel = isVideo
+		? "Video loop"
+		: isAudio
+			? "Audio"
+			: "Still image";
 
 	const specs = [
 		{ label: "Format", value: post.format.toUpperCase() },
-		{ label: "Resolution", value: post.resolution },
-		{ label: "Type", value: isVideo ? "Video loop" : "Still image" },
+		...(!isAudio ? [{ label: "Resolution", value: post.resolution }] : []),
+		{ label: "Type", value: assetTypeLabel },
 		{
 			label: "Access",
 			value: post.access === "free" ? "Free" : "All Access"
@@ -122,7 +135,9 @@ function AssetDetail() {
 				</nav>
 
 				{/* Media */}
-				<div className="mb-10 aspect-[16/9] overflow-hidden rounded-lg bg-muted">
+				<div
+					className={`mb-10 overflow-hidden rounded-lg bg-muted ${isAudio ? "" : "aspect-[16/9]"}`}
+				>
 					{isVideo && post.previewUrl ? (
 						<video
 							autoPlay
@@ -133,6 +148,20 @@ function AssetDetail() {
 							src={post.previewUrl}
 							className="h-full w-full object-cover"
 						/>
+					) : isAudio && post.previewUrl ? (
+						<div className="flex flex-col items-center gap-4 px-6 py-10">
+							<img
+								src={post.coverThumb ?? ""}
+								alt={post.title}
+								className="h-40 w-40 rounded-md object-cover shadow-md"
+								loading="eager"
+							/>
+							<audio
+								controls
+								src={post.previewUrl}
+								className="w-full max-w-lg"
+							/>
+						</div>
 					) : (
 						<img
 							src={post.coverThumb ?? ""}
@@ -163,8 +192,14 @@ function AssetDetail() {
 						</h1>
 
 						<p className="mt-2.5 text-sm text-muted-foreground">
-							{post.format.toUpperCase()} · {post.resolution} ·{" "}
-							{isVideo ? "Seamless loop" : "Still image"}
+							{post.format.toUpperCase()}
+							{!isAudio && ` · ${post.resolution}`}
+							{" · "}
+							{isVideo
+								? "Seamless loop"
+								: isAudio
+									? "Audio"
+									: "Still image"}
 						</p>
 					</div>
 

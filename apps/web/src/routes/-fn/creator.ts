@@ -20,6 +20,12 @@ type UpdatePostResponse = InferResponseType<
 	(typeof client.api.v1.creator.posts)[":id"]["$patch"],
 	200
 >;
+type PostStatusResponse = InferResponseType<
+	(typeof client.api.v1.creator.posts)[":id"]["status"]["$get"],
+	200
+>;
+
+export type PostStatusData = NonNullable<PostStatusResponse["data"]>;
 
 type CreatePostInput = InferRequestType<
 	typeof client.api.v1.creator.posts.$post
@@ -109,8 +115,33 @@ export const uploadAssetFn = createServerFn({ method: "POST" })
 		})
 	);
 
+export const getPostStatusFn = createServerFn({ method: "GET" })
+	.inputValidator((input: { data: string }) => input)
+	.handler(({ data: { data: id } }) =>
+		handleError(async () => {
+			const api = createApiClient();
+			const res = await api.api.v1.creator.posts[":id"].status.$get({
+				param: { id }
+			});
+			const json = (await res.json()) as PostStatusResponse;
+			return json.data;
+		})
+	);
+
 export const creatorPostsQueryOptions = () =>
 	queryOptions({
 		queryKey: ["creator-posts"],
 		queryFn: () => getCreatorPostsFn()
+	});
+
+export const postStatusQueryOptions = (id: string, enabled: boolean) =>
+	queryOptions({
+		queryKey: ["post-status", id],
+		queryFn: () => getPostStatusFn({ data: id }),
+		enabled,
+		refetchInterval: (query) => {
+			const status = query.state.data?.processingStatus;
+			if (status === "processing" || status === "pending") return 3000;
+			return false;
+		}
 	});

@@ -16,13 +16,29 @@ const ALLOWED_ASSET_TYPES: Record<string, string> = {
 	"image/png": "png",
 	"image/webp": "webp",
 	"video/mp4": "mp4",
-	"video/webm": "webm"
+	"video/webm": "webm",
+	"audio/mpeg": "mp3",
+	"audio/mp3": "mp3",
+	"audio/wav": "wav",
+	"audio/ogg": "ogg",
+	"audio/aac": "aac"
 };
+
+const PROCESSABLE_FORMATS = new Set([
+	"mp4",
+	"webm",
+	"mp3",
+	"wav",
+	"ogg",
+	"aac"
+]);
 
 const MAX_ASSET_SIZE = 200 * 1024 * 1024; // 200 MB
 
 const AssetMetaSchema = z.object({
-	format: z.enum(["mp4", "png", "jpg", "webm"]).optional(),
+	format: z
+		.enum(["mp4", "png", "jpg", "webm", "mp3", "wav", "ogg", "aac"])
+		.optional(),
 	resolution: z.string().optional(),
 	duration: z.number().int().positive().optional().nullable(),
 	isLoop: z.boolean().optional(),
@@ -118,6 +134,17 @@ const creatorHandler = new Hono<HonoEnv>()
 					fileSize: data.fileSize!,
 					access: data.access ?? "premium"
 				});
+
+				if (PROCESSABLE_FORMATS.has(data.format!)) {
+					await c.env.VIDEO_PROCESSING_WORKFLOW.create({
+						params: {
+							postId,
+							slug,
+							fileKey: data.fileKey!,
+							format: data.format!
+						}
+					});
+				}
 			}
 
 			return ApiResponse.created(c, "Post created", post);
@@ -190,8 +217,12 @@ const creatorHandler = new Hono<HonoEnv>()
 						metaUpdates.duration = data.duration;
 					if (data.isLoop !== undefined)
 						metaUpdates.isLoop = data.isLoop ? 1 : 0;
-					if (data.fileKey !== undefined)
+					if (data.fileKey !== undefined) {
 						metaUpdates.fileKey = data.fileKey;
+						metaUpdates.processingStatus = "pending";
+						metaUpdates.previewKey = null;
+						metaUpdates.clipKey = null;
+					}
 					if (data.fileSize !== undefined)
 						metaUpdates.fileSize = data.fileSize;
 					if (data.access !== undefined)
@@ -215,6 +246,24 @@ const creatorHandler = new Hono<HonoEnv>()
 						fileKey: data.fileKey,
 						fileSize: data.fileSize,
 						access: data.access ?? "premium"
+					});
+				}
+
+				const newFileKey = data.fileKey;
+				const newFormat = data.format ?? existingMeta?.format;
+				if (
+					newFileKey &&
+					newFormat &&
+					PROCESSABLE_FORMATS.has(newFormat)
+				) {
+					const slug = existing.slug;
+					await c.env.VIDEO_PROCESSING_WORKFLOW.create({
+						params: {
+							postId: id,
+							slug,
+							fileKey: newFileKey,
+							format: newFormat
+						}
 					});
 				}
 			}
@@ -245,6 +294,27 @@ const creatorHandler = new Hono<HonoEnv>()
 				.then((rows) => rows[0]);
 
 			return ApiResponse.ok(c, "Post updated", updated);
+		}
+	)
+	.get(
+		"/posts/:id/status",
+		authMiddleware,
+		protect("content.manage"),
+		async (c) => {
+			const db = c.get("db");
+			const id = c.req.param("id");
+
+			const meta = await db.query.postMetadata.findFirst({
+				where: eq(postMetadata.postId, id)
+			});
+			if (!meta) throw ApiError.notFound("Post metadata not found");
+
+			return ApiResponse.ok(c, "Processing status", {
+				processingStatus: meta.processingStatus,
+				previewKey: meta.previewKey ?? null,
+				clipKey: meta.clipKey ?? null,
+				format: meta.format
+			});
 		}
 	)
 	.delete(

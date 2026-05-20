@@ -11,9 +11,13 @@ const PAGE_SIZE = 12;
 
 const CONTENT_TYPES: Record<string, string> = {
 	mp4: "video/mp4",
+	webm: "video/webm",
 	png: "image/png",
 	jpg: "image/jpeg",
-	webm: "video/webm"
+	mp3: "audio/mpeg",
+	wav: "audio/wav",
+	ogg: "audio/ogg",
+	aac: "audio/aac"
 };
 
 const postsHandler = new Hono<HonoEnv>()
@@ -121,7 +125,9 @@ const postsHandler = new Hono<HonoEnv>()
 		if (!row) throw ApiError.notFound("Post not found");
 
 		const { previewKey, clipKey, ...post } = row;
-		const previewUrl = previewKey ? `${origin}/api/files/${previewKey}` : null;
+		const previewUrl = previewKey
+			? `${origin}/api/files/${previewKey}`
+			: null;
 		const clipUrl = clipKey ? `${origin}/api/files/${clipKey}` : null;
 
 		return ApiResponse.ok(c, "Post", { ...post, previewUrl, clipUrl });

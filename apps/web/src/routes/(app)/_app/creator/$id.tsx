@@ -1,6 +1,7 @@
 import { createFileRoute, redirect, useNavigate } from "@tanstack/react-router";
 import {
 	useSuspenseQuery,
+	useQuery,
 	useMutation,
 	useQueryClient
 } from "@tanstack/react-query";
@@ -25,7 +26,8 @@ import {
 	createPostFn,
 	updatePostFn,
 	uploadImageFn,
-	uploadAssetFn
+	uploadAssetFn,
+	postStatusQueryOptions
 } from "@/routes/-fn/creator";
 import { PostSchema } from "./-lib/schema";
 import { EditorHeader } from "./-components/editor-header";
@@ -40,7 +42,10 @@ export const Route = createFileRoute("/(app)/_app/creator/$id")({
 			actor: context.session.user
 		});
 		if (!result.allowed) {
-			throw redirect({ to: "/feed", search: { page: 1, type: "all", sort: "newest" } });
+			throw redirect({
+				to: "/feed",
+				search: { page: 1, type: "all", sort: "newest" }
+			});
 		}
 	},
 	component: PostEditorPage
@@ -57,6 +62,9 @@ function PostEditorPage() {
 
 	const [isUploadingCover, setIsUploadingCover] = useState(false);
 	const [isUploadingAsset, setIsUploadingAsset] = useState(false);
+
+	const hasMedia = !isNew && !!(existing as any)?.fileKey;
+	const { data: postStatus } = useQuery(postStatusQueryOptions(id, hasMedia));
 
 	const editor = useEditor({
 		extensions: [
@@ -304,14 +312,18 @@ function PostEditorPage() {
 												value={field.state.value}
 												onBlur={field.handleBlur}
 												onChange={(e) =>
-													field.handleChange(e.target.value)
+													field.handleChange(
+														e.target.value
+													)
 												}
 												disabled={isPending}
 												placeholder="Warm Rustic Mountain Lodge Background"
 											/>
 											{isInvalid && (
 												<FieldError
-													errors={field.state.meta.errors}
+													errors={
+														field.state.meta.errors
+													}
 												/>
 											)}
 										</FieldContent>
@@ -342,7 +354,9 @@ function PostEditorPage() {
 											value={field.state.value}
 											onBlur={field.handleBlur}
 											onChange={(e) =>
-												field.handleChange(e.target.value)
+												field.handleChange(
+													e.target.value
+												)
 											}
 											disabled={isPending}
 											placeholder="cozy, fireplace, twitch background"
@@ -364,12 +378,15 @@ function PostEditorPage() {
 							onUpload={handleAssetUpload}
 						/>
 
-						<AssetMetadataFields form={form} isPending={isPending} />
+						<AssetMetadataFields
+							form={form}
+							isPending={isPending}
+						/>
 
 						<BodyEditorField editor={editor} />
 					</div>
 
-					<div className="hidden md:flex flex-col gap-1.5">
+					<div className="hidden md:flex flex-col gap-4">
 						<p
 							className="text-xs font-medium"
 							style={{
@@ -380,6 +397,9 @@ function PostEditorPage() {
 						>
 							Preview
 						</p>
+
+						{hasMedia && <AssetPreview postStatus={postStatus} />}
+
 						<div
 							className="rounded-md border px-6 py-5 min-h-[400px] overflow-auto"
 							style={{
@@ -401,4 +421,94 @@ function PostEditorPage() {
 			</form>
 		</div>
 	);
+}
+
+type PostStatus = {
+	processingStatus:
+		| "pending"
+		| "processing"
+		| "ready"
+		| "failed"
+		| null
+		| undefined;
+	previewKey: string | null | undefined;
+	clipKey: string | null | undefined;
+	format: string | null | undefined;
+};
+
+function AssetPreview({
+	postStatus
+}: {
+	postStatus: PostStatus | null | undefined;
+}) {
+	const status = postStatus?.processingStatus;
+	const previewKey = postStatus?.previewKey;
+	const format = postStatus?.format;
+
+	if (!status || status === "pending" || status === "processing") {
+		return (
+			<div
+				className="rounded-md border flex items-center justify-center gap-2 py-6 text-sm"
+				style={{
+					borderColor: "oklch(0.88 0.008 80)",
+					background: "oklch(0.95 0.010 80)",
+					color: "oklch(0.50 0.010 60)",
+					fontFamily: "var(--font-sans)"
+				}}
+			>
+				<span
+					className="inline-block w-3.5 h-3.5 rounded-full border-2 border-current border-t-transparent animate-spin"
+					aria-hidden
+				/>
+				Processing preview…
+			</div>
+		);
+	}
+
+	if (status === "failed") {
+		return (
+			<div
+				className="rounded-md border px-4 py-3 text-sm"
+				style={{
+					borderColor: "oklch(0.88 0.008 80)",
+					background: "oklch(0.96 0.012 25)",
+					color: "oklch(0.50 0.12 25)",
+					fontFamily: "var(--font-sans)"
+				}}
+			>
+				Preview generation failed.
+			</div>
+		);
+	}
+
+	if (status === "ready" && previewKey) {
+		const src = `/api/files/${previewKey}`;
+		const isAudio = format && ["mp3", "wav", "ogg", "aac"].includes(format);
+
+		if (isAudio) {
+			return (
+				<audio
+					key={previewKey}
+					controls
+					className="w-full rounded-md"
+					style={{ accentColor: "oklch(0.62 0.14 47)" }}
+				>
+					<source src={src} />
+				</audio>
+			);
+		}
+
+		return (
+			<video
+				key={previewKey}
+				controls
+				className="w-full rounded-md"
+				style={{ background: "#000" }}
+			>
+				<source src={src} type="video/mp4" />
+			</video>
+		);
+	}
+
+	return null;
 }

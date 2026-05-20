@@ -3,7 +3,7 @@ export type FeedAsset = {
 	slug: string;
 	title: string;
 	tag: string;
-	type: "video" | "image";
+	type: "video" | "audio" | "image";
 	access: "free" | "members";
 	format: string;
 	resolution: string;

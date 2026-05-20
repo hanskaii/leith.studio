@@ -66,6 +66,13 @@ export const postStatsQueryOptions = () =>
 	});
 
 const VIDEO_FORMATS = new Set(["mp4", "webm"]);
+const AUDIO_FORMATS = new Set(["mp3", "wav", "ogg", "aac"]);
+
+function assetType(format: string): "video" | "audio" | "image" {
+	if (VIDEO_FORMATS.has(format)) return "video";
+	if (AUDIO_FORMATS.has(format)) return "audio";
+	return "image";
+}
 
 export function toFeedAsset(item: {
 	id: string;
@@ -87,7 +94,7 @@ export function toFeedAsset(item: {
 		slug: item.slug,
 		title: item.title,
 		tag: item.tags[0] ?? "",
-		type: VIDEO_FORMATS.has(item.format) ? "video" : "image",
+		type: assetType(item.format),
 		access: item.access === "free" ? "free" : "members",
 		format: item.format,
 		resolution: item.resolution,

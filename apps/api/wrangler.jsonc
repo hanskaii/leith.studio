@@ -77,7 +77,7 @@
 	"containers": [
 		{
 			"class_name": "MediaContainer",
-			"image": "./apps/media-container"
+			"image": "../media-container"
 		}
 	]
 }
