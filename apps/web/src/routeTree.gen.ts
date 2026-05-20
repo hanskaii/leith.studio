@@ -26,6 +26,9 @@ import { Route as appHomeLegalsTermsRouteImport } from './routes/(app)/_home/leg
 import { Route as appHomeLegalsPrivacyPolicyRouteImport } from './routes/(app)/_home/legals/privacy-policy'
 import { Route as appHomeFeedSlugRouteImport } from './routes/(app)/_home/feed/$slug'
 import { Route as appAppCreatorIdRouteImport } from './routes/(app)/_app/creator/$id'
+import { Route as appAppStudioTopicsIndexRouteImport } from './routes/(app)/_app/studio/topics/index'
+import { Route as appAppStudioSettingsIndexRouteImport } from './routes/(app)/_app/studio/settings/index'
+import { Route as appAppStudioReviewIndexRouteImport } from './routes/(app)/_app/studio/review/index'
 import { Route as appAppAccountSecurityIndexRouteImport } from './routes/(app)/_app/account/security/index'
 import { Route as appAppAccountProfileIndexRouteImport } from './routes/(app)/_app/account/profile/index'
 import { Route as appAppAccountBillingIndexRouteImport } from './routes/(app)/_app/account/billing/index'
@@ -115,6 +118,22 @@ const appAppCreatorIdRoute = appAppCreatorIdRouteImport.update({
   path: '/creator/$id',
   getParentRoute: () => appAppRouteRoute,
 } as any)
+const appAppStudioTopicsIndexRoute = appAppStudioTopicsIndexRouteImport.update({
+  id: '/studio/topics/',
+  path: '/studio/topics/',
+  getParentRoute: () => appAppRouteRoute,
+} as any)
+const appAppStudioSettingsIndexRoute =
+  appAppStudioSettingsIndexRouteImport.update({
+    id: '/studio/settings/',
+    path: '/studio/settings/',
+    getParentRoute: () => appAppRouteRoute,
+  } as any)
+const appAppStudioReviewIndexRoute = appAppStudioReviewIndexRouteImport.update({
+  id: '/studio/review/',
+  path: '/studio/review/',
+  getParentRoute: () => appAppRouteRoute,
+} as any)
 const appAppAccountSecurityIndexRoute =
   appAppAccountSecurityIndexRouteImport.update({
     id: '/security/',
@@ -175,6 +194,9 @@ export interface FileRoutesByFullPath {
   '/account/billing/': typeof appAppAccountBillingIndexRoute
   '/account/profile/': typeof appAppAccountProfileIndexRoute
   '/account/security/': typeof appAppAccountSecurityIndexRoute
+  '/studio/review/': typeof appAppStudioReviewIndexRoute
+  '/studio/settings/': typeof appAppStudioSettingsIndexRoute
+  '/studio/topics/': typeof appAppStudioTopicsIndexRoute
 }
 export interface FileRoutesByTo {
   '/account': typeof appAppAccountRouteRouteWithChildren
@@ -196,6 +218,9 @@ export interface FileRoutesByTo {
   '/account/billing': typeof appAppAccountBillingIndexRoute
   '/account/profile': typeof appAppAccountProfileIndexRoute
   '/account/security': typeof appAppAccountSecurityIndexRoute
+  '/studio/review': typeof appAppStudioReviewIndexRoute
+  '/studio/settings': typeof appAppStudioSettingsIndexRoute
+  '/studio/topics': typeof appAppStudioTopicsIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -223,6 +248,9 @@ export interface FileRoutesById {
   '/(app)/_app/account/billing/': typeof appAppAccountBillingIndexRoute
   '/(app)/_app/account/profile/': typeof appAppAccountProfileIndexRoute
   '/(app)/_app/account/security/': typeof appAppAccountSecurityIndexRoute
+  '/(app)/_app/studio/review/': typeof appAppStudioReviewIndexRoute
+  '/(app)/_app/studio/settings/': typeof appAppStudioSettingsIndexRoute
+  '/(app)/_app/studio/topics/': typeof appAppStudioTopicsIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -246,6 +274,9 @@ export interface FileRouteTypes {
     | '/account/billing/'
     | '/account/profile/'
     | '/account/security/'
+    | '/studio/review/'
+    | '/studio/settings/'
+    | '/studio/topics/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/account'
@@ -267,6 +298,9 @@ export interface FileRouteTypes {
     | '/account/billing'
     | '/account/profile'
     | '/account/security'
+    | '/studio/review'
+    | '/studio/settings'
+    | '/studio/topics'
   id:
     | '__root__'
     | '/(app)'
@@ -293,6 +327,9 @@ export interface FileRouteTypes {
     | '/(app)/_app/account/billing/'
     | '/(app)/_app/account/profile/'
     | '/(app)/_app/account/security/'
+    | '/(app)/_app/studio/review/'
+    | '/(app)/_app/studio/settings/'
+    | '/(app)/_app/studio/topics/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -420,6 +457,27 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof appAppCreatorIdRouteImport
       parentRoute: typeof appAppRouteRoute
     }
+    '/(app)/_app/studio/topics/': {
+      id: '/(app)/_app/studio/topics/'
+      path: '/studio/topics'
+      fullPath: '/studio/topics/'
+      preLoaderRoute: typeof appAppStudioTopicsIndexRouteImport
+      parentRoute: typeof appAppRouteRoute
+    }
+    '/(app)/_app/studio/settings/': {
+      id: '/(app)/_app/studio/settings/'
+      path: '/studio/settings'
+      fullPath: '/studio/settings/'
+      preLoaderRoute: typeof appAppStudioSettingsIndexRouteImport
+      parentRoute: typeof appAppRouteRoute
+    }
+    '/(app)/_app/studio/review/': {
+      id: '/(app)/_app/studio/review/'
+      path: '/studio/review'
+      fullPath: '/studio/review/'
+      preLoaderRoute: typeof appAppStudioReviewIndexRouteImport
+      parentRoute: typeof appAppRouteRoute
+    }
     '/(app)/_app/account/security/': {
       id: '/(app)/_app/account/security/'
       path: '/security'
@@ -512,6 +570,9 @@ interface appAppRouteRouteChildren {
   appAppChatIndexRoute: typeof appAppChatIndexRoute
   appAppCreatorIndexRoute: typeof appAppCreatorIndexRoute
   appAppOverviewIndexRoute: typeof appAppOverviewIndexRoute
+  appAppStudioReviewIndexRoute: typeof appAppStudioReviewIndexRoute
+  appAppStudioSettingsIndexRoute: typeof appAppStudioSettingsIndexRoute
+  appAppStudioTopicsIndexRoute: typeof appAppStudioTopicsIndexRoute
 }
 
 const appAppRouteRouteChildren: appAppRouteRouteChildren = {
@@ -521,6 +582,9 @@ const appAppRouteRouteChildren: appAppRouteRouteChildren = {
   appAppChatIndexRoute: appAppChatIndexRoute,
   appAppCreatorIndexRoute: appAppCreatorIndexRoute,
   appAppOverviewIndexRoute: appAppOverviewIndexRoute,
+  appAppStudioReviewIndexRoute: appAppStudioReviewIndexRoute,
+  appAppStudioSettingsIndexRoute: appAppStudioSettingsIndexRoute,
+  appAppStudioTopicsIndexRoute: appAppStudioTopicsIndexRoute,
 }
 
 const appAppRouteRouteWithChildren = appAppRouteRoute._addFileChildren(

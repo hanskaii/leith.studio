@@ -7,16 +7,10 @@ import {
 	FieldDescription,
 	toast
 } from "@workspace/ui";
-import {
-	useMutation,
-	useQueryClient,
-	useSuspenseQuery
-} from "@tanstack/react-query";
 import { Gate } from "@workspace/core";
-import { deleteApiKeyFn, listApiKeysQueryOptions } from "@/routes/-fn/auth";
 import { AppModalContext } from "@/routes/-components/providers/app-modal-provider";
 import { useContext, Suspense } from "react";
-import { ApiKeyItem } from "./-components/api-key-item";
+import { ApiKeyList } from "./-components/api-key-list";
 import { ApiKeySkeleton } from "./-components/api-key-skeleton";
 
 export const Route = createFileRoute("/(app)/_app/account/api-key/")({
@@ -67,47 +61,6 @@ function ApiKeyPage() {
 					<ApiKeyList handleCreateKey={handleCreateKey} />
 				</Suspense>
 			</section>
-		</div>
-	);
-}
-
-function ApiKeyList({ handleCreateKey }: { handleCreateKey: () => void }) {
-	const queryClient = useQueryClient();
-	const { data: apiKeys } = useSuspenseQuery(listApiKeysQueryOptions());
-
-	const deleteMutation = useMutation({
-		mutationFn: (id: string) => deleteApiKeyFn({ data: id }),
-		onSuccess: () => {
-			toast.success("API Key deleted");
-			queryClient.invalidateQueries({ queryKey: ["api-keys"] });
-		},
-		onError: (error: any) => {
-			toast.error(error.message || "Failed to delete API key");
-		}
-	});
-
-	return (
-		<div className="flex flex-col gap-3 mt-2">
-			{apiKeys?.map((key) => (
-				<ApiKeyItem
-					key={key.id}
-					apiKey={key}
-					deleteMutation={deleteMutation}
-				/>
-			))}
-
-			{apiKeys?.length === 0 && (
-				<div className="py-12 text-center text-muted-foreground flex flex-col items-center gap-3 rounded-xl border border-dashed border-border">
-					<p className="text-xs">You don't have any API keys yet.</p>
-					<Button
-						variant="ghost"
-						className="text-xs"
-						onClick={handleCreateKey}
-					>
-						Create your first API key
-					</Button>
-				</div>
-			)}
 		</div>
 	);
 }
