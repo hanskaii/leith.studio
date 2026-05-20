@@ -5,6 +5,7 @@ import postsHandler from "./handlers/posts.handler";
 import filesHandler from "./handlers/files.handler";
 import creatorHandler from "./handlers/creator.handler";
 import licenseHandler from "./handlers/license.handler";
+import studioHandler from "./handlers/studio.handler";
 
 /**
  * Typed RPC contract for Hono client (`hc<AppType>`).
@@ -23,7 +24,8 @@ const contract = new Hono<HonoEnv>()
 	.route("/api/v1/posts", postsHandler)
 	.route("/api/files", filesHandler)
 	.route("/api/v1/creator", creatorHandler)
-	.route("/api/v1/license", licenseHandler);
+	.route("/api/v1/license", licenseHandler)
+	.route("/api/v1/studio", studioHandler);
 
 export type AppType = typeof contract;
 export { contract };

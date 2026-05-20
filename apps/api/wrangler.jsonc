@@ -92,8 +92,16 @@
 			"name": "vio-motion-control",
 			"binding": "VIO_MOTION_CONTROL_WORKFLOW",
 			"class_name": "VioMotionControlWorkflow"
+		},
+		{
+			"name": "topic-generation",
+			"binding": "TOPIC_GENERATION_WORKFLOW",
+			"class_name": "TopicGenerationWorkflow"
 		}
 	],
+	"triggers": {
+		"crons": ["*/1 * * * *"]
+	},
 	"containers": [
 		{
 			"class_name": "MediaContainer",

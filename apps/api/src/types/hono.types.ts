@@ -9,6 +9,7 @@ export interface HonoEnv {
 		VIO_VIDEO_WORKFLOW: Workflow;
 		VIO_UPSCALE_WORKFLOW: Workflow;
 		VIO_MOTION_CONTROL_WORKFLOW: Workflow;
+		TOPIC_GENERATION_WORKFLOW: Workflow;
 	};
 	Variables: {
 		user: User;
