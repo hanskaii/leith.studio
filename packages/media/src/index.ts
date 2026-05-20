@@ -1,8 +1,17 @@
-import { register } from '@mediabunny/server'
+import { register } from "@mediabunny/server";
 
-// Register server codecs once at module load time
-register()
+register();
 
-export { resize } from './operations/resize'
-export { clip } from './operations/clip'
-export type { ResizeOptions, ClipOptions, OperationResult } from './types'
+export { transform } from "./operations/transform";
+export type {
+	Transform,
+	ProcessItem,
+	TransformResult,
+	FitMode,
+	Rotation,
+	VideoCodec,
+	AudioCodec,
+	QualityLevel,
+	OutputFormat,
+	WatermarkPosition
+} from "./types";

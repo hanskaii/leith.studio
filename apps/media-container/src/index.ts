@@ -1,66 +1,63 @@
-import { Hono } from 'hono'
-import { serve } from '@hono/node-server'
-import { createReadStream } from 'node:fs'
-import { mkdir, writeFile, access } from 'node:fs/promises'
-import path from 'node:path'
-import { Readable } from 'node:stream'
-import { resize, clip } from '@workspace/media'
-import type { ResizeOptions, ClipOptions } from '@workspace/media'
+import { Hono } from "hono";
+import { serve } from "@hono/node-server";
+import { createReadStream } from "node:fs";
+import { mkdir, writeFile, access } from "node:fs/promises";
+import path from "node:path";
+import { Readable } from "node:stream";
+import { transform } from "@workspace/media";
+import type { ProcessItem } from "@workspace/media";
 
-const MOUNT = '/mnt/r2'
-
-interface OperationRequest {
-  type: 'resize' | 'clip'
-  inputPath: string
-  outputPath: string
-  options: ResizeOptions | ClipOptions
-}
+const MOUNT = "/mnt/r2";
 
 interface ProcessRequest {
-  operations: OperationRequest[]
+	items: ProcessItem[];
 }
 
-interface OperationResultEntry {
-  outputPath: string
-  sizeBytes: number
+interface ProcessResultEntry {
+	outputPath: string;
+	sizeBytes: number;
 }
 
 const app = new Hono()
-  .get('/health', async (c) => {
-    try {
-      await access(MOUNT)
-      return c.json({ ok: true, mount: MOUNT })
-    } catch {
-      return c.json({ ok: false, mount: MOUNT, error: 'R2 mount not available' }, 503)
-    }
-  })
-  .post('/process', async (c) => {
-    const body = await c.req.json<ProcessRequest>()
-    const results: OperationResultEntry[] = []
+	.get("/health", async (c) => {
+		try {
+			await access(MOUNT);
+			return c.json({ ok: true, mount: MOUNT });
+		} catch {
+			return c.json(
+				{ ok: false, mount: MOUNT, error: "R2 mount not available" },
+				503
+			);
+		}
+	})
+	.post("/process", async (c) => {
+		const body = await c.req.json<ProcessRequest>();
+		const results: ProcessResultEntry[] = [];
 
-    for (const op of body.operations) {
-      const nodeStream = createReadStream(op.inputPath)
-      const webStream = Readable.toWeb(nodeStream) as ReadableStream<Uint8Array>
+		for (const item of body.items) {
+			const nodeStream = createReadStream(item.inputPath);
+			const webStream = Readable.toWeb(
+				nodeStream
+			) as ReadableStream<Uint8Array>;
 
-      let result: { buffer: ArrayBuffer; format: string }
-      if (op.type === 'resize') {
-        result = await resize(webStream, op.options as ResizeOptions)
-      } else {
-        result = await clip(webStream, op.options as ClipOptions)
-      }
+			const result = await transform(
+				webStream,
+				item.pipeline,
+				item.outputFormat
+			);
 
-      await mkdir(path.dirname(op.outputPath), { recursive: true })
-      await writeFile(op.outputPath, Buffer.from(result.buffer))
+			await mkdir(path.dirname(item.outputPath), { recursive: true });
+			await writeFile(item.outputPath, Buffer.from(result.buffer));
 
-      results.push({
-        outputPath: op.outputPath,
-        sizeBytes: result.buffer.byteLength
-      })
-    }
+			results.push({
+				outputPath: item.outputPath,
+				sizeBytes: result.buffer.byteLength
+			});
+		}
 
-    return c.json({ ok: true, operations: results })
-  })
+		return c.json({ ok: true, results });
+	});
 
 serve({ fetch: app.fetch, port: 8080 }, (info) => {
-  console.log(`Media container listening on port ${info.port}`)
-})
+	console.log(`Media container listening on port ${info.port}`);
+});
