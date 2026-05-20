@@ -12,7 +12,7 @@ export async function seedUsers(db: DrizzleD1Database<typeof schema> | any) {
 			id: "user_admin_seed",
 			name: "Admin",
 			username: "admin",
-			email: "admin@example.com",
+			email: "admin@tanship.dev",
 			emailVerified: true,
 			image: null,
 			role: "admin",
@@ -31,7 +31,7 @@ export async function seedUsers(db: DrizzleD1Database<typeof schema> | any) {
 			id: "user_pro_seed",
 			name: "Alice Pro",
 			username: "alice_pro",
-			email: "alice@example.com",
+			email: "alice@tanship.dev",
 			emailVerified: true,
 			image: null,
 			role: "user",
@@ -50,7 +50,7 @@ export async function seedUsers(db: DrizzleD1Database<typeof schema> | any) {
 			id: "user_free_seed",
 			name: "Bob Free",
 			username: "bob_free",
-			email: "bob@example.com",
+			email: "bob@tanship.dev",
 			emailVerified: true,
 			image: null,
 			role: "user",
@@ -69,7 +69,7 @@ export async function seedUsers(db: DrizzleD1Database<typeof schema> | any) {
 			id: "user_credits_seed",
 			name: "Carol Credits",
 			username: "carol_credits",
-			email: "carol@example.com",
+			email: "carol@tanship.dev",
 			emailVerified: false,
 			image: null,
 			role: "user",
@@ -88,7 +88,7 @@ export async function seedUsers(db: DrizzleD1Database<typeof schema> | any) {
 			id: "user_banned_seed",
 			name: "Dave Banned",
 			username: "dave_banned",
-			email: "dave@example.com",
+			email: "dave@tanship.dev",
 			emailVerified: true,
 			image: null,
 			role: "user",
@@ -141,12 +141,12 @@ export async function seedUsers(db: DrizzleD1Database<typeof schema> | any) {
 
 	console.log(`✓ Seeded ${usersData.length} users with auth records`);
 	console.log(
-		"  admin@example.com     → admin (API Key: leith_admin_test_key)"
+		"  admin@tanship.dev     → admin (API Key: leith_admin_test_key)"
 	);
-	console.log("  alice@example.com     → pro subscriber");
-	console.log("  bob@example.com       → free user");
-	console.log("  carol@example.com     → 10k credits (unverified)");
-	console.log("  dave@example.com      → banned");
+	console.log("  alice@tanship.dev     → pro subscriber");
+	console.log("  bob@tanship.dev       → free user");
+	console.log("  carol@tanship.dev     → 10k credits (unverified)");
+	console.log("  dave@tanship.dev      → banned");
 
 	return usersData;
 }
