@@ -63,11 +63,13 @@ routes/(app)/_app/posts/
 
 ```typescript
 // -components/post-list-skeleton.tsx
+import { Skeleton } from "@workspace/ui";
+
 export function PostListSkeleton() {
   return (
     <div className="flex flex-col gap-3">
       {[...Array(5)].map((_, i) => (
-        <div key={i} className="h-16 rounded-lg animate-pulse bg-muted" />
+        <Skeleton key={i} className="h-16 rounded-lg" />
       ))}
     </div>
   );
@@ -96,7 +98,8 @@ Rules:
 
 - **Never** inline a skeleton as an anonymous function inside `fallback={}` — always name it and keep it in `-components/`.
 - **Never** put the skeleton in the same file as the real component — they are separate files so the page shell imports only what it needs without pulling in query dependencies.
-- Skeleton files must contain **only** static markup and `animate-pulse` classes. No hooks, no queries, no props beyond optional `className`.
+- Skeleton files must use the `Skeleton` component from `@workspace/ui`. No raw `animate-pulse` divs — import `{ Skeleton } from "@workspace/ui"` instead.
+- Skeleton files must contain **only** static markup. No hooks, no queries, no props beyond optional `className`.
 
 ## 5. UI Components
 
