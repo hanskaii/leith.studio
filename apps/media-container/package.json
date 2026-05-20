@@ -10,7 +10,6 @@
     "hono": "latest",
     "mediabunny": "latest",
     "@mediabunny/server": "latest",
-    "@aws-sdk/client-s3": "latest",
     "@workspace/media": "workspace:*"
   },
   "devDependencies": {

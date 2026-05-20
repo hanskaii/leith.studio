@@ -43,9 +43,7 @@
 		"SESSION_DOMAIN": "inurhuda00-526.workers.dev",
 		"RESEND_FROM_EMAIL": "no-reply@mixetape.com",
 		"R2_BUCKET_NAME": "leith",
-		"R2_ENDPOINT": "https://<ACCOUNT_ID>.r2.cloudflarestorage.com",
-		"R2_ACCESS_KEY_ID": "",
-		"R2_SECRET_ACCESS_KEY": ""
+		"R2_ACCOUNT_ID": "<ACCOUNT_ID>"
 	},
 	"durable_objects": {
 		"bindings": [

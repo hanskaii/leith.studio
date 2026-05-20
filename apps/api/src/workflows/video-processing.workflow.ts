@@ -35,21 +35,17 @@ export class VideoProcessingWorkflow extends WorkflowEntrypoint<Env, VideoProces
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          bucket: this.env.R2_BUCKET_NAME,
-          endpoint: this.env.R2_ENDPOINT,
-          accessKeyId: this.env.R2_ACCESS_KEY_ID,
-          secretAccessKey: this.env.R2_SECRET_ACCESS_KEY,
           operations: [
             {
               type: 'resize',
-              inputKey: fileKey,
-              outputKey: previewKey,
+              inputPath: `/mnt/r2/${fileKey}`,
+              outputPath: `/mnt/r2/${previewKey}`,
               options: { width: 854, height: 480, fit: 'contain' }
             },
             {
               type: 'clip',
-              inputKey: fileKey,
-              outputKey: clipKey,
+              inputPath: `/mnt/r2/${fileKey}`,
+              outputPath: `/mnt/r2/${clipKey}`,
               options: { width: 640, height: 360, fit: 'contain', durationSeconds: 10 }
             }
           ]

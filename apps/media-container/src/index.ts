@@ -1,67 +1,47 @@
 import { Hono } from 'hono'
 import { serve } from '@hono/node-server'
-import { S3Client, GetObjectCommand, PutObjectCommand } from '@aws-sdk/client-s3'
+import { createReadStream } from 'node:fs'
+import { mkdir, writeFile, access } from 'node:fs/promises'
+import path from 'node:path'
+import { Readable } from 'node:stream'
 import { resize, clip } from '@workspace/media'
 import type { ResizeOptions, ClipOptions } from '@workspace/media'
 
+const MOUNT = '/mnt/r2'
+
 interface OperationRequest {
   type: 'resize' | 'clip'
-  inputKey: string
-  outputKey: string
+  inputPath: string
+  outputPath: string
   options: ResizeOptions | ClipOptions
 }
 
 interface ProcessRequest {
-  bucket: string
-  endpoint: string
-  accessKeyId: string
-  secretAccessKey: string
   operations: OperationRequest[]
 }
 
 interface OperationResultEntry {
-  outputKey: string
+  outputPath: string
   sizeBytes: number
 }
 
 const app = new Hono()
+  .get('/health', async (c) => {
+    try {
+      await access(MOUNT)
+      return c.json({ ok: true, mount: MOUNT })
+    } catch {
+      return c.json({ ok: false, mount: MOUNT, error: 'R2 mount not available' }, 503)
+    }
+  })
   .post('/process', async (c) => {
     const body = await c.req.json<ProcessRequest>()
-
-    const s3 = new S3Client({
-      region: 'auto',
-      endpoint: body.endpoint,
-      credentials: {
-        accessKeyId: body.accessKeyId,
-        secretAccessKey: body.secretAccessKey
-      }
-    })
-
     const results: OperationResultEntry[] = []
 
     for (const op of body.operations) {
-      // Fetch the source object from R2
-      const getResult = await s3.send(
-        new GetObjectCommand({ Bucket: body.bucket, Key: op.inputKey })
-      )
+      const nodeStream = createReadStream(op.inputPath)
+      const webStream = Readable.toWeb(nodeStream) as ReadableStream<Uint8Array>
 
-      if (!getResult.Body) {
-        throw new Error(`Object not found in R2: ${op.inputKey}`)
-      }
-
-      // Convert the SDK stream to a Web API ReadableStream
-      const nodeStream = getResult.Body as NodeJS.ReadableStream
-      const webStream = new ReadableStream<Uint8Array>({
-        start(controller) {
-          nodeStream.on('data', (chunk: Buffer) => {
-            controller.enqueue(new Uint8Array(chunk))
-          })
-          nodeStream.on('end', () => controller.close())
-          nodeStream.on('error', (err) => controller.error(err))
-        }
-      })
-
-      // Run the appropriate operation
       let result: { buffer: ArrayBuffer; format: string }
       if (op.type === 'resize') {
         result = await resize(webStream, op.options as ResizeOptions)
@@ -69,18 +49,11 @@ const app = new Hono()
         result = await clip(webStream, op.options as ClipOptions)
       }
 
-      // Upload processed result to R2
-      await s3.send(
-        new PutObjectCommand({
-          Bucket: body.bucket,
-          Key: op.outputKey,
-          Body: Buffer.from(result.buffer),
-          ContentType: 'video/mp4'
-        })
-      )
+      await mkdir(path.dirname(op.outputPath), { recursive: true })
+      await writeFile(op.outputPath, Buffer.from(result.buffer))
 
       results.push({
-        outputKey: op.outputKey,
+        outputPath: op.outputPath,
         sizeBytes: result.buffer.byteLength
       })
     }
