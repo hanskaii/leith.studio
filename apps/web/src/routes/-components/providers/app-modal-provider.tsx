@@ -12,17 +12,21 @@ import {
 import { ConfirmModal, type ConfirmOptions } from "../modals/confirm-modal";
 import { CreateApiKeyModal } from "../modals/create-api-key-modal";
 import { ShowApiKeyModal } from "../modals/show-api-key-modal";
+import { TopicFormModal } from "../modals/topic-form-modal";
+import type { StudioTopic } from "@/routes/-fn/studio";
 
 export const AppModalContext = createContext<{
 	openConfirmModal: (options: ConfirmOptions, onConfirm: () => void) => void;
 	openSessionsModal: () => void;
 	openCreateApiKeyModal: (onCreated: (key: string) => void) => void;
 	openShowApiKeyModal: (key: string) => void;
+	openTopicModal: (topic?: StudioTopic | null) => void;
 }>({
 	openConfirmModal: () => {},
 	openSessionsModal: () => {},
 	openCreateApiKeyModal: () => {},
-	openShowApiKeyModal: () => {}
+	openShowApiKeyModal: () => {},
+	openTopicModal: () => {}
 });
 
 export function AppModalProvider({ children }: { children: ReactNode }) {
@@ -48,6 +52,9 @@ const AppModalProviderClient = memo(function AppModalProviderClient({
 
 	const [showApiKeyOpen, setShowApiKeyOpen] = useState(false);
 	const [apiKeyToShow, setApiKeyToShow] = useState("");
+
+	const [topicModalOpen, setTopicModalOpen] = useState(false);
+	const [topicToEdit, setTopicToEdit] = useState<StudioTopic | null>(null);
 
 	const handleConfirm = useCallback(() => {
 		setConfirmOpen(false);
@@ -86,18 +93,25 @@ const AppModalProviderClient = memo(function AppModalProviderClient({
 		setShowApiKeyOpen(true);
 	}, []);
 
+	const openTopicModal = useCallback((topic?: StudioTopic | null) => {
+		setTopicToEdit(topic ?? null);
+		setTopicModalOpen(true);
+	}, []);
+
 	const contextValue = useMemo(
 		() => ({
 			openConfirmModal,
 			openSessionsModal,
 			openCreateApiKeyModal,
-			openShowApiKeyModal
+			openShowApiKeyModal,
+			openTopicModal
 		}),
 		[
 			openConfirmModal,
 			openSessionsModal,
 			openCreateApiKeyModal,
-			openShowApiKeyModal
+			openShowApiKeyModal,
+			openTopicModal
 		]
 	);
 
@@ -123,6 +137,11 @@ const AppModalProviderClient = memo(function AppModalProviderClient({
 				apiKey={apiKeyToShow}
 				showModal={showApiKeyOpen}
 				setShowModal={setShowApiKeyOpen}
+			/>
+			<TopicFormModal
+				topic={topicToEdit}
+				showModal={topicModalOpen}
+				setShowModal={setTopicModalOpen}
 			/>
 		</AppModalContext.Provider>
 	);
