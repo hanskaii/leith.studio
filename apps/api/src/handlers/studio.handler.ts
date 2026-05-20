@@ -247,37 +247,53 @@ Output only the JSON object, nothing else.`
 			if (!videoResponse.ok) continue;
 
 			const videoKey = `generated/${gen.topicId}/${genId}.mp4`;
-			await (c.env as any).STORAGE.put(videoKey, videoResponse.body!, {
+			await c.env.STORAGE.put(videoKey, videoResponse.body!, {
 				httpMetadata: { contentType: "video/mp4" }
 			});
 
-			// 3. Create draft post
+			// 3. Create draft post + update generation atomically
 			const postId = crypto.randomUUID();
 			const slug = await uniqueSlug(title, db);
 			const now = new Date();
 
-			await db.insert(posts).values({
-				id: postId,
-				slug,
-				title,
-				body,
-				tags,
-				status: "draft",
-				createdAt: now,
-				updatedAt: now
+			await db.transaction(async (tx) => {
+				await tx.insert(posts).values({
+					id: postId,
+					slug,
+					title,
+					body,
+					tags,
+					status: "draft",
+					createdAt: now,
+					updatedAt: now
+				});
+
+				await tx.insert(postMetadata).values({
+					postId,
+					format: "mp4",
+					resolution: "1920x1080",
+					fileKey: videoKey,
+					fileSize: 0,
+					access: "premium",
+					processingStatus: "pending"
+				});
+
+				await tx
+					.update(topicGenerations)
+					.set({
+						status: "approved",
+						postId,
+						scheduledAt: scheduledDate
+					})
+					.where(eq(topicGenerations.id, genId));
+
+				await tx
+					.update(generationTopics)
+					.set({ status: "approved", updatedAt: now })
+					.where(eq(generationTopics.id, gen.topicId));
 			});
 
-			await db.insert(postMetadata).values({
-				postId,
-				format: "mp4",
-				resolution: "1920x1080",
-				fileKey: videoKey,
-				fileSize: 0,
-				access: "premium",
-				processingStatus: "pending"
-			});
-
-			// 4. Trigger video processing workflow
+			// 4. Trigger video processing workflow (after transaction commits)
 			await c.env.VIDEO_PROCESSING_WORKFLOW.create({
 				params: {
 					postId,
@@ -286,17 +302,6 @@ Output only the JSON object, nothing else.`
 					format: "mp4"
 				}
 			});
-
-			// 5. Update generation + topic
-			await db
-				.update(topicGenerations)
-				.set({ status: "approved", postId, scheduledAt: scheduledDate })
-				.where(eq(topicGenerations.id, genId));
-
-			await db
-				.update(generationTopics)
-				.set({ status: "approved", updatedAt: now })
-				.where(eq(generationTopics.id, gen.topicId));
 
 			results.push({ genId, postId, slug });
 		}

@@ -4,7 +4,9 @@ import {
 	useMutation,
 	useQueryClient
 } from "@tanstack/react-query";
-import { Suspense, useState, useEffect } from "react";
+import { Suspense, useEffect } from "react";
+import { useForm } from "@tanstack/react-form";
+import { z } from "zod";
 import { Gate } from "@workspace/core";
 import { toast } from "@workspace/ui";
 import {
@@ -56,33 +58,51 @@ const VIDEO_MODELS = [
 	"happyhorse-1.0"
 ];
 
-function SettingsForm({ settings }: { settings: StudioSettings | null }) {
-	const queryClient = useQueryClient();
+const SettingsSchema = z.object({
+	defaultImageModel: z.string().min(1),
+	defaultVideoModel: z.string().min(1),
+	defaultCount: z.number().int().min(1, "Min 1").max(10, "Max 10"),
+	globalReferenceImageUrl: z
+		.string()
+		.url("Must be a valid URL")
+		.or(z.literal("")),
+	imagePromptTemplate: z.string().min(10, "Min 10 characters"),
+	videoPromptTemplate: z.string().min(10, "Min 10 characters")
+});
 
-	const [form, setForm] = useState({
+type SettingsValues = z.infer<typeof SettingsSchema>;
+
+function settingsToValues(settings: StudioSettings | null): SettingsValues {
+	return {
 		defaultImageModel: settings?.defaultImageModel ?? "nano-banana-2",
 		defaultVideoModel: settings?.defaultVideoModel ?? "kling-v3",
-		defaultCount: settings?.defaultCount?.toString() ?? "3",
+		defaultCount: settings?.defaultCount ?? 3,
 		globalReferenceImageUrl: settings?.globalReferenceImageUrl ?? "",
 		imagePromptTemplate: settings?.imagePromptTemplate ?? "",
 		videoPromptTemplate: settings?.videoPromptTemplate ?? ""
-	});
+	};
+}
 
-	useEffect(() => {
-		if (settings) {
-			setForm({
-				defaultImageModel: settings.defaultImageModel,
-				defaultVideoModel: settings.defaultVideoModel,
-				defaultCount: settings.defaultCount.toString(),
-				globalReferenceImageUrl: settings.globalReferenceImageUrl ?? "",
-				imagePromptTemplate: settings.imagePromptTemplate,
-				videoPromptTemplate: settings.videoPromptTemplate
-			});
-		}
-	}, [settings]);
+function SettingsForm({ settings }: { settings: StudioSettings | null }) {
+	const queryClient = useQueryClient();
 
 	const mutation = useMutation({
-		mutationFn: (data: any) => updateSettingsFn({ data: { data } }),
+		mutationFn: (data: SettingsValues) =>
+			updateSettingsFn({
+				data: {
+					data: {
+						defaultImageModel: data.defaultImageModel,
+						defaultVideoModel: data.defaultVideoModel,
+						defaultCount: data.defaultCount,
+						globalReferenceImageUrl:
+							data.globalReferenceImageUrl || null,
+						imagePromptTemplate:
+							data.imagePromptTemplate || undefined,
+						videoPromptTemplate:
+							data.videoPromptTemplate || undefined
+					}
+				}
+			}),
 		onSuccess: () => {
 			toast.success("Settings saved");
 			queryClient.invalidateQueries({ queryKey: ["studio-settings"] });
@@ -91,16 +111,16 @@ function SettingsForm({ settings }: { settings: StudioSettings | null }) {
 			toast.error(e?.message || "Failed to save settings")
 	});
 
-	const handleSave = () => {
-		mutation.mutate({
-			defaultImageModel: form.defaultImageModel,
-			defaultVideoModel: form.defaultVideoModel,
-			defaultCount: parseInt(form.defaultCount) || 3,
-			globalReferenceImageUrl: form.globalReferenceImageUrl || null,
-			imagePromptTemplate: form.imagePromptTemplate || undefined,
-			videoPromptTemplate: form.videoPromptTemplate || undefined
-		});
-	};
+	const form = useForm({
+		defaultValues: settingsToValues(settings),
+		onSubmit: async ({ value }) => {
+			await mutation.mutateAsync(value);
+		}
+	});
+
+	useEffect(() => {
+		form.reset(settingsToValues(settings));
+	}, [settings]);
 
 	const inputStyle = {
 		borderColor: "oklch(0.85 0.008 80)",
@@ -114,8 +134,21 @@ function SettingsForm({ settings }: { settings: StudioSettings | null }) {
 		fontFamily: "var(--font-sans)"
 	};
 
+	const errorStyle = {
+		color: "oklch(0.55 0.18 20)",
+		fontSize: "0.7rem",
+		marginTop: "2px"
+	};
+
 	return (
-		<div className="max-w-2xl flex flex-col gap-6">
+		<form
+			onSubmit={(e) => {
+				e.preventDefault();
+				e.stopPropagation();
+				form.handleSubmit();
+			}}
+			className="max-w-2xl flex flex-col gap-6"
+		>
 			{/* Models */}
 			<section>
 				<h2
@@ -128,56 +161,82 @@ function SettingsForm({ settings }: { settings: StudioSettings | null }) {
 					Default models
 				</h2>
 				<div className="grid grid-cols-2 gap-4">
-					<div>
-						<label
-							className="mb-1 block text-xs font-medium"
-							style={labelStyle}
-						>
-							Image model
-						</label>
-						<select
-							className="w-full rounded border px-3 py-2 text-sm outline-none"
-							style={inputStyle}
-							value={form.defaultImageModel}
-							onChange={(e) =>
-								setForm((p) => ({
-									...p,
-									defaultImageModel: e.target.value
-								}))
+					<form.Field
+						name="defaultImageModel"
+						validators={{
+							onChange: ({ value }) => {
+								const r = z.string().min(1).safeParse(value);
+								return r.success
+									? undefined
+									: r.error.issues[0]?.message;
 							}
-						>
-							{IMAGE_MODELS.map((m) => (
-								<option key={m} value={m}>
-									{m}
-								</option>
-							))}
-						</select>
-					</div>
-					<div>
-						<label
-							className="mb-1 block text-xs font-medium"
-							style={labelStyle}
-						>
-							Video model
-						</label>
-						<select
-							className="w-full rounded border px-3 py-2 text-sm outline-none"
-							style={inputStyle}
-							value={form.defaultVideoModel}
-							onChange={(e) =>
-								setForm((p) => ({
-									...p,
-									defaultVideoModel: e.target.value
-								}))
+						}}
+					>
+						{(field) => (
+							<div>
+								<label
+									className="mb-1 block text-xs font-medium"
+									style={labelStyle}
+								>
+									Image model
+								</label>
+								<select
+									className="w-full rounded border px-3 py-2 text-sm outline-none"
+									style={inputStyle}
+									value={field.state.value}
+									onBlur={field.handleBlur}
+									onChange={(e) =>
+										field.handleChange(e.target.value)
+									}
+									disabled={mutation.isPending}
+								>
+									{IMAGE_MODELS.map((m) => (
+										<option key={m} value={m}>
+											{m}
+										</option>
+									))}
+								</select>
+							</div>
+						)}
+					</form.Field>
+					<form.Field
+						name="defaultVideoModel"
+						validators={{
+							onChange: ({ value }) => {
+								const r = z.string().min(1).safeParse(value);
+								return r.success
+									? undefined
+									: r.error.issues[0]?.message;
 							}
-						>
-							{VIDEO_MODELS.map((m) => (
-								<option key={m} value={m}>
-									{m}
-								</option>
-							))}
-						</select>
-					</div>
+						}}
+					>
+						{(field) => (
+							<div>
+								<label
+									className="mb-1 block text-xs font-medium"
+									style={labelStyle}
+								>
+									Video model
+								</label>
+								<select
+									className="w-full rounded border px-3 py-2 text-sm outline-none"
+									style={inputStyle}
+									value={field.state.value}
+									onBlur={field.handleBlur}
+									onChange={(e) =>
+										field.handleChange(e.target.value)
+									}
+									disabled={mutation.isPending}
+								>
+									{VIDEO_MODELS.map((m) => (
+										<option key={m} value={m}>
+											{m}
+										</option>
+									))}
+								</select>
+							</div>
+						)}
+					</form.Field>
 				</div>
 			</section>
 
@@ -192,28 +251,54 @@ function SettingsForm({ settings }: { settings: StudioSettings | null }) {
 				>
 					Generation count
 				</h2>
-				<div className="flex items-center gap-3">
-					<input
-						type="number"
-						min="1"
-						max="10"
-						className="w-24 rounded border px-3 py-2 text-sm outline-none"
-						style={inputStyle}
-						value={form.defaultCount}
-						onChange={(e) =>
-							setForm((p) => ({
-								...p,
-								defaultCount: e.target.value
-							}))
+				<form.Field
+					name="defaultCount"
+					validators={{
+						onChange: ({ value }) => {
+							const r = z
+								.number()
+								.int()
+								.min(1)
+								.max(10)
+								.safeParse(value);
+							return r.success
+								? undefined
+								: r.error.issues[0]?.message;
 						}
-					/>
-					<span
-						className="text-xs"
-						style={{ color: "oklch(0.50 0.010 60)" }}
-					>
-						videos generated per topic per cron run
-					</span>
-				</div>
+					}}
+				>
+					{(field) => (
+						<div className="flex items-center gap-3">
+							<input
+								type="number"
+								min="1"
+								max="10"
+								className="w-24 rounded border px-3 py-2 text-sm outline-none"
+								style={inputStyle}
+								value={field.state.value}
+								onBlur={field.handleBlur}
+								onChange={(e) =>
+									field.handleChange(
+										parseInt(e.target.value) || 3
+									)
+								}
+								disabled={mutation.isPending}
+							/>
+							<span
+								className="text-xs"
+								style={{ color: "oklch(0.50 0.010 60)" }}
+							>
+								videos generated per topic per cron run
+							</span>
+							{field.state.meta.isTouched &&
+								!field.state.meta.isValid && (
+									<span style={errorStyle}>
+										{field.state.meta.errors[0]}
+									</span>
+								)}
+						</div>
+					)}
+				</form.Field>
 			</section>
 
 			{/* Reference image */}
@@ -234,18 +319,40 @@ function SettingsForm({ settings }: { settings: StudioSettings | null }) {
 					Style reference applied to all topics unless overridden
 					per-topic.
 				</p>
-				<input
-					className="w-full rounded border px-3 py-2 text-sm outline-none"
-					style={inputStyle}
-					value={form.globalReferenceImageUrl}
-					onChange={(e) =>
-						setForm((p) => ({
-							...p,
-							globalReferenceImageUrl: e.target.value
-						}))
-					}
-					placeholder="https://... (public image URL)"
-				/>
+				<form.Field
+					name="globalReferenceImageUrl"
+					validators={{
+						onChange: ({ value }) => {
+							if (!value) return undefined;
+							const r = z.string().url().safeParse(value);
+							return r.success
+								? undefined
+								: r.error.issues[0]?.message;
+						}
+					}}
+				>
+					{(field) => (
+						<div>
+							<input
+								className="w-full rounded border px-3 py-2 text-sm outline-none"
+								style={inputStyle}
+								value={field.state.value}
+								onBlur={field.handleBlur}
+								onChange={(e) =>
+									field.handleChange(e.target.value)
+								}
+								placeholder="https://... (public image URL)"
+								disabled={mutation.isPending}
+							/>
+							{field.state.meta.isTouched &&
+								!field.state.meta.isValid && (
+									<p style={errorStyle}>
+										{field.state.meta.errors[0]}
+									</p>
+								)}
+						</div>
+					)}
+				</form.Field>
 			</section>
 
 			{/* Prompt templates */}
@@ -275,18 +382,39 @@ function SettingsForm({ settings }: { settings: StudioSettings | null }) {
 					</code>{" "}
 					as placeholder for the topic keyword.
 				</p>
-				<textarea
-					rows={6}
-					className="w-full rounded border px-3 py-2 text-sm outline-none font-mono resize-y"
-					style={{ ...inputStyle, fontSize: "0.75rem" }}
-					value={form.imagePromptTemplate}
-					onChange={(e) =>
-						setForm((p) => ({
-							...p,
-							imagePromptTemplate: e.target.value
-						}))
-					}
-				/>
+				<form.Field
+					name="imagePromptTemplate"
+					validators={{
+						onChange: ({ value }) => {
+							const r = z.string().min(10).safeParse(value);
+							return r.success
+								? undefined
+								: r.error.issues[0]?.message;
+						}
+					}}
+				>
+					{(field) => (
+						<div>
+							<textarea
+								rows={6}
+								className="w-full rounded border px-3 py-2 text-sm outline-none font-mono resize-y"
+								style={{ ...inputStyle, fontSize: "0.75rem" }}
+								value={field.state.value}
+								onBlur={field.handleBlur}
+								onChange={(e) =>
+									field.handleChange(e.target.value)
+								}
+								disabled={mutation.isPending}
+							/>
+							{field.state.meta.isTouched &&
+								!field.state.meta.isValid && (
+									<p style={errorStyle}>
+										{field.state.meta.errors[0]}
+									</p>
+								)}
+						</div>
+					)}
+				</form.Field>
 			</section>
 
 			<section>
@@ -315,34 +443,59 @@ function SettingsForm({ settings }: { settings: StudioSettings | null }) {
 					</code>{" "}
 					as placeholder for the generated image prompt.
 				</p>
-				<textarea
-					rows={6}
-					className="w-full rounded border px-3 py-2 text-sm outline-none font-mono resize-y"
-					style={{ ...inputStyle, fontSize: "0.75rem" }}
-					value={form.videoPromptTemplate}
-					onChange={(e) =>
-						setForm((p) => ({
-							...p,
-							videoPromptTemplate: e.target.value
-						}))
-					}
-				/>
+				<form.Field
+					name="videoPromptTemplate"
+					validators={{
+						onChange: ({ value }) => {
+							const r = z.string().min(10).safeParse(value);
+							return r.success
+								? undefined
+								: r.error.issues[0]?.message;
+						}
+					}}
+				>
+					{(field) => (
+						<div>
+							<textarea
+								rows={6}
+								className="w-full rounded border px-3 py-2 text-sm outline-none font-mono resize-y"
+								style={{ ...inputStyle, fontSize: "0.75rem" }}
+								value={field.state.value}
+								onBlur={field.handleBlur}
+								onChange={(e) =>
+									field.handleChange(e.target.value)
+								}
+								disabled={mutation.isPending}
+							/>
+							{field.state.meta.isTouched &&
+								!field.state.meta.isValid && (
+									<p style={errorStyle}>
+										{field.state.meta.errors[0]}
+									</p>
+								)}
+						</div>
+					)}
+				</form.Field>
 			</section>
 
 			<div className="flex justify-end">
-				<button
-					onClick={handleSave}
-					disabled={mutation.isPending}
-					className="px-5 py-2 rounded-md text-sm font-medium disabled:opacity-50"
-					style={{
-						background: "oklch(0.62 0.14 47)",
-						color: "oklch(0.97 0.008 80)"
-					}}
-				>
-					{mutation.isPending ? "Saving..." : "Save settings"}
-				</button>
+				<form.Subscribe selector={(state) => state.canSubmit}>
+					{(canSubmit) => (
+						<button
+							type="submit"
+							disabled={!canSubmit || mutation.isPending}
+							className="px-5 py-2 rounded-md text-sm font-medium disabled:opacity-50"
+							style={{
+								background: "oklch(0.62 0.14 47)",
+								color: "oklch(0.97 0.008 80)"
+							}}
+						>
+							{mutation.isPending ? "Saving..." : "Save settings"}
+						</button>
+					)}
+				</form.Subscribe>
 			</div>
-		</div>
+		</form>
 	);
 }
 

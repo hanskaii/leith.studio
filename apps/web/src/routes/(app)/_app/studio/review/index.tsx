@@ -380,10 +380,10 @@ function ReviewGrid() {
 	const approveMutation = useMutation({
 		mutationFn: (scheduledAt?: string) =>
 			approveGenerationsFn({
-				data: { data: { ids: selected, scheduledAt } }
+				data: { ids: selected, scheduledAt }
 			}),
 		onSuccess: (data: any) => {
-			const count = data?.data?.length ?? selected.length;
+			const count = Array.isArray(data) ? data.length : selected.length;
 			toast.success(`${count} draft post${count > 1 ? "s" : ""} created`);
 			setSelected([]);
 			setShowSchedule(false);
@@ -399,8 +399,7 @@ function ReviewGrid() {
 	});
 
 	const rejectMutation = useMutation({
-		mutationFn: () =>
-			rejectGenerationsFn({ data: { data: { ids: selected } } }),
+		mutationFn: () => rejectGenerationsFn({ data: { ids: selected } }),
 		onSuccess: () => {
 			toast.success("Rejected");
 			setSelected([]);

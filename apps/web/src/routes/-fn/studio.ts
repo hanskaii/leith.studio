@@ -33,9 +33,27 @@ type CreateTopicInput = InferRequestType<
 type UpdateTopicInput = InferRequestType<
 	(typeof client.api.v1.studio.topics)[":id"]["$patch"]
 >["json"];
+type UpdateTopicResponse = InferResponseType<
+	(typeof client.api.v1.studio.topics)[":id"]["$patch"],
+	200
+>;
 type UpdateSettingsInput = InferRequestType<
 	(typeof client.api.v1.studio.settings)["$put"]
 >["json"];
+type UpdateSettingsResponse = InferResponseType<
+	(typeof client.api.v1.studio.settings)["$put"],
+	200
+>;
+type ApproveInput = InferRequestType<
+	(typeof client.api.v1.studio.review)["approve"]["$post"]
+>["json"];
+type RejectInput = InferRequestType<
+	(typeof client.api.v1.studio.review)["reject"]["$post"]
+>["json"];
+type ApproveResponse = InferResponseType<
+	(typeof client.api.v1.studio.review)["approve"]["$post"],
+	200
+>;
 
 export type StudioTopic = NonNullable<TopicsResponse["data"]>[number];
 export type StudioGeneration = NonNullable<ReviewResponse["data"]>[number];
@@ -79,7 +97,8 @@ export const updateTopicFn = createServerFn({ method: "POST" })
 					param: { id },
 					json: data
 				});
-				return (await res.json()) as any;
+				const json = (await res.json()) as UpdateTopicResponse;
+				return json.data;
 			})
 	);
 
@@ -97,7 +116,7 @@ export const triggerTopicFn = createServerFn({ method: "POST" })
 	.handler(({ data: { data: id } }) =>
 		handleError(async () => {
 			const api = createApiClient();
-			await (api.api.v1.studio.topics[":id"] as any).trigger.$post({
+			await api.api.v1.studio.topics[":id"].trigger.$post({
 				param: { id }
 			});
 		})
@@ -115,27 +134,24 @@ export const getReviewFn = createServerFn({ method: "GET" }).handler(() =>
 );
 
 export const approveGenerationsFn = createServerFn({ method: "POST" })
-	.inputValidator(
-		(input: { data: { ids: string[]; scheduledAt?: string } }) => input
-	)
+	.inputValidator((input: { data: ApproveInput }) => input)
 	.handler(({ data: { data } }) =>
 		handleError(async () => {
 			const api = createApiClient();
-			const res = await (api.api.v1.studio.review as any).approve.$post({
-				json: { ids: data.ids, scheduledAt: data.scheduledAt }
+			const res = await api.api.v1.studio.review.approve.$post({
+				json: data
 			});
-			return (await res.json()) as any;
+			const json = (await res.json()) as ApproveResponse;
+			return json.data;
 		})
 	);
 
 export const rejectGenerationsFn = createServerFn({ method: "POST" })
-	.inputValidator((input: { data: { ids: string[] } }) => input)
+	.inputValidator((input: { data: RejectInput }) => input)
 	.handler(({ data: { data } }) =>
 		handleError(async () => {
 			const api = createApiClient();
-			await (api.api.v1.studio.review as any).reject.$post({
-				json: { ids: data.ids }
-			});
+			await api.api.v1.studio.review.reject.$post({ json: data });
 		})
 	);
 
@@ -156,7 +172,8 @@ export const updateSettingsFn = createServerFn({ method: "POST" })
 		handleError(async () => {
 			const api = createApiClient();
 			const res = await api.api.v1.studio.settings.$put({ json: data });
-			return (await res.json()) as any;
+			const json = (await res.json()) as UpdateSettingsResponse;
+			return json.data;
 		})
 	);
 

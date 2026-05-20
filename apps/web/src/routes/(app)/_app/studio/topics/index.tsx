@@ -5,6 +5,8 @@ import {
 	useQueryClient
 } from "@tanstack/react-query";
 import { Suspense, useState } from "react";
+import { useForm } from "@tanstack/react-form";
+import { z } from "zod";
 import { Gate } from "@workspace/core";
 import { toast } from "@workspace/ui";
 import {
@@ -132,20 +134,96 @@ function TopicRow({
 	);
 }
 
+const TopicSchema = z.object({
+	topic: z.string().min(1, "Topic is required").max(200),
+	referenceImageUrl: z.string().url("Must be a valid URL").or(z.literal("")),
+	countOverride: z.number().int().min(1).max(10).optional()
+});
+
+type TopicValues = z.infer<typeof TopicSchema>;
+
 function TopicFormDialog({
 	topic,
 	onClose,
-	onSave
+	onSuccess
 }: {
 	topic?: StudioTopic | null;
 	onClose: () => void;
-	onSave: (data: any) => void;
+	onSuccess: () => void;
 }) {
-	const [formData, setFormData] = useState({
-		topic: topic?.topic ?? "",
-		referenceImageUrl: topic?.referenceImageUrl ?? "",
-		countOverride: topic?.countOverride?.toString() ?? ""
+	const queryClient = useQueryClient();
+
+	const createMutation = useMutation({
+		mutationFn: (data: TopicValues) =>
+			createTopicFn({
+				data: {
+					data: {
+						topic: data.topic,
+						referenceImageUrl: data.referenceImageUrl || undefined,
+						countOverride: data.countOverride
+					}
+				}
+			}),
+		onSuccess: () => {
+			toast.success("Topic created");
+			queryClient.invalidateQueries({ queryKey: ["studio-topics"] });
+			onSuccess();
+		},
+		onError: (e: any) => toast.error(e?.message || "Failed to create topic")
 	});
+
+	const updateMutation = useMutation({
+		mutationFn: (data: TopicValues) =>
+			updateTopicFn({
+				data: {
+					data: {
+						id: topic!.id,
+						data: {
+							topic: data.topic,
+							referenceImageUrl:
+								data.referenceImageUrl || undefined,
+							countOverride: data.countOverride
+						}
+					}
+				}
+			}),
+		onSuccess: () => {
+			toast.success("Topic updated");
+			queryClient.invalidateQueries({ queryKey: ["studio-topics"] });
+			onSuccess();
+		},
+		onError: (e: any) => toast.error(e?.message || "Failed to update topic")
+	});
+
+	const isPending = createMutation.isPending || updateMutation.isPending;
+
+	const form = useForm({
+		defaultValues: {
+			topic: topic?.topic ?? "",
+			referenceImageUrl: topic?.referenceImageUrl ?? "",
+			countOverride: topic?.countOverride ?? undefined
+		} as TopicValues,
+		onSubmit: async ({ value }) => {
+			if (topic) {
+				await updateMutation.mutateAsync(value);
+			} else {
+				await createMutation.mutateAsync(value);
+			}
+		}
+	});
+
+	const inputStyle = {
+		borderColor: "oklch(0.85 0.008 80)",
+		color: "oklch(0.15 0.008 60)",
+		background: "white"
+	};
+
+	const labelStyle = { color: "oklch(0.40 0.010 60)" };
+	const errorStyle = {
+		color: "oklch(0.55 0.18 20)",
+		fontSize: "0.7rem",
+		marginTop: "2px"
+	};
 
 	return (
 		<div
@@ -169,118 +247,180 @@ function TopicFormDialog({
 					{topic ? "Edit topic" : "New topic"}
 				</h2>
 
-				<div className="flex flex-col gap-3">
-					<div>
-						<label
-							className="mb-1 block text-xs font-medium"
-							style={{ color: "oklch(0.40 0.010 60)" }}
-						>
-							Topic / keyword *
-						</label>
-						<input
-							className="w-full rounded border px-3 py-2 text-sm outline-none focus:ring-1"
-							style={{
-								borderColor: "oklch(0.85 0.008 80)",
-								color: "oklch(0.15 0.008 60)",
-								background: "white"
-							}}
-							value={formData.topic}
-							onChange={(e) =>
-								setFormData((p) => ({
-									...p,
-									topic: e.target.value
-								}))
+				<form
+					onSubmit={(e) => {
+						e.preventDefault();
+						e.stopPropagation();
+						form.handleSubmit();
+					}}
+					className="flex flex-col gap-3"
+				>
+					<form.Field
+						name="topic"
+						validators={{
+							onChange: ({ value }) => {
+								const r = z
+									.string()
+									.min(1)
+									.max(200)
+									.safeParse(value);
+								return r.success
+									? undefined
+									: r.error.issues[0]?.message;
 							}
-							placeholder="e.g. cozy lofi room, dark fantasy forest"
-						/>
-					</div>
-
-					<div>
-						<label
-							className="mb-1 block text-xs font-medium"
-							style={{ color: "oklch(0.40 0.010 60)" }}
-						>
-							Reference image URL (overrides global)
-						</label>
-						<input
-							className="w-full rounded border px-3 py-2 text-sm outline-none"
-							style={{
-								borderColor: "oklch(0.85 0.008 80)",
-								color: "oklch(0.15 0.008 60)",
-								background: "white"
-							}}
-							value={formData.referenceImageUrl}
-							onChange={(e) =>
-								setFormData((p) => ({
-									...p,
-									referenceImageUrl: e.target.value
-								}))
-							}
-							placeholder="https://..."
-						/>
-					</div>
-
-					<div>
-						<label
-							className="mb-1 block text-xs font-medium"
-							style={{ color: "oklch(0.40 0.010 60)" }}
-						>
-							Count override (default: from settings)
-						</label>
-						<input
-							type="number"
-							min="1"
-							max="10"
-							className="w-full rounded border px-3 py-2 text-sm outline-none"
-							style={{
-								borderColor: "oklch(0.85 0.008 80)",
-								color: "oklch(0.15 0.008 60)",
-								background: "white"
-							}}
-							value={formData.countOverride}
-							onChange={(e) =>
-								setFormData((p) => ({
-									...p,
-									countOverride: e.target.value
-								}))
-							}
-							placeholder="3"
-						/>
-					</div>
-				</div>
-
-				<div className="mt-5 flex justify-end gap-2">
-					<button
-						onClick={onClose}
-						className="px-4 py-2 rounded text-sm"
-						style={{
-							background: "oklch(0.92 0.008 80)",
-							color: "oklch(0.30 0.008 60)"
 						}}
 					>
-						Cancel
-					</button>
-					<button
-						onClick={() =>
-							onSave({
-								topic: formData.topic,
-								referenceImageUrl:
-									formData.referenceImageUrl || undefined,
-								countOverride: formData.countOverride
-									? parseInt(formData.countOverride)
-									: undefined
-							})
-						}
-						disabled={!formData.topic.trim()}
-						className="px-4 py-2 rounded text-sm font-medium disabled:opacity-50"
-						style={{
-							background: "oklch(0.62 0.14 47)",
-							color: "oklch(0.97 0.008 80)"
+						{(field) => (
+							<div>
+								<label
+									className="mb-1 block text-xs font-medium"
+									style={labelStyle}
+								>
+									Topic / keyword *
+								</label>
+								<input
+									className="w-full rounded border px-3 py-2 text-sm outline-none"
+									style={inputStyle}
+									value={field.state.value}
+									onBlur={field.handleBlur}
+									onChange={(e) =>
+										field.handleChange(e.target.value)
+									}
+									placeholder="e.g. cozy lofi room, dark fantasy forest"
+									disabled={isPending}
+								/>
+								{field.state.meta.isTouched &&
+									!field.state.meta.isValid && (
+										<p style={errorStyle}>
+											{field.state.meta.errors[0]}
+										</p>
+									)}
+							</div>
+						)}
+					</form.Field>
+
+					<form.Field
+						name="referenceImageUrl"
+						validators={{
+							onChange: ({ value }) => {
+								if (!value) return undefined;
+								const r = z.string().url().safeParse(value);
+								return r.success
+									? undefined
+									: r.error.issues[0]?.message;
+							}
 						}}
 					>
-						Save
-					</button>
-				</div>
+						{(field) => (
+							<div>
+								<label
+									className="mb-1 block text-xs font-medium"
+									style={labelStyle}
+								>
+									Reference image URL (overrides global)
+								</label>
+								<input
+									className="w-full rounded border px-3 py-2 text-sm outline-none"
+									style={inputStyle}
+									value={field.state.value}
+									onBlur={field.handleBlur}
+									onChange={(e) =>
+										field.handleChange(e.target.value)
+									}
+									placeholder="https://..."
+									disabled={isPending}
+								/>
+								{field.state.meta.isTouched &&
+									!field.state.meta.isValid && (
+										<p style={errorStyle}>
+											{field.state.meta.errors[0]}
+										</p>
+									)}
+							</div>
+						)}
+					</form.Field>
+
+					<form.Field
+						name="countOverride"
+						validators={{
+							onChange: ({ value }) => {
+								if (value === undefined) return undefined;
+								const r = z
+									.number()
+									.int()
+									.min(1)
+									.max(10)
+									.safeParse(value);
+								return r.success
+									? undefined
+									: r.error.issues[0]?.message;
+							}
+						}}
+					>
+						{(field) => (
+							<div>
+								<label
+									className="mb-1 block text-xs font-medium"
+									style={labelStyle}
+								>
+									Count override (default: from settings)
+								</label>
+								<input
+									type="number"
+									min="1"
+									max="10"
+									className="w-full rounded border px-3 py-2 text-sm outline-none"
+									style={inputStyle}
+									value={field.state.value ?? ""}
+									onBlur={field.handleBlur}
+									onChange={(e) => {
+										const v = e.target.value;
+										field.handleChange(
+											v ? parseInt(v) : undefined
+										);
+									}}
+									placeholder="3"
+									disabled={isPending}
+								/>
+								{field.state.meta.isTouched &&
+									!field.state.meta.isValid && (
+										<p style={errorStyle}>
+											{field.state.meta.errors[0]}
+										</p>
+									)}
+							</div>
+						)}
+					</form.Field>
+
+					<div className="mt-2 flex justify-end gap-2">
+						<button
+							type="button"
+							onClick={onClose}
+							className="px-4 py-2 rounded text-sm"
+							style={{
+								background: "oklch(0.92 0.008 80)",
+								color: "oklch(0.30 0.008 60)"
+							}}
+						>
+							Cancel
+						</button>
+						<form.Subscribe selector={(s) => s.canSubmit}>
+							{(canSubmit) => (
+								<button
+									type="submit"
+									disabled={!canSubmit || isPending}
+									className="px-4 py-2 rounded text-sm font-medium disabled:opacity-50"
+									style={{
+										background: "oklch(0.62 0.14 47)",
+										color: "oklch(0.97 0.008 80)"
+									}}
+								>
+									{isPending ? "Saving..." : "Save"}
+								</button>
+							)}
+						</form.Subscribe>
+					</div>
+				</form>
 			</div>
 		</div>
 	);
@@ -289,31 +429,8 @@ function TopicFormDialog({
 function TopicsTable() {
 	const queryClient = useQueryClient();
 	const { data: topics } = useSuspenseQuery(studioTopicsQueryOptions());
-	const [editTarget, setEditTarget] = useState<StudioTopic | null | "new">(
-		null
-	);
+	const [editTarget, setEditTarget] = useState<StudioTopic | null>(null);
 	const [deleteTarget, setDeleteTarget] = useState<StudioTopic | null>(null);
-
-	const createMutation = useMutation({
-		mutationFn: (data: any) => createTopicFn({ data: { data } }),
-		onSuccess: () => {
-			toast.success("Topic created");
-			setEditTarget(null);
-			queryClient.invalidateQueries({ queryKey: ["studio-topics"] });
-		},
-		onError: (e: any) => toast.error(e?.message || "Failed to create topic")
-	});
-
-	const updateMutation = useMutation({
-		mutationFn: ({ id, data }: { id: string; data: any }) =>
-			updateTopicFn({ data: { data: { id, data } } }),
-		onSuccess: () => {
-			toast.success("Topic updated");
-			setEditTarget(null);
-			queryClient.invalidateQueries({ queryKey: ["studio-topics"] });
-		},
-		onError: (e: any) => toast.error(e?.message || "Failed to update topic")
-	});
 
 	const deleteMutation = useMutation({
 		mutationFn: (id: string) => deleteTopicFn({ data: { data: id } }),
@@ -338,18 +455,9 @@ function TopicsTable() {
 		<>
 			{editTarget !== null && (
 				<TopicFormDialog
-					topic={editTarget === "new" ? null : editTarget}
+					topic={editTarget}
 					onClose={() => setEditTarget(null)}
-					onSave={(data) => {
-						if (editTarget === "new") {
-							createMutation.mutate(data);
-						} else {
-							updateMutation.mutate({
-								id: (editTarget as StudioTopic).id,
-								data
-							});
-						}
-					}}
+					onSuccess={() => setEditTarget(null)}
 				/>
 			)}
 
@@ -549,25 +657,14 @@ function TopicsPage() {
 }
 
 function TopicsTableWithAdd() {
-	const queryClient = useQueryClient();
 	const [showForm, setShowForm] = useState(false);
-
-	const createMutation = useMutation({
-		mutationFn: (data: any) => createTopicFn({ data: { data } }),
-		onSuccess: () => {
-			toast.success("Topic created");
-			setShowForm(false);
-			queryClient.invalidateQueries({ queryKey: ["studio-topics"] });
-		},
-		onError: (e: any) => toast.error(e?.message || "Failed")
-	});
 
 	return (
 		<>
 			{showForm && (
 				<TopicFormDialog
 					onClose={() => setShowForm(false)}
-					onSave={(data) => createMutation.mutate(data)}
+					onSuccess={() => setShowForm(false)}
 				/>
 			)}
 			<div className="flex justify-end mb-3">
