@@ -3,7 +3,9 @@
 	"name": "leith-api",
 	"main": "src/index.ts",
 	"compatibility_date": "2025-09-02",
-	"compatibility_flags": ["nodejs_compat"],
+	"compatibility_flags": [
+		"nodejs_compat"
+	],
 	"placement": {
 		"mode": "smart"
 	},
@@ -60,11 +62,15 @@
 	"migrations": [
 		{
 			"tag": "v2",
-			"new_sqlite_classes": ["ChatAgent"]
+			"new_sqlite_classes": [
+				"ChatAgent"
+			]
 		},
 		{
 			"tag": "v3",
-			"new_classes": ["MediaContainer"]
+			"new_sqlite_classes": [
+				"MediaContainer"
+			]
 		}
 	],
 	"workflows": [
@@ -100,7 +106,9 @@
 		}
 	],
 	"triggers": {
-		"crons": ["*/1 * * * *"]
+		"crons": [
+			"*/1 * * * *"
+		]
 	},
 	"containers": [
 		{
