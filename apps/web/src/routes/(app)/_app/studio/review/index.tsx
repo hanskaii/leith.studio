@@ -50,14 +50,14 @@ function ReviewPage() {
 					</p>
 				</div>
 				<Link
-					to="/studio/topics"
+					to="/studio/agent"
 					className="px-3 py-2 rounded-md text-sm"
 					style={{
 						background: "oklch(0.92 0.008 80)",
 						color: "oklch(0.30 0.008 60)"
 					}}
 				>
-					Topics
+					Agent
 				</Link>
 			</div>
 

@@ -10,7 +10,7 @@ export function GenerationCard({
 	selected: boolean;
 	onToggle: (id: string) => void;
 }) {
-	const topic = (gen as any).topic;
+	const topicLabel = gen.topic ?? "Unknown topic";
 	const isApproved = gen.status === "approved";
 
 	return (
@@ -107,7 +107,7 @@ export function GenerationCard({
 						fontFamily: "var(--font-sans)"
 					}}
 				>
-					{topic?.topic ?? "Unknown topic"}
+					{topicLabel}
 				</p>
 				{gen.videoPrompt && (
 					<p

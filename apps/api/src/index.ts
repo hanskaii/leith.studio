@@ -26,16 +26,6 @@ import { authMiddleware } from "./middleware/auth.middleware";
 import { protect } from "./middleware/protect.middleware";
 import { dbMiddleware } from "./middleware/db.middleware";
 import { boot } from "./boot";
-import {
-	database,
-	eq,
-	generationTopics,
-	generationSettings
-} from "@workspace/database";
-import {
-	DEFAULT_IMAGE_PROMPT_TEMPLATE,
-	DEFAULT_VIDEO_PROMPT_TEMPLATE
-} from "@workspace/database";
 
 boot();
 
@@ -120,12 +110,13 @@ app.onError((err, c) => {
 });
 
 export { ChatAgent };
+export { StudioAgent } from "./agents/studio.agent";
 export { VideoProcessingWorkflow } from "./workflows/video-processing.workflow";
 export { VioImageWorkflow } from "./workflows/vio-image.workflow";
 export { VioVideoWorkflow } from "./workflows/vio-video.workflow";
 export { VioUpscaleWorkflow } from "./workflows/vio-upscale.workflow";
 export { VioMotionControlWorkflow } from "./workflows/vio-motion-control.workflow";
-export { TopicGenerationWorkflow } from "./workflows/topic-generation.workflow";
+export { StudioApproveWorkflow } from "./workflows/studio-approve.workflow";
 export { MediaContainer } from "./containers/media.container";
 export type { AppType } from "./contract";
 
@@ -154,52 +145,10 @@ export default {
 
 	scheduled: async (
 		_event: ScheduledController,
-		env: CloudflareBindings,
+		_env: CloudflareBindings,
 		_ctx: ExecutionContext
 	) => {
-		const db = database((env as any).DATABASE);
-
-		const idleTopics = await db.query.generationTopics.findMany({
-			where: eq(generationTopics.status, "idle")
-		});
-
-		if (idleTopics.length === 0) return;
-
-		const settings = await db.query.generationSettings.findFirst();
-
-		for (const topic of idleTopics) {
-			await db
-				.update(generationTopics)
-				.set({ status: "generating", updatedAt: new Date() })
-				.where(eq(generationTopics.id, topic.id));
-
-			await (env as any).TOPIC_GENERATION_WORKFLOW.create({
-				params: {
-					topicId: topic.id,
-					topic: topic.topic,
-					count: topic.countOverride ?? settings?.defaultCount ?? 3,
-					imageModel:
-						topic.modelOverrides?.image ??
-						settings?.defaultImageModel ??
-						"nano-banana-2",
-					videoModel:
-						topic.modelOverrides?.video ??
-						settings?.defaultVideoModel ??
-						"kling-v3",
-					referenceImageUrl:
-						topic.referenceImageUrl ??
-						settings?.globalReferenceImageUrl ??
-						undefined,
-					imagePromptTemplate:
-						topic.promptTemplateOverrides?.image ??
-						settings?.imagePromptTemplate ??
-						DEFAULT_IMAGE_PROMPT_TEMPLATE,
-					videoPromptTemplate:
-						topic.promptTemplateOverrides?.video ??
-						settings?.videoPromptTemplate ??
-						DEFAULT_VIDEO_PROMPT_TEMPLATE
-				}
-			});
-		}
+		// Studio generation scheduling is now handled by per-user StudioAgent
+		// DO alarms (via this.schedule()), so the worker cron is a no-op here.
 	}
 } satisfies ExportedHandler<CloudflareBindings>;

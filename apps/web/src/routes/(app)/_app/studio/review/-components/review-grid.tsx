@@ -24,7 +24,7 @@ export function ReviewGrid() {
 		"approve" | "reject" | null
 	>(null);
 
-	const readyGens = gens.filter((g) => g.status === "ready");
+	const readyGens = gens.filter((g) => g.status === "pending_review");
 
 	const toggleSelect = (id: string) =>
 		setSelected((prev) =>
@@ -80,14 +80,14 @@ export function ReviewGrid() {
 			>
 				<p className="text-sm">No generations ready for review.</p>
 				<p className="text-xs mt-1">
-					Run topics from the{" "}
+					Open the{" "}
 					<Link
-						to="/studio/topics"
+						to="/studio/agent"
 						style={{ color: "oklch(0.62 0.14 47)" }}
 					>
-						Topics
+						Studio Agent
 					</Link>{" "}
-					page to start generating.
+					to start generating.
 				</p>
 			</div>
 		);
