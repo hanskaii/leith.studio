@@ -38,7 +38,7 @@ RUN ARCH=$(uname -m) && \
 
 COPY --from=builder /usr/src/stitcher/target/release/stitcher /usr/local/bin/stitcher
 
-RUN printf '#!/bin/sh\nmkdir -p /mnt/r2\n/usr/local/bin/tigrisfs --endpoint "https://${R2_ACCOUNT_ID}.r2.cloudflarestorage.com" -f "${R2_BUCKET_NAME}" /mnt/r2 &\nsleep 3\nexec /usr/local/bin/stitcher\n' > /entrypoint.sh && chmod +x /entrypoint.sh
+RUN printf '#!/bin/sh\nmkdir -p /mnt/r2\n/usr/local/bin/tigrisfs --endpoint "https://${R2_ACCOUNT_ID}.r2.cloudflarestorage.com" -f "${R2_BUCKET}" /mnt/r2 &\nsleep 3\nexec /usr/local/bin/stitcher\n' > /entrypoint.sh && chmod +x /entrypoint.sh
 
 EXPOSE 8080
 ENTRYPOINT ["/entrypoint.sh"]

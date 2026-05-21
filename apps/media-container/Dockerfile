@@ -30,7 +30,7 @@ WORKDIR /app
 COPY --from=builder /app/dist ./dist
 COPY --from=builder /app/node_modules ./node_modules
 
-RUN printf '#!/bin/sh\nmkdir -p /mnt/r2\n/usr/local/bin/tigrisfs --endpoint "https://${R2_ACCOUNT_ID}.r2.cloudflarestorage.com" -f "${R2_BUCKET_NAME}" /mnt/r2 &\nsleep 3\nexec node /app/dist/index.js\n' > /entrypoint.sh && chmod +x /entrypoint.sh
+RUN printf '#!/bin/sh\nmkdir -p /mnt/r2\n/usr/local/bin/tigrisfs --endpoint "https://${R2_ACCOUNT_ID}.r2.cloudflarestorage.com" -f "${R2_BUCKET}" /mnt/r2 &\nsleep 3\nexec node /app/dist/index.js\n' > /entrypoint.sh && chmod +x /entrypoint.sh
 
 EXPOSE 8080
 ENTRYPOINT ["/entrypoint.sh"]
