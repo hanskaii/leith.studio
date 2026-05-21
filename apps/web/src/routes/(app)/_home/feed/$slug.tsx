@@ -1,4 +1,5 @@
 import { Suspense } from "react";
+import { Image } from "@unpic/react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { ArrowLeft01Icon, Download01Icon } from "@hugeicons/core-free-icons";
@@ -150,10 +151,12 @@ function AssetDetail() {
 						/>
 					) : isAudio && post.previewUrl ? (
 						<div className="flex flex-col items-center gap-4 px-6 py-10">
-							<img
+							<Image
 								src={post.coverThumb ?? ""}
 								alt={post.title}
-								className="h-40 w-40 rounded-md object-cover shadow-md"
+								width={160}
+								height={160}
+								className="rounded-md object-cover shadow-md"
 								loading="eager"
 							/>
 							<audio
@@ -163,12 +166,15 @@ function AssetDetail() {
 							/>
 						</div>
 					) : (
-						<img
-							src={post.coverThumb ?? ""}
-							alt={post.title}
-							className="h-full w-full object-cover"
-							loading="eager"
-						/>
+						<div className="relative h-full w-full">
+							<Image
+								src={post.coverThumb ?? ""}
+								alt={post.title}
+								layout="fill"
+								className="object-cover"
+								loading="eager"
+							/>
+						</div>
 					)}
 				</div>
 

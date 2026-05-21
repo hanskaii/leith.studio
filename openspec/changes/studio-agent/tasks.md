@@ -57,7 +57,7 @@
 - [x] 4.8 Implement `wait_video_workflow` handler: same pattern as `wait_image_workflow`. `status.output` is a single `Generation`. Write `videoUrl = status.output.asset_url`. Advance step, schedule 0s.
 - [x] 4.9 Implement `save_result` handler: `db.insert(studioGenerations, { id: generationId, topic, imageUrl, videoUrl, imagePrompt, videoPrompt: accumulated.loopingPrompt ?? null, status: "pending_review", createdAt: new Date() })`. If `accumulated.triggeredBy === "manual"`: append a new assistant message via `this.saveMessages([...this.messages, { role: "assistant", content: [{ type: "text", text: \`Selesai!\\n\\n![${topic}](${imageUrl})\\n\\n...Mau langsung publish?\` }], annotations: [{ type: "generation", generationId }] }])`. `DELETE FROM flow_state WHERE id = flowId`. Broadcast `{ type: "flow_done", topic, imageUrl, videoUrl, mode: accumulated.triggeredBy }`.
 - [x] 4.10 Implement `failFlow(flowId, stepType, error)`: `DELETE FROM flow_state WHERE id = flowId`. Broadcast `{ type: "flow_failed", stepType, error }`. No DB row inserted on failure — failed flows produce no result.
-- [ ] 4.11 Implement concurrency guard at flow start: `SELECT COUNT(*) FROM flow_state` — if `>= 3`, broadcast `{ type: "flow_skipped" }` and return without inserting.
+- [x] 4.11 Implement concurrency guard at flow start: `SELECT COUNT(*) FROM flow_state` — if `>= 3`, broadcast `{ type: "flow_skipped" }` and return without inserting. (Implemented inline in `runFlowNow` tool AND in `executeTask` for schedule-triggered flows.)
 
 ## 5. StudioAgent — LLM Tools
 
@@ -119,9 +119,9 @@
 
 ## 11. Verification
 
-- [ ] 11.1 `grep -r "TopicGenerationWorkflow" apps/ packages/` — zero results
-- [ ] 11.2 `grep -r "TOPIC_GENERATION_WORKFLOW" apps/ packages/` — zero results
-- [ ] 11.3 `grep -r "topicGenerations\|generationTopics\|generationSettings" apps/ packages/` — zero results
+- [x] 11.1 `grep -r "TopicGenerationWorkflow" apps/ packages/` — zero results
+- [x] 11.2 `grep -r "TOPIC_GENERATION_WORKFLOW" apps/ packages/` — zero results
+- [x] 11.3 `grep -r "topicGenerations\|generationTopics\|generationSettings" apps/ packages/` — zero results
 - [ ] 11.4 Manual: open `/studio/agent`, say "generate lofi background" without specifying model — verify agent presents model options before executing
 - [ ] 11.5 Manual: select model, confirm — verify `flow_state` row created, alarms fire, `VioImageWorkflow` triggered, `flow_progress` broadcast per step
 - [ ] 11.6 Manual: flow completes (manual) → verify `studioGenerations` row with `status: "pending_review"` + assistant message appended with inline image + `flow_done` broadcast + review grid auto-refreshes
@@ -138,4 +138,4 @@
 - [ ] 11.14 Manual: attach 2 images, type "generate video @image-1 start @image-2 end pake kling-v3 i2v-fl" → verify agent injects attachment hint, uploads both to Vio at flow start, `accumulated.userAssets` has both entries, `VIO_VIDEO_WORKFLOW` receives correct `start_frame_asset_id` and `end_frame_asset_id`
 - [ ] 11.15 Manual: simulate Vio upload failure for attachment → verify NO `flow_state` row inserted, agent replies with error message in chat
 - [ ] 11.16 Manual: send message without attachment for i2v-fl flow → verify `generate_video` falls back to `accumulated.imageAssetId` from `upload_asset` step
-- [ ] 11.17 `pnpm typecheck` — no errors
+- [x] 11.17 `pnpm typecheck` — no errors related to this change (pre-existing errors in `creator.handler.ts`, `files.handler.ts`, `license.handler.ts`, `upload.service.ts` for `STORAGE`/`APP_ENV`/etc. CloudflareBindings unrelated to studio-agent)

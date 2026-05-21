@@ -1,4 +1,11 @@
-import { Suspense, useEffect, useMemo, useState } from "react";
+import {
+	Suspense,
+	useEffect,
+	useMemo,
+	useState,
+	memo,
+	useCallback
+} from "react";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { Search01Icon } from "@hugeicons/core-free-icons";
@@ -50,7 +57,7 @@ interface FeedItemsProps {
 	onClearFilters: () => void;
 }
 
-function FeedItems({
+const FeedItems = memo(function FeedItems({
 	page,
 	tag,
 	q,
@@ -188,7 +195,7 @@ function FeedItems({
 			)}
 		</>
 	);
-}
+});
 
 function FeedPage() {
 	const { page, tag, q, type, sort } = Route.useSearch();
@@ -199,24 +206,40 @@ function FeedPage() {
 		setSearchInput(q ?? "");
 	}, [q]);
 
-	const setSearch = (updates: Record<string, unknown>) => {
-		navigate({
-			search: (prev) => ({ ...prev, ...updates, page: 1 })
-		});
-	};
+	const setSearch = useCallback(
+		(updates: Record<string, unknown>) => {
+			navigate({
+				search: (prev) => ({ ...prev, ...updates, page: 1 })
+			});
+		},
+		[navigate]
+	);
 
 	const handleSearchSubmit = (e: React.FormEvent) => {
 		e.preventDefault();
 		setSearch({ q: searchInput.trim() || undefined });
 	};
 
-	const setType = (t: TypeFilter) => setSearch({ type: t });
-	const setSort = (s: SortOrder) => setSearch({ sort: s });
-	const setTag = (t: string | undefined) => setSearch({ tag: t });
-	const setPage = (p: number) =>
-		navigate({ search: (prev) => ({ ...prev, page: p }) });
-	const clearFilters = () =>
-		setSearch({ q: undefined, tag: undefined, type: "all" });
+	const setType = useCallback(
+		(t: TypeFilter) => setSearch({ type: t }),
+		[setSearch]
+	);
+	const setSort = useCallback(
+		(s: SortOrder) => setSearch({ sort: s }),
+		[setSearch]
+	);
+	const setTag = useCallback(
+		(t: string | undefined) => setSearch({ tag: t }),
+		[setSearch]
+	);
+	const setPage = useCallback(
+		(p: number) => navigate({ search: (prev) => ({ ...prev, page: p }) }),
+		[navigate]
+	);
+	const clearFilters = useCallback(
+		() => setSearch({ q: undefined, tag: undefined, type: "all" }),
+		[setSearch]
+	);
 
 	return (
 		<>

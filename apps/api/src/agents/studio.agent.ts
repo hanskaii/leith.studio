@@ -477,17 +477,16 @@ Today's date: ${new Date().toISOString()}.${systemNote}`,
 						shouldAdvance = false;
 						nextScheduleDelay = 15;
 					} else if (status.status === "complete") {
-						// @ts-ignore
+						const output = status.output as any;
 						accumulated.imageUrl =
-							status.output[0]?.asset_url ||
-							status.output?.asset_url;
+							output?.[0]?.asset_url ?? output?.asset_url;
 						shouldAdvance = true;
 						nextScheduleDelay = 0;
 					} else if (status.status === "errored") {
 						return await this.failFlow(
 							flowId,
 							step.type,
-							status.error?.message || "Workflow errored"
+							(status.error as any)?.message ?? "Workflow errored"
 						);
 					}
 					break;

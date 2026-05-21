@@ -57,6 +57,24 @@ app.route("/", contract);
 // Health check
 app.get("/", (c) => ApiResponse.ok(c, "Welcome to the API"));
 
+// Studio agent — protected by content.manage only (NOT app.use).
+// MUST be registered before the catchall /agents/* below.
+app.all(
+	"/agents/studio-agent/*",
+	authMiddleware,
+	protect("content.manage"),
+	async (c) => {
+		const user = c.get("user") as any;
+		const res = await (routeAgentRequest as any)(
+			c.req.raw,
+			(c as any).env,
+			{ metadata: { userId: user.id } }
+		);
+		if (res) return res;
+		return c.notFound();
+	}
+);
+
 app.all("/agents/*", authMiddleware, protect("app.use"), async (c) => {
 	const user = c.get("user") as any;
 	const res = await (routeAgentRequest as any)(c.req.raw, (c as any).env, {

@@ -1,8 +1,9 @@
-import { useRef, useState } from "react";
+import { memo, useRef, useState } from "react";
+import { Image } from "@unpic/react";
 import { Link } from "@tanstack/react-router";
 import type { FeedAsset } from "../-lib/feed-data";
 
-export function FeedCard({
+export const FeedCard = memo(function FeedCard({
 	asset,
 	aspect = "aspect-[16/9]"
 }: {
@@ -53,9 +54,12 @@ export function FeedCard({
 				onPointerLeave={handlePointerLeave}
 			>
 				{/* Thumbnail — always rendered */}
-				<img
+				<Image
 					src={asset.coverThumb}
 					alt={asset.title}
+					loading="lazy"
+					decoding="async"
+					layout="fill"
 					className={`absolute inset-0 h-full w-full object-cover transition-[transform,opacity] duration-500 ${
 						hovered && hasClip
 							? "opacity-0 scale-[1.04]"
@@ -104,6 +108,7 @@ export function FeedCard({
 										className="w-[3px] rounded-full bg-white/80"
 										style={{
 											height: `${h}px`,
+											transformOrigin: "bottom",
 											animation: hovered
 												? `bar-bounce 0.8s ease-in-out ${(i * 0.07).toFixed(2)}s infinite alternate`
 												: "none"
@@ -144,7 +149,7 @@ export function FeedCard({
 			</div>
 		</Link>
 	);
-}
+});
 
 export function FeedCardSkeleton() {
 	return (

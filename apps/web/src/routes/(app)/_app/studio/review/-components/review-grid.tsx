@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { Link } from "@tanstack/react-router";
 import {
 	useSuspenseQuery,
@@ -20,16 +20,14 @@ export function ReviewGrid() {
 	const { data: gens } = useSuspenseQuery(studioReviewQueryOptions());
 	const [selected, setSelected] = useState<string[]>([]);
 	const [showSchedule, setShowSchedule] = useState(false);
-	const [pendingAction, setPendingAction] = useState<
-		"approve" | "reject" | null
-	>(null);
 
 	const readyGens = gens.filter((g) => g.status === "pending_review");
 
-	const toggleSelect = (id: string) =>
+	const toggleSelect = useCallback((id: string) => {
 		setSelected((prev) =>
 			prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]
 		);
+	}, []);
 
 	const approveMutation = useMutation({
 		mutationFn: (scheduledAt?: string) =>
@@ -41,14 +39,12 @@ export function ReviewGrid() {
 			toast.success(`${count} draft post${count > 1 ? "s" : ""} created`);
 			setSelected([]);
 			setShowSchedule(false);
-			setPendingAction(null);
 			queryClient.invalidateQueries({ queryKey: ["studio-review"] });
 			queryClient.invalidateQueries({ queryKey: ["studio-topics"] });
 			queryClient.invalidateQueries({ queryKey: ["creator-posts"] });
 		},
 		onError: (e: any) => {
 			toast.error(e?.message || "Failed to approve");
-			setPendingAction(null);
 		}
 	});
 
@@ -57,13 +53,11 @@ export function ReviewGrid() {
 		onSuccess: () => {
 			toast.success("Rejected");
 			setSelected([]);
-			setPendingAction(null);
 			queryClient.invalidateQueries({ queryKey: ["studio-review"] });
 			queryClient.invalidateQueries({ queryKey: ["studio-topics"] });
 		},
 		onError: (e: any) => {
 			toast.error(e?.message || "Failed to reject");
-			setPendingAction(null);
 		}
 	});
 
@@ -113,7 +107,6 @@ export function ReviewGrid() {
 				onClearAll={() => setSelected([])}
 				onApprove={() => setShowSchedule(true)}
 				onReject={() => {
-					setPendingAction("reject");
 					rejectMutation.mutate();
 				}}
 				isPending={isPending}

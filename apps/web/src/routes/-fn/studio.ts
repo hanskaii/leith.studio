@@ -35,8 +35,8 @@ export const getReviewFn = createServerFn({ method: "GET" }).handler(() =>
 );
 
 export const approveGenerationsFn = createServerFn({ method: "POST" })
-	.inputValidator((input: { data: ApproveInput }) => input)
-	.handler(({ data: { data } }) =>
+	.inputValidator((input: ApproveInput) => input)
+	.handler(({ data }) =>
 		handleError(async () => {
 			const api = createApiClient();
 			const res = await api.api.v1.studio.review.approve.$post({
@@ -48,8 +48,8 @@ export const approveGenerationsFn = createServerFn({ method: "POST" })
 	);
 
 export const rejectGenerationsFn = createServerFn({ method: "POST" })
-	.inputValidator((input: { data: RejectInput }) => input)
-	.handler(({ data: { data } }) =>
+	.inputValidator((input: RejectInput) => input)
+	.handler(({ data }) =>
 		handleError(async () => {
 			const api = createApiClient();
 			await api.api.v1.studio.review.reject.$post({ json: data });
