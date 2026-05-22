@@ -54,6 +54,10 @@
 			{
 				"name": "MEDIA_CONTAINER",
 				"class_name": "MediaContainer"
+			},
+			{
+				"name": "STUDIO_AGENT",
+				"class_name": "StudioAgent"
 			}
 		]
 	},
@@ -64,7 +68,15 @@
 		},
 		{
 			"tag": "v3",
-			"new_sqlite_classes": ["MediaContainer"]
+			"new_sqlite_classes": [
+				"MediaContainer"
+			]
+		},
+		{
+			"tag": "v4",
+			"new_sqlite_classes": [
+				"StudioAgent"
+			]
 		}
 	],
 	"workflows": [
@@ -94,9 +106,9 @@
 			"class_name": "VioMotionControlWorkflow"
 		},
 		{
-			"name": "topic-generation",
-			"binding": "TOPIC_GENERATION_WORKFLOW",
-			"class_name": "TopicGenerationWorkflow"
+			"name": "studio-approve",
+			"binding": "STUDIO_APPROVE_WORKFLOW",
+			"class_name": "StudioApproveWorkflow"
 		}
 	],
 	"triggers": {

@@ -118,7 +118,14 @@ function PostEditorPage() {
 		defaultValues: {
 			title: existing?.title ?? "",
 			tags: Array.isArray((existing as any)?.tags)
-				? (existing as any).tags.join(", ")
+				? (existing as any).tags
+						.map((t: any) =>
+							typeof t === "string"
+								? t
+								: (t?.name ?? t?.slug ?? "")
+						)
+						.filter(Boolean)
+						.join(", ")
 				: "",
 			coverImage: ((existing as any)?.coverImage ?? null) as
 				| string

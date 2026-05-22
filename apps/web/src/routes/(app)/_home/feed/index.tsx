@@ -1,10 +1,18 @@
-import { Suspense, useEffect, useMemo, useState } from "react";
+import {
+	Suspense,
+	useEffect,
+	useMemo,
+	useState,
+	memo,
+	useCallback
+} from "react";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { Search01Icon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { z } from "zod";
 import { postsQueryOptions, toFeedAsset } from "@/routes/-fn/posts";
+import { tagsQueryOptions } from "@/routes/-fn/tags";
 import type { FeedAsset } from "./-lib/feed-data";
 import { PAGE_SIZE } from "./-lib/feed-data";
 import { FeedCard } from "./-components/feed-card";
@@ -50,7 +58,7 @@ interface FeedItemsProps {
 	onClearFilters: () => void;
 }
 
-function FeedItems({
+const FeedItems = memo(function FeedItems({
 	page,
 	tag,
 	q,
@@ -60,23 +68,25 @@ function FeedItems({
 	onPageChange,
 	onClearFilters
 }: FeedItemsProps) {
-	const { data } = useSuspenseQuery(postsQueryOptions(1));
-	const allAssets: FeedAsset[] = (data?.items ?? []).map(toFeedAsset);
+	// Fetch posts with the tag filter applied server-side; cache key varies
+	// by tag so different filters don't clobber each other.
+	const { data } = useSuspenseQuery(postsQueryOptions(1, tag));
+	const { data: tagListRaw } = useSuspenseQuery(tagsQueryOptions());
+	const tagList = tagListRaw ?? [];
 
-	const tags = useMemo(
-		() => [...new Set(allAssets.map((a) => a.tag).filter(Boolean))],
-		[allAssets]
-	);
+	const allAssets: FeedAsset[] = (data?.items ?? []).map(toFeedAsset);
 
 	const filtered = useMemo(() => {
 		let items = [...allAssets];
 		if (type !== "all") items = items.filter((a) => a.type === type);
-		if (tag) items = items.filter((a) => a.tag === tag);
+		// Tag filter is server-side now — no client-side filter for `tag`.
 		if (q)
 			items = items.filter(
 				(a) =>
 					a.title.toLowerCase().includes(q.toLowerCase()) ||
-					a.tag.toLowerCase().includes(q.toLowerCase())
+					a.tags.some((t) =>
+						t.name.toLowerCase().includes(q.toLowerCase())
+					)
 			);
 		if (sort === "popular") {
 			items.sort((a, b) => b.popularity - a.popularity);
@@ -88,10 +98,12 @@ function FeedItems({
 			);
 		}
 		return items;
-	}, [allAssets, type, tag, q, sort]);
+	}, [allAssets, type, q, sort]);
 
 	const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
 	const items = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
+
+	const activeTagName = tag && tagList.find((t) => t.slug === tag)?.name;
 
 	return (
 		<>
@@ -108,18 +120,20 @@ function FeedItems({
 				>
 					All
 				</button>
-				{tags.map((t) => (
+				{tagList.map((t) => (
 					<button
-						key={t}
+						key={t.slug}
 						type="button"
-						onClick={() => onTagChange(tag === t ? undefined : t)}
+						onClick={() =>
+							onTagChange(tag === t.slug ? undefined : t.slug)
+						}
 						className={`shrink-0 rounded-full px-3 py-1 text-xs font-semibold transition-colors ${
-							tag === t
+							tag === t.slug
 								? "bg-foreground text-background"
 								: "border border-border text-muted-foreground hover:text-foreground hover:border-foreground/30"
 						}`}
 					>
-						{t}
+						{t.name}
 					</button>
 				))}
 			</div>
@@ -135,7 +149,14 @@ function FeedItems({
 				<div className="py-24 text-center">
 					<p className="text-sm text-muted-foreground">
 						No assets found
-						{q ? ` for "${q}"` : tag ? ` tagged ${tag}` : ""}.
+						{q
+							? ` for "${q}"`
+							: activeTagName
+								? ` tagged ${activeTagName}`
+								: tag
+									? ` tagged ${tag}`
+									: ""}
+						.
 					</p>
 					{(q || tag) && (
 						<button
@@ -188,7 +209,7 @@ function FeedItems({
 			)}
 		</>
 	);
-}
+});
 
 function FeedPage() {
 	const { page, tag, q, type, sort } = Route.useSearch();
@@ -199,24 +220,40 @@ function FeedPage() {
 		setSearchInput(q ?? "");
 	}, [q]);
 
-	const setSearch = (updates: Record<string, unknown>) => {
-		navigate({
-			search: (prev) => ({ ...prev, ...updates, page: 1 })
-		});
-	};
+	const setSearch = useCallback(
+		(updates: Record<string, unknown>) => {
+			navigate({
+				search: (prev) => ({ ...prev, ...updates, page: 1 })
+			});
+		},
+		[navigate]
+	);
 
 	const handleSearchSubmit = (e: React.FormEvent) => {
 		e.preventDefault();
 		setSearch({ q: searchInput.trim() || undefined });
 	};
 
-	const setType = (t: TypeFilter) => setSearch({ type: t });
-	const setSort = (s: SortOrder) => setSearch({ sort: s });
-	const setTag = (t: string | undefined) => setSearch({ tag: t });
-	const setPage = (p: number) =>
-		navigate({ search: (prev) => ({ ...prev, page: p }) });
-	const clearFilters = () =>
-		setSearch({ q: undefined, tag: undefined, type: "all" });
+	const setType = useCallback(
+		(t: TypeFilter) => setSearch({ type: t }),
+		[setSearch]
+	);
+	const setSort = useCallback(
+		(s: SortOrder) => setSearch({ sort: s }),
+		[setSearch]
+	);
+	const setTag = useCallback(
+		(t: string | undefined) => setSearch({ tag: t }),
+		[setSearch]
+	);
+	const setPage = useCallback(
+		(p: number) => navigate({ search: (prev) => ({ ...prev, page: p }) }),
+		[navigate]
+	);
+	const clearFilters = useCallback(
+		() => setSearch({ q: undefined, tag: undefined, type: "all" }),
+		[setSearch]
+	);
 
 	return (
 		<>

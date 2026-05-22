@@ -1,7 +1,9 @@
+import { memo } from "react";
+import { Image } from "@unpic/react";
 import { Link } from "@tanstack/react-router";
 import type { StudioGeneration } from "@/routes/-fn/studio";
 
-export function GenerationCard({
+export const GenerationCard = memo(function GenerationCard({
 	gen,
 	selected,
 	onToggle
@@ -10,7 +12,7 @@ export function GenerationCard({
 	selected: boolean;
 	onToggle: (id: string) => void;
 }) {
-	const topic = (gen as any).topic;
+	const topicLabel = gen.topic ?? "Unknown topic";
 	const isApproved = gen.status === "approved";
 
 	return (
@@ -72,9 +74,12 @@ export function GenerationCard({
 						playsInline
 					/>
 				) : gen.imageUrl ? (
-					<img
+					<Image
 						src={gen.imageUrl}
 						alt=""
+						loading="lazy"
+						decoding="async"
+						layout="fullWidth"
 						className="absolute inset-0 w-full h-full object-cover"
 					/>
 				) : (
@@ -107,7 +112,7 @@ export function GenerationCard({
 						fontFamily: "var(--font-sans)"
 					}}
 				>
-					{topic?.topic ?? "Unknown topic"}
+					{topicLabel}
 				</p>
 				{gen.videoPrompt && (
 					<p
@@ -136,4 +141,4 @@ export function GenerationCard({
 			)}
 		</div>
 	);
-}
+});

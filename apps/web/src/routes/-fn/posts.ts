@@ -79,7 +79,7 @@ export function toFeedAsset(item: {
 	slug: string;
 	title: string;
 	coverThumb: string | null;
-	tags: string[];
+	tags: { slug: string; name: string }[];
 	format: string;
 	resolution: string;
 	access: string;
@@ -93,7 +93,7 @@ export function toFeedAsset(item: {
 		id: item.id,
 		slug: item.slug,
 		title: item.title,
-		tag: item.tags[0] ?? "",
+		tags: item.tags ?? [],
 		type: assetType(item.format),
 		access: item.access === "free" ? "free" : "members",
 		format: item.format,

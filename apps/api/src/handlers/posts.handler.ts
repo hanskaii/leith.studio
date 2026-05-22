@@ -1,6 +1,12 @@
 import { Hono } from "hono";
-import { eq, and, desc, count, sql } from "drizzle-orm";
-import { posts, postMetadata, postStats } from "@workspace/database";
+import { eq, and, desc, count, sql, inArray } from "drizzle-orm";
+import {
+	posts,
+	postMetadata,
+	postStats,
+	postTags,
+	tags
+} from "@workspace/database";
 import { Gate } from "@workspace/core";
 import { ApiError } from "../helpers/errors.helper";
 import { ApiResponse } from "../helpers/response.helper";
@@ -20,6 +26,18 @@ const CONTENT_TYPES: Record<string, string> = {
 	aac: "audio/aac"
 };
 
+type TagRef = { slug: string; name: string };
+
+function parseTags(raw: string | null | undefined): TagRef[] {
+	if (!raw) return [];
+	try {
+		const parsed = JSON.parse(raw);
+		return Array.isArray(parsed) ? (parsed as TagRef[]) : [];
+	} catch {
+		return [];
+	}
+}
+
 const postsHandler = new Hono<HonoEnv>()
 	.get("/stats", async (c) => {
 		const db = c.get("db");
@@ -37,12 +55,26 @@ const postsHandler = new Hono<HonoEnv>()
 		const tag = c.req.query("tag");
 		const origin = new URL(c.req.url).origin;
 
+		// Subquery: post ids that carry the requested tag slug. Only applied
+		// when ?tag= is set, so unfiltered listings stay simple.
+		const tagFilter = tag
+			? inArray(
+					posts.id,
+					db
+						.select({ postId: postTags.postId })
+						.from(postTags)
+						.innerJoin(tags, eq(tags.id, postTags.tagId))
+						.where(eq(tags.slug, tag))
+				)
+			: undefined;
+
 		const readyFilter = and(
 			eq(posts.status, "published"),
-			eq(postMetadata.processingStatus, "ready")
+			eq(postMetadata.processingStatus, "ready"),
+			tagFilter
 		);
 
-		const [items, [total]] = await Promise.all([
+		const [rawItems, [total]] = await Promise.all([
 			db
 				.select({
 					id: posts.id,
@@ -50,7 +82,15 @@ const postsHandler = new Hono<HonoEnv>()
 					title: posts.title,
 					coverImage: posts.coverImage,
 					coverThumb: posts.coverThumb,
-					tags: posts.tags,
+					// Aggregate tags as a JSON string per post — parsed below.
+					// FILTER (WHERE tags.id IS NOT NULL) ensures posts with
+					// zero tags get '[]' instead of '[{"slug":null,...}]'.
+					tags: sql<string>`COALESCE(
+						JSON_GROUP_ARRAY(
+							JSON_OBJECT('slug', ${tags.slug}, 'name', ${tags.name})
+						) FILTER (WHERE ${tags.id} IS NOT NULL),
+						'[]'
+					)`,
 					publishedAt: posts.publishedAt,
 					format: postMetadata.format,
 					resolution: postMetadata.resolution,
@@ -62,29 +102,33 @@ const postsHandler = new Hono<HonoEnv>()
 				})
 				.from(posts)
 				.innerJoin(postMetadata, eq(posts.id, postMetadata.postId))
+				.leftJoin(postTags, eq(postTags.postId, posts.id))
+				.leftJoin(tags, eq(tags.id, postTags.tagId))
 				.where(readyFilter)
+				.groupBy(posts.id)
 				.orderBy(desc(posts.publishedAt))
 				.limit(PAGE_SIZE)
 				.offset((page - 1) * PAGE_SIZE),
 			db
-				.select({ count: count() })
+				.select({ count: count(sql`DISTINCT ${posts.id}`) })
 				.from(posts)
 				.innerJoin(postMetadata, eq(posts.id, postMetadata.postId))
 				.where(readyFilter)
 		]);
 
-		const raw = tag
-			? items.filter((p) => Array.isArray(p.tags) && p.tags.includes(tag))
-			: items;
-
-		const filtered = raw.map(({ previewKey, clipKey, ...item }) => ({
-			...item,
-			previewUrl: previewKey ? `${origin}/api/files/${previewKey}` : null,
-			clipUrl: clipKey ? `${origin}/api/files/${clipKey}` : null
-		}));
+		const items = rawItems.map(
+			({ previewKey, clipKey, tags: tagsRaw, ...item }) => ({
+				...item,
+				tags: parseTags(tagsRaw),
+				previewUrl: previewKey
+					? `${origin}/api/files/${previewKey}`
+					: null,
+				clipUrl: clipKey ? `${origin}/api/files/${clipKey}` : null
+			})
+		);
 
 		return ApiResponse.ok(c, "Posts", {
-			items: filtered,
+			items,
 			total: total?.count ?? 0,
 			page,
 			pageSize: PAGE_SIZE
@@ -103,7 +147,12 @@ const postsHandler = new Hono<HonoEnv>()
 				body: posts.body,
 				coverImage: posts.coverImage,
 				coverThumb: posts.coverThumb,
-				tags: posts.tags,
+				tags: sql<string>`COALESCE(
+					JSON_GROUP_ARRAY(
+						JSON_OBJECT('slug', ${tags.slug}, 'name', ${tags.name})
+					) FILTER (WHERE ${tags.id} IS NOT NULL),
+					'[]'
+				)`,
 				status: posts.status,
 				publishedAt: posts.publishedAt,
 				createdAt: posts.createdAt,
@@ -120,17 +169,25 @@ const postsHandler = new Hono<HonoEnv>()
 			})
 			.from(posts)
 			.innerJoin(postMetadata, eq(posts.id, postMetadata.postId))
-			.where(and(eq(posts.slug, slug), eq(posts.status, "published")));
+			.leftJoin(postTags, eq(postTags.postId, posts.id))
+			.leftJoin(tags, eq(tags.id, postTags.tagId))
+			.where(and(eq(posts.slug, slug), eq(posts.status, "published")))
+			.groupBy(posts.id);
 
 		if (!row) throw ApiError.notFound("Post not found");
 
-		const { previewKey, clipKey, ...post } = row;
+		const { previewKey, clipKey, tags: tagsRaw, ...post } = row;
 		const previewUrl = previewKey
 			? `${origin}/api/files/${previewKey}`
 			: null;
 		const clipUrl = clipKey ? `${origin}/api/files/${clipKey}` : null;
 
-		return ApiResponse.ok(c, "Post", { ...post, previewUrl, clipUrl });
+		return ApiResponse.ok(c, "Post", {
+			...post,
+			tags: parseTags(tagsRaw),
+			previewUrl,
+			clipUrl
+		});
 	})
 	.get("/:slug/download", authMiddleware, async (c) => {
 		const db = c.get("db");

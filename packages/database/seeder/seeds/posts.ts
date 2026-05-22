@@ -1,5 +1,6 @@
 import type { DrizzleD1Database } from "drizzle-orm/d1";
 import * as schema from "../../schema";
+import { slugifyTag } from "../../utils/slug";
 
 const img = (id: string) =>
 	`https://images.unsplash.com/photo-${id}?w=1600&q=80&auto=format&fit=crop`;
@@ -21,11 +22,13 @@ const doc = (text: string) =>
 const MB = 1024 * 1024;
 
 export async function seedPosts(db: DrizzleD1Database<typeof schema> | any) {
-	console.log("🎬 Seeding posts and asset metadata...");
+	console.log("🎬 Seeding posts, tags, and asset metadata...");
 
 	const now = new Date();
 	const daysAgo = (d: number) => new Date(now.getTime() - d * 86_400_000);
 
+	// Tag map alongside posts — kept separately so we can normalize into the
+	// `tags` + `post_tags` tables instead of stuffing a JSON array on `posts`.
 	const postsData = [
 		{
 			id: "post_noir_rain",
@@ -36,7 +39,6 @@ export async function seedPosts(db: DrizzleD1Database<typeof schema> | any) {
 			),
 			coverImage: img("1518640467707-6811f4a6ab73"),
 			coverThumb: thumb("1518640467707-6811f4a6ab73"),
-			tags: ["Loop", "Rain", "Cinematic"],
 			status: "published" as const,
 			publishedAt: daysAgo(30),
 			createdAt: daysAgo(32),
@@ -51,7 +53,6 @@ export async function seedPosts(db: DrizzleD1Database<typeof schema> | any) {
 			),
 			coverImage: img("1419833479478-11ca64c1e585"),
 			coverThumb: thumb("1419833479478-11ca64c1e585"),
-			tags: ["Ambience", "Fog", "Dark"],
 			status: "published" as const,
 			publishedAt: daysAgo(28),
 			createdAt: daysAgo(30),
@@ -66,7 +67,6 @@ export async function seedPosts(db: DrizzleD1Database<typeof schema> | any) {
 			),
 			coverImage: img("1516912481808-3406841bd33c"),
 			coverThumb: thumb("1516912481808-3406841bd33c"),
-			tags: ["Loop", "Fire", "Ambient"],
 			status: "published" as const,
 			publishedAt: daysAgo(25),
 			createdAt: daysAgo(27),
@@ -81,7 +81,6 @@ export async function seedPosts(db: DrizzleD1Database<typeof schema> | any) {
 			),
 			coverImage: img("1558618666-fcd25c85cd64"),
 			coverThumb: thumb("1558618666-fcd25c85cd64"),
-			tags: ["Overlay", "Transition", "Impact"],
 			status: "published" as const,
 			publishedAt: daysAgo(22),
 			createdAt: daysAgo(24),
@@ -96,7 +95,6 @@ export async function seedPosts(db: DrizzleD1Database<typeof schema> | any) {
 			),
 			coverImage: img("1480714378408-67cf0d13bc1b"),
 			coverThumb: thumb("1480714378408-67cf0d13bc1b"),
-			tags: ["Background", "Space", "Static"],
 			status: "published" as const,
 			publishedAt: daysAgo(20),
 			createdAt: daysAgo(22),
@@ -111,7 +109,6 @@ export async function seedPosts(db: DrizzleD1Database<typeof schema> | any) {
 			),
 			coverImage: img("1525909002-1b05e0c869dd"),
 			coverThumb: thumb("1525909002-1b05e0c869dd"),
-			tags: ["Background", "Urban", "Neon"],
 			status: "published" as const,
 			publishedAt: daysAgo(18),
 			createdAt: daysAgo(20),
@@ -126,7 +123,6 @@ export async function seedPosts(db: DrizzleD1Database<typeof schema> | any) {
 			),
 			coverImage: img("1476514525405-09baa58e8721"),
 			coverThumb: thumb("1476514525405-09baa58e8721"),
-			tags: ["Transition", "Storm", "Effect"],
 			status: "published" as const,
 			publishedAt: daysAgo(15),
 			createdAt: daysAgo(17),
@@ -141,7 +137,6 @@ export async function seedPosts(db: DrizzleD1Database<typeof schema> | any) {
 			),
 			coverImage: img("1491029113948-a1f3e42e7f15"),
 			coverThumb: thumb("1491029113948-a1f3e42e7f15"),
-			tags: ["Loop", "Moon", "Cinematic"],
 			status: "published" as const,
 			publishedAt: daysAgo(12),
 			createdAt: daysAgo(14),
@@ -156,7 +151,6 @@ export async function seedPosts(db: DrizzleD1Database<typeof schema> | any) {
 			),
 			coverImage: img("1441974231531-c6227db76b6e"),
 			coverThumb: thumb("1441974231531-c6227db76b6e"),
-			tags: ["Background", "Nature", "Dark"],
 			status: "published" as const,
 			publishedAt: daysAgo(10),
 			createdAt: daysAgo(12),
@@ -171,7 +165,6 @@ export async function seedPosts(db: DrizzleD1Database<typeof schema> | any) {
 			),
 			coverImage: img("1451187580459-43490279c0fa"),
 			coverThumb: thumb("1451187580459-43490279c0fa"),
-			tags: ["Overlay", "Smoke", "Loop"],
 			status: "published" as const,
 			publishedAt: daysAgo(8),
 			createdAt: daysAgo(10),
@@ -186,7 +179,6 @@ export async function seedPosts(db: DrizzleD1Database<typeof schema> | any) {
 			),
 			coverImage: img("1470252649021-ba82e40a5792"),
 			coverThumb: thumb("1470252649021-ba82e40a5792"),
-			tags: ["Ambience", "Minimal", "Dark"],
 			status: "published" as const,
 			publishedAt: daysAgo(5),
 			createdAt: daysAgo(7),
@@ -201,13 +193,29 @@ export async function seedPosts(db: DrizzleD1Database<typeof schema> | any) {
 			),
 			coverImage: img("1464822759023-fed622ff2c3b"),
 			coverThumb: thumb("1464822759023-fed622ff2c3b"),
-			tags: ["Transition", "Glitch", "Effect"],
 			status: "published" as const,
 			publishedAt: daysAgo(2),
 			createdAt: daysAgo(4),
 			updatedAt: daysAgo(2)
 		}
 	];
+
+	// Tag assignments per post (post id → tag names). Kept here instead of on
+	// the post row so the seeder can normalize into `tags` + `post_tags`.
+	const postTagsMap: Record<string, string[]> = {
+		post_noir_rain: ["Loop", "Rain", "Cinematic"],
+		post_obsidian_fog: ["Ambience", "Fog", "Dark"],
+		post_ember_drift: ["Loop", "Fire", "Ambient"],
+		post_shattered_glass: ["Overlay", "Transition", "Impact"],
+		post_deep_space: ["Background", "Space", "Static"],
+		post_neon_city: ["Background", "Urban", "Neon"],
+		post_storm_transition: ["Transition", "Storm", "Effect"],
+		post_blood_moon: ["Loop", "Moon", "Cinematic"],
+		post_dark_forest: ["Background", "Nature", "Dark"],
+		post_smoke_curtain: ["Overlay", "Smoke", "Loop"],
+		post_void_ambience: ["Ambience", "Minimal", "Dark"],
+		post_glitch_wipe: ["Transition", "Glitch", "Effect"]
+	};
 
 	// format / resolution / fileKey / previewKey / clipKey / fileSize / access / duration / isLoop / processingStatus
 	const metadataData = [
@@ -377,7 +385,57 @@ export async function seedPosts(db: DrizzleD1Database<typeof schema> | any) {
 		await db.insert(schema.postMetadata).values(meta).onConflictDoNothing();
 	}
 
-	console.log(`✓ Seeded ${postsData.length} posts with asset metadata`);
+	// Build the unique tag set across all posts, keyed by slug so duplicates
+	// from different casings collapse. Each tag gets a stable UUID we can
+	// reference when inserting the junction rows.
+	const tagBySlug = new Map<
+		string,
+		{ id: string; slug: string; name: string }
+	>();
+	for (const names of Object.values(postTagsMap)) {
+		for (const name of names) {
+			const slug = slugifyTag(name);
+			if (!slug) continue;
+			if (!tagBySlug.has(slug)) {
+				tagBySlug.set(slug, {
+					id: crypto.randomUUID(),
+					slug,
+					name
+				});
+			}
+		}
+	}
+
+	for (const tag of tagBySlug.values()) {
+		await db
+			.insert(schema.tags)
+			.values({
+				id: tag.id,
+				slug: tag.slug,
+				name: tag.name,
+				createdAt: now
+			})
+			.onConflictDoNothing();
+	}
+
+	for (const [postId, names] of Object.entries(postTagsMap)) {
+		for (const name of names) {
+			const slug = slugifyTag(name);
+			if (!slug) continue;
+			const tag = tagBySlug.get(slug);
+			if (!tag) continue;
+			await db
+				.insert(schema.postTags)
+				.values({ postId, tagId: tag.id })
+				.onConflictDoNothing();
+		}
+	}
+
+	console.log(
+		`✓ Seeded ${postsData.length} posts, ${tagBySlug.size} tags, ${Object.values(
+			postTagsMap
+		).reduce((acc, t) => acc + t.length, 0)} post_tags links`
+	);
 	console.log(
 		"  Free  : noir-rain-loop, deep-space, neon-city-night, smoke-curtain"
 	);

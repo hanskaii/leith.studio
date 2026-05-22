@@ -1,4 +1,5 @@
 import { Suspense } from "react";
+import { Image } from "@unpic/react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { ArrowLeft01Icon, Download01Icon } from "@hugeicons/core-free-icons";
@@ -51,19 +52,24 @@ function RelatedPostsSkeleton() {
 	);
 }
 
-function RelatedPosts({ tag, currentId }: { tag: string; currentId: string }) {
+function RelatedPosts({
+	tagSlug,
+	tagName,
+	currentId
+}: {
+	tagSlug: string;
+	tagName: string;
+	currentId: string;
+}) {
 	const { data } = useSuspenseQuery(postsQueryOptions(1));
 	const items = data?.items ?? [];
 
-	const sameTag = items.filter(
-		(p) =>
-			p.id !== currentId && Array.isArray(p.tags) && p.tags.includes(tag)
-	);
-	const others = items.filter(
-		(p) =>
-			p.id !== currentId &&
-			!(Array.isArray(p.tags) && p.tags.includes(tag))
-	);
+	const hasTag = (p: (typeof items)[number]) =>
+		Array.isArray(p.tags) &&
+		p.tags.some((t: { slug: string }) => t.slug === tagSlug);
+
+	const sameTag = items.filter((p) => p.id !== currentId && hasTag(p));
+	const others = items.filter((p) => p.id !== currentId && !hasTag(p));
 	const related = [...sameTag, ...others].slice(0, 3).map(toFeedAsset);
 
 	if (related.length === 0) return null;
@@ -74,7 +80,7 @@ function RelatedPosts({ tag, currentId }: { tag: string; currentId: string }) {
 				More like this
 			</p>
 			<h2 className="mb-6 font-heading font-bold text-xl tracking-tight text-foreground">
-				{tag} assets
+				{tagName} assets
 			</h2>
 			<div className="grid gap-x-5 gap-y-7 sm:grid-cols-2 lg:grid-cols-3">
 				{related.map((a) => (
@@ -95,7 +101,9 @@ function AssetDetail() {
 	const AUDIO_FORMATS = new Set(["mp3", "wav", "ogg", "aac"]);
 	const isVideo = VIDEO_FORMATS.has(post.format);
 	const isAudio = AUDIO_FORMATS.has(post.format);
-	const tag = Array.isArray(post.tags) ? (post.tags[0] ?? "") : "";
+	const primaryTag = Array.isArray(post.tags) ? post.tags[0] : undefined;
+	const tagName = primaryTag?.name ?? "";
+	const tagSlug = primaryTag?.slug;
 
 	const assetTypeLabel = isVideo
 		? "Video loop"
@@ -131,7 +139,7 @@ function AssetDetail() {
 						Feed
 					</Link>
 					<span className="text-border/80">/</span>
-					<span className="text-foreground/60">{tag}</span>
+					<span className="text-foreground/60">{tagName}</span>
 				</nav>
 
 				{/* Media */}
@@ -150,10 +158,12 @@ function AssetDetail() {
 						/>
 					) : isAudio && post.previewUrl ? (
 						<div className="flex flex-col items-center gap-4 px-6 py-10">
-							<img
+							<Image
 								src={post.coverThumb ?? ""}
 								alt={post.title}
-								className="h-40 w-40 rounded-md object-cover shadow-md"
+								width={160}
+								height={160}
+								className="rounded-md object-cover shadow-md"
 								loading="eager"
 							/>
 							<audio
@@ -163,12 +173,15 @@ function AssetDetail() {
 							/>
 						</div>
 					) : (
-						<img
-							src={post.coverThumb ?? ""}
-							alt={post.title}
-							className="h-full w-full object-cover"
-							loading="eager"
-						/>
+						<div className="relative h-full w-full">
+							<Image
+								src={post.coverThumb ?? ""}
+								alt={post.title}
+								layout="fill"
+								className="object-cover"
+								loading="eager"
+							/>
+						</div>
 					)}
 				</div>
 
@@ -177,9 +190,11 @@ function AssetDetail() {
 					{/* Left: identity */}
 					<div>
 						<div className="mb-3 flex flex-wrap items-center gap-2">
-							<span className="rounded border border-border px-2 py-0.5 text-[11px] font-semibold uppercase tracking-[0.06em] text-muted-foreground">
-								{tag}
-							</span>
+							{tagName && (
+								<span className="rounded border border-border px-2 py-0.5 text-[11px] font-semibold uppercase tracking-[0.06em] text-muted-foreground">
+									{tagName}
+								</span>
+							)}
 							{post.access !== "free" && (
 								<span className="rounded bg-primary px-2 py-0.5 text-[11px] font-bold uppercase tracking-[0.08em] text-primary-foreground">
 									All Access
@@ -257,9 +272,15 @@ function AssetDetail() {
 				</div>
 
 				{/* Related */}
-				<Suspense fallback={<RelatedPostsSkeleton />}>
-					<RelatedPosts tag={tag} currentId={post.id} />
-				</Suspense>
+				{tagSlug && (
+					<Suspense fallback={<RelatedPostsSkeleton />}>
+						<RelatedPosts
+							tagSlug={tagSlug}
+							tagName={tagName}
+							currentId={post.id}
+						/>
+					</Suspense>
+				)}
 			</div>
 		</main>
 	);
