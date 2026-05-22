@@ -1,12 +1,31 @@
 import { Hono } from "hono";
 import { zValidator } from "@hono/zod-validator";
 import { z } from "zod";
-import { eq, desc } from "@workspace/database";
-import { studioGenerations } from "@workspace/database";
+import { and, eq, desc, sql } from "@workspace/database";
+import {
+	postMetadata,
+	postTags,
+	posts,
+	studioGenerations,
+	tags
+} from "@workspace/database";
 import { ApiResponse } from "../helpers/response.helper";
 import { authMiddleware } from "../middleware/auth.middleware";
 import { protect } from "../middleware/protect.middleware";
+import { SearchService } from "../services/search.service";
 import type { HonoEnv } from "../types/hono.types";
+
+type TagRef = { slug: string; name: string };
+
+function parseTagsJson(raw: string | null | undefined): TagRef[] {
+	if (!raw) return [];
+	try {
+		const parsed = JSON.parse(raw);
+		return Array.isArray(parsed) ? (parsed as TagRef[]) : [];
+	} catch {
+		return [];
+	}
+}
 
 const ApproveSchema = z.object({
 	ids: z.array(z.string()).min(1),
@@ -68,6 +87,68 @@ const studioHandler = new Hono<HonoEnv>()
 
 			return ApiResponse.ok(c, "Rejected");
 		}
-	);
+	)
+
+	// ── Search Index ──────────────────────────────────────────────────────────
+
+	/**
+	 * Rebuild the search index from scratch. Walks every ready+published post,
+	 * builds an IndexablePost from the joined row, and writes the markdown
+	 * document to R2. Idempotent — safe to run repeatedly.
+	 *
+	 * Use cases:
+	 *   - Document schema changed (new field added, format adjusted)
+	 *   - R2 search/ prefix was wiped
+	 *   - One-shot bootstrap on a fresh deployment
+	 */
+	.post("/search/reindex", async (c) => {
+		const db = c.get("db");
+
+		const rows = await db
+			.select({
+				id: posts.id,
+				slug: posts.slug,
+				title: posts.title,
+				body: posts.body,
+				publishedAt: posts.publishedAt,
+				format: postMetadata.format,
+				access: postMetadata.access,
+				tags: sql<string>`COALESCE(
+					JSON_GROUP_ARRAY(
+						JSON_OBJECT('slug', ${tags.slug}, 'name', ${tags.name})
+					) FILTER (WHERE ${tags.id} IS NOT NULL),
+					'[]'
+				)`
+			})
+			.from(posts)
+			.innerJoin(postMetadata, eq(postMetadata.postId, posts.id))
+			.leftJoin(postTags, eq(postTags.postId, posts.id))
+			.leftJoin(tags, eq(tags.id, postTags.tagId))
+			.where(
+				and(
+					eq(posts.status, "published"),
+					eq(postMetadata.processingStatus, "ready")
+				)
+			)
+			.groupBy(posts.id);
+
+		const search = new SearchService(c.env);
+		let indexed = 0;
+		for (const row of rows) {
+			await search.index({
+				id: row.id,
+				slug: row.slug,
+				title: row.title,
+				body: row.body,
+				tags: parseTagsJson(row.tags),
+				format: row.format,
+				access: row.access as "free" | "premium",
+				publishedAt: row.publishedAt ?? null
+			});
+			indexed++;
+		}
+
+		return ApiResponse.ok(c, "Search index rebuilt", { indexed });
+	});
 
 export default studioHandler;

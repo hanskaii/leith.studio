@@ -68,9 +68,11 @@ const FeedItems = memo(function FeedItems({
 	onPageChange,
 	onClearFilters
 }: FeedItemsProps) {
-	// Fetch posts with the tag filter applied server-side; cache key varies
-	// by tag so different filters don't clobber each other.
-	const { data } = useSuspenseQuery(postsQueryOptions(1, tag));
+	// Fetch posts with tag AND q applied server-side. Cache key varies by all
+	// three so toggling between filters doesn't clobber each other's results.
+	// When q is set, the server returns ranked semantic results — sort/filter
+	// on top of that is intentionally limited.
+	const { data } = useSuspenseQuery(postsQueryOptions(1, tag, q));
 	const { data: tagListRaw } = useSuspenseQuery(tagsQueryOptions());
 	const tagList = tagListRaw ?? [];
 
@@ -79,15 +81,9 @@ const FeedItems = memo(function FeedItems({
 	const filtered = useMemo(() => {
 		let items = [...allAssets];
 		if (type !== "all") items = items.filter((a) => a.type === type);
-		// Tag filter is server-side now — no client-side filter for `tag`.
-		if (q)
-			items = items.filter(
-				(a) =>
-					a.title.toLowerCase().includes(q.toLowerCase()) ||
-					a.tags.some((t) =>
-						t.name.toLowerCase().includes(q.toLowerCase())
-					)
-			);
+		// Tag + q are server-side. When sorting, respect q ranking by leaving
+		// the server's order untouched (skip the sort block entirely).
+		if (q) return items;
 		if (sort === "popular") {
 			items.sort((a, b) => b.popularity - a.popularity);
 		} else {
@@ -107,6 +103,25 @@ const FeedItems = memo(function FeedItems({
 
 	return (
 		<>
+			{/* Search hint — visible only when a query is active. */}
+			{q && (
+				<div className="mb-4 flex items-center gap-3 rounded-md border border-border bg-card px-3 py-2 text-sm">
+					<span className="text-muted-foreground">
+						Searching for{" "}
+						<span className="font-semibold text-foreground">
+							"{q}"
+						</span>
+					</span>
+					<button
+						type="button"
+						onClick={onClearFilters}
+						className="ml-auto text-xs text-primary hover:underline underline-offset-4"
+					>
+						Clear search
+					</button>
+				</div>
+			)}
+
 			{/* Tag pills */}
 			<div className="mb-8 flex items-center gap-2 overflow-x-auto pb-1">
 				<button
@@ -170,8 +185,8 @@ const FeedItems = memo(function FeedItems({
 				</div>
 			)}
 
-			{/* Pagination */}
-			{totalPages > 1 && (
+			{/* Pagination — hidden while searching (results are ranked, not paged) */}
+			{!q && totalPages > 1 && (
 				<div className="mt-14 flex items-center justify-center gap-1.5">
 					<button
 						type="button"

@@ -5,14 +5,17 @@ import { handleError } from "@/routes/-fn/handle-error";
 import type { FeedAsset } from "@/routes/(app)/_home/feed/-lib/feed-data";
 
 export const getPostsFn = createServerFn({ method: "GET" })
-	.inputValidator((input: { page?: number; tag?: string }) => input)
+	.inputValidator(
+		(input: { page?: number; tag?: string; q?: string }) => input
+	)
 	.handler(({ data }) =>
 		handleError(async () => {
 			const api = createApiClient();
 			const res = await api.api.v1.posts.$get({
 				query: {
 					page: String(data.page ?? 1),
-					...(data.tag ? { tag: data.tag } : {})
+					...(data.tag ? { tag: data.tag } : {}),
+					...(data.q ? { q: data.q } : {})
 				}
 			});
 			const { data: results } = await res.json();
@@ -47,10 +50,10 @@ export const getPostStatsFn = createServerFn({ method: "GET" }).handler(() =>
 	})
 );
 
-export const postsQueryOptions = (page = 1, tag?: string) =>
+export const postsQueryOptions = (page = 1, tag?: string, q?: string) =>
 	queryOptions({
-		queryKey: ["posts", page, tag],
-		queryFn: () => getPostsFn({ data: { page, tag } })
+		queryKey: ["posts", page, tag, q],
+		queryFn: () => getPostsFn({ data: { page, tag, q } })
 	});
 
 export const postQueryOptions = (slug: string) =>

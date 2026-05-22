@@ -15,6 +15,7 @@ import {
 } from "@workspace/database";
 import { slugifyTag } from "@workspace/database/utils/slug";
 import { uniqueSlug } from "../lib/slug";
+import { SearchService } from "../services/search.service";
 
 type ApproveParams = {
 	generationId: string;
@@ -295,6 +296,27 @@ export class StudioApproveWorkflow extends WorkflowEntrypoint<
 				});
 
 				return { inserted: enriched.tags.length };
+			});
+
+			// 12.5c index-search — write the post's search document to R2 so
+			// Cloudflare AI Search picks it up on its next auto-crawl. R2 PUT
+			// is idempotent so workflow retries are safe. Failures bubble up
+			// to the outer catch and revert the generation row via the agent
+			// notify path — better fail loud than ship an un-indexed post.
+			currentStepName = "index-search";
+			await step.do("index-search", async () => {
+				await new SearchService(this.env).index({
+					id: postId,
+					slug: created.slug,
+					title: enriched.title,
+					body: enriched.description,
+					tags: enriched.tags
+						.map((name) => ({ slug: slugifyTag(name), name }))
+						.filter((t) => t.slug.length > 0),
+					format: videoFileKey ? "mp4" : "jpg",
+					access: "premium",
+					publishedAt: scheduledAt ? new Date(scheduledAt) : null
+				});
 			});
 
 			// 12.6 trigger-video-processing — only for video posts; image-only

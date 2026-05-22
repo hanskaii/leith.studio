@@ -254,6 +254,18 @@ See `.claude/rules/better-auth.md` for the full guide.
 
 ---
 
+## Search (`AI_SEARCH` binding + R2)
+
+Posts are indexed for semantic search via Cloudflare AI Search, backed by Markdown documents in R2.
+
+- **R2 is the source of truth** — every searchable post has a document at `search/posts/{postId}.md` (Markdown body + YAML front matter). AI Search auto-crawls that prefix.
+- **All write paths go through `SearchService.index` / `.deindex`** in `apps/api/src/services/search.service.ts`. Never call the AI Search items API directly — write to R2 instead. The hook points are: `StudioApproveWorkflow` (`index-search` step), `creator.handler.ts` (POST/PATCH/DELETE on `/posts`).
+- **Querying** uses `SearchService.search({ query, max })` from the same class. The `GET /api/v1/posts?q=` handler branches: when `q` is set it calls AI Search and re-sorts the SQL hydration by rank; otherwise it falls back to the chronological browse query. If the AI Search binding throws, the handler degrades to `SearchService.sqlFallback` (SQL `LIKE`) automatically.
+- **The Cmd+K command palette** (`apps/web/src/routes/(app)/_home/-components/search-dialog.tsx`) is also a consumer of the same `/posts?q=` endpoint — debounced typing, ranked results inline, `shouldFilter={false}` on cmdk so server rank is preserved.
+- **Bootstrap / rebuild**: `POST /api/v1/studio/search/reindex` walks all published posts and re-writes the R2 documents. Run after `pnpm db:seed` on a fresh environment.
+
+---
+
 ## Package Boundaries
 
 | Package               | Purpose                                   | Do not import         |

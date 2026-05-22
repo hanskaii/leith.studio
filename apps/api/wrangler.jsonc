@@ -35,6 +35,12 @@
 	"ai": {
 		"binding": "AI"
 	},
+	"ai_search": [
+		{
+			"binding": "AI_SEARCH",
+			"instance_name": "leith-posts"
+		}
+	],
 	"vars": {
 		// Production values — for local dev, override via apps/api/.dev.vars
 		"APP_ENV": "production",

@@ -11,6 +11,7 @@ import { Gate } from "@workspace/core";
 import { ApiError } from "../helpers/errors.helper";
 import { ApiResponse } from "../helpers/response.helper";
 import { authMiddleware } from "../middleware/auth.middleware";
+import { SearchService, type SearchHit } from "../services/search.service";
 import type { HonoEnv } from "../types/hono.types";
 
 const PAGE_SIZE = 12;
@@ -53,8 +54,110 @@ const postsHandler = new Hono<HonoEnv>()
 		const db = c.get("db");
 		const page = Number(c.req.query("page") ?? "1");
 		const tag = c.req.query("tag");
+		const q = c.req.query("q")?.trim();
 		const origin = new URL(c.req.url).origin;
 
+		// Search path — when ?q= is set, route through AI Search for semantic
+		// ranking, then hydrate from D1. Tag filter (if any) is layered as a
+		// SQL constraint on top of the AI Search candidate ids.
+		if (q) {
+			const searchService = new SearchService(c.env);
+			let hits: SearchHit[] = [];
+			try {
+				hits = await searchService.search({ query: q, max: 50 });
+			} catch (err) {
+				console.error(
+					"[search] AI Search failed, falling back to LIKE",
+					err
+				);
+				hits = await searchService.sqlFallback(db, q);
+			}
+
+			if (hits.length === 0) {
+				return ApiResponse.ok(c, "Posts", {
+					items: [],
+					total: 0,
+					page: 1,
+					pageSize: 50
+				});
+			}
+
+			const idsByRank = hits.map((h) => h.postId);
+			const rankIndex = new Map(idsByRank.map((id, i) => [id, i]));
+
+			const searchTagFilter = tag
+				? inArray(
+						posts.id,
+						db
+							.select({ postId: postTags.postId })
+							.from(postTags)
+							.innerJoin(tags, eq(tags.id, postTags.tagId))
+							.where(eq(tags.slug, tag))
+					)
+				: undefined;
+
+			const searchRows = await db
+				.select({
+					id: posts.id,
+					slug: posts.slug,
+					title: posts.title,
+					coverImage: posts.coverImage,
+					coverThumb: posts.coverThumb,
+					tags: sql<string>`COALESCE(
+						JSON_GROUP_ARRAY(
+							JSON_OBJECT('slug', ${tags.slug}, 'name', ${tags.name})
+						) FILTER (WHERE ${tags.id} IS NOT NULL),
+						'[]'
+					)`,
+					publishedAt: posts.publishedAt,
+					format: postMetadata.format,
+					resolution: postMetadata.resolution,
+					isLoop: postMetadata.isLoop,
+					access: postMetadata.access,
+					previewKey: postMetadata.previewKey,
+					clipKey: postMetadata.clipKey,
+					downloadCount: sql<number>`(SELECT COUNT(*) FROM ${postStats} WHERE ${postStats.postId} = ${posts.id})`
+				})
+				.from(posts)
+				.innerJoin(postMetadata, eq(posts.id, postMetadata.postId))
+				.leftJoin(postTags, eq(postTags.postId, posts.id))
+				.leftJoin(tags, eq(tags.id, postTags.tagId))
+				.where(
+					and(
+						eq(posts.status, "published"),
+						eq(postMetadata.processingStatus, "ready"),
+						inArray(posts.id, idsByRank),
+						searchTagFilter
+					)
+				)
+				.groupBy(posts.id);
+
+			// SQL `IN` returns unordered rows — re-sort against the AI Search
+			// rank map so the response preserves relevance order.
+			const searchItems = searchRows
+				.map(({ previewKey, clipKey, tags: tagsRaw, ...item }) => ({
+					...item,
+					tags: parseTags(tagsRaw),
+					previewUrl: previewKey
+						? `${origin}/api/files/${previewKey}`
+						: null,
+					clipUrl: clipKey ? `${origin}/api/files/${clipKey}` : null
+				}))
+				.sort((a, b) => {
+					const ai = rankIndex.get(a.id) ?? Infinity;
+					const bi = rankIndex.get(b.id) ?? Infinity;
+					return ai - bi;
+				});
+
+			return ApiResponse.ok(c, "Posts", {
+				items: searchItems,
+				total: searchItems.length,
+				page: 1,
+				pageSize: searchItems.length
+			});
+		}
+
+		// Browse path — no ?q=, pure SQL pagination + optional tag filter.
 		// Subquery: post ids that carry the requested tag slug. Only applied
 		// when ?tag= is set, so unfiltered listings stay simple.
 		const tagFilter = tag

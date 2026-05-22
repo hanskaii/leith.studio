@@ -10,6 +10,7 @@ import { authMiddleware } from "../middleware/auth.middleware";
 import { protect } from "../middleware/protect.middleware";
 import { uniqueSlug } from "../lib/slug";
 import { UploadService } from "../services/upload.service";
+import { SearchService } from "../services/search.service";
 import type { HonoEnv } from "../types/hono.types";
 
 type TagRef = { slug: string; name: string };
@@ -201,6 +202,26 @@ const creatorHandler = new Hono<HonoEnv>()
 						}
 					});
 				}
+
+				// Index for search now that the post has format/access. Posts
+				// without metadata are invisible to the feed anyway (the feed
+				// requires processingStatus='ready' on a metadata row), so
+				// skipping the no-meta branch is correct.
+				await new SearchService(c.env).index({
+					id: postId,
+					slug,
+					title: data.title,
+					body: data.body,
+					tags: (data.tags ?? [])
+						.map((name) => ({
+							slug: slugifyTag(name),
+							name
+						}))
+						.filter((t) => t.slug.length > 0),
+					format: data.format!,
+					access: data.access ?? "premium",
+					publishedAt: null
+				});
 			}
 
 			return ApiResponse.created(c, "Post created", post);
@@ -372,6 +393,24 @@ const creatorHandler = new Hono<HonoEnv>()
 					}
 				: undefined;
 
+			// Re-index after update. The SELECT above already has the joined
+			// tags + metadata, so we just shape it into IndexablePost. Skip if
+			// the post somehow has no metadata (no format → nothing to index).
+			if (updated && updated.format) {
+				await new SearchService(c.env).index({
+					id: updated.id,
+					slug: updated.slug,
+					title: updated.title,
+					body: updated.body,
+					tags: updated.tags,
+					format: updated.format,
+					access:
+						(updated.access as "free" | "premium" | undefined) ??
+						"premium",
+					publishedAt: updated.publishedAt ?? null
+				});
+			}
+
 			return ApiResponse.ok(c, "Post updated", updated);
 		}
 	)
@@ -413,6 +452,7 @@ const creatorHandler = new Hono<HonoEnv>()
 			}
 
 			await db.delete(posts).where(eq(posts.id, id));
+			await new SearchService(c.env).deindex(id);
 			return ApiResponse.ok(c, "Post deleted", null);
 		}
 	)

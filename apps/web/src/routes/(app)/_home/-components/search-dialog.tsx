@@ -1,4 +1,4 @@
-import { useContext } from "react";
+import { useContext, useState } from "react";
 import { useNavigate } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import {
@@ -11,17 +11,36 @@ import {
 } from "@workspace/ui";
 import { ModalContext } from "@/routes/-components/providers/modal-provider";
 import { tagsQueryOptions } from "@/routes/-fn/tags";
+import {
+	searchPostsQueryOptions,
+	useDebouncedValue
+} from "@/routes/-fn/search";
 
 export function SearchDialog() {
 	const { searchOpen, closeSearch } = useContext(ModalContext);
 	const navigate = useNavigate();
-	// Plain useQuery (not Suspense) — the command dialog mounts at the root
-	// shell so we cannot afford a Suspense boundary throwing here.
-	const { data } = useQuery(tagsQueryOptions());
-	const tagList = data ?? [];
 
-	const handleSelect = (slug: string) => {
+	const [input, setInput] = useState("");
+	const debouncedQ = useDebouncedValue(input.trim(), 250);
+
+	const { data: searchData, isFetching } = useQuery(
+		searchPostsQueryOptions(debouncedQ)
+	);
+	const { data: tagData } = useQuery(tagsQueryOptions());
+	const tagList = tagData ?? [];
+
+	const results = searchData?.items ?? [];
+	const showTags = debouncedQ.length <= 1;
+
+	const handlePostSelect = (slug: string) => {
 		closeSearch();
+		setInput("");
+		navigate({ to: "/feed/$slug", params: { slug } });
+	};
+
+	const handleTagSelect = (slug: string) => {
+		closeSearch();
+		setInput("");
 		navigate({
 			to: "/feed",
 			search: { page: 1, tag: slug, type: "all", sort: "newest" }
@@ -32,25 +51,78 @@ export function SearchDialog() {
 		<CommandDialog
 			open={searchOpen}
 			onOpenChange={(open) => !open && closeSearch()}
+			// Server returns AI Search ranked results — cmdk's built-in
+			// substring filter would re-rank or hide them, which we don't want.
+			shouldFilter={false}
 		>
-			<CommandInput placeholder="Search by vibe... loop, overlay, transition" />
+			<CommandInput
+				placeholder="Search by vibe… moody rain, golden warmth"
+				value={input}
+				onValueChange={setInput}
+			/>
 			<CommandList>
-				<CommandEmpty>No results found.</CommandEmpty>
-				<CommandGroup
-					heading="Browse by tag"
-					className="[&_[cmdk-group-heading]]:text-[10px] [&_[cmdk-group-heading]]:tracking-[0.12em] [&_[cmdk-group-heading]]:uppercase"
-				>
-					{tagList.map((tag) => (
-						<CommandItem
-							key={tag.slug}
-							value={tag.name}
-							onSelect={() => handleSelect(tag.slug)}
-							className="cursor-pointer"
-						>
-							{tag.name}
-						</CommandItem>
-					))}
-				</CommandGroup>
+				<CommandEmpty>
+					{debouncedQ.length > 1
+						? isFetching
+							? "Searching…"
+							: `No matches for "${debouncedQ}".`
+						: "Type to search, or pick a tag below."}
+				</CommandEmpty>
+
+				{results.length > 0 && (
+					<CommandGroup
+						heading="Results"
+						className="[&_[cmdk-group-heading]]:text-[10px] [&_[cmdk-group-heading]]:tracking-[0.12em] [&_[cmdk-group-heading]]:uppercase"
+					>
+						{results.slice(0, 8).map((post) => {
+							const primaryTag = post.tags?.[0];
+							return (
+								<CommandItem
+									key={post.id}
+									value={post.slug}
+									onSelect={() => handlePostSelect(post.slug)}
+									className="cursor-pointer gap-3"
+								>
+									{post.coverThumb ? (
+										<img
+											src={post.coverThumb}
+											alt=""
+											className="h-8 w-12 rounded object-cover"
+										/>
+									) : (
+										<div className="h-8 w-12 rounded bg-muted" />
+									)}
+									<span className="truncate">
+										{post.title}
+									</span>
+									{primaryTag && (
+										<span className="ml-auto text-xs text-muted-foreground">
+											{primaryTag.name}
+										</span>
+									)}
+								</CommandItem>
+							);
+						})}
+					</CommandGroup>
+				)}
+
+				{showTags && tagList.length > 0 && (
+					<CommandGroup
+						heading="Browse by tag"
+						className="[&_[cmdk-group-heading]]:text-[10px] [&_[cmdk-group-heading]]:tracking-[0.12em] [&_[cmdk-group-heading]]:uppercase"
+					>
+						{tagList.map((tag) => (
+							<CommandItem
+								key={tag.slug}
+								value={tag.name}
+								onSelect={() => handleTagSelect(tag.slug)}
+								className="cursor-pointer"
+							>
+								{tag.name}
+							</CommandItem>
+						))}
+					</CommandGroup>
+				)}
 			</CommandList>
 		</CommandDialog>
 	);
