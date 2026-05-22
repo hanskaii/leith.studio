@@ -4,7 +4,8 @@
 	"exports": {
 		".": "./index.ts",
 		"./schema": "./schema/index.ts",
-		"./utils/d1": "./utils/d1.ts"
+		"./utils/d1": "./utils/d1.ts",
+		"./utils/slug": "./utils/slug.ts"
 	},
 	"scripts": {
 		"db:generate": "drizzle-kit generate",

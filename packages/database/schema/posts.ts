@@ -2,6 +2,7 @@ import { index, integer, sqliteTable, text } from "drizzle-orm/sqlite-core";
 import { relations } from "drizzle-orm";
 import { postMetadata } from "./post-metadata";
 import { postStats } from "./post-stats";
+import { postTags } from "./tags";
 
 export const posts = sqliteTable(
 	"posts",
@@ -12,10 +13,6 @@ export const posts = sqliteTable(
 		body: text("body").notNull(),
 		coverImage: text("cover_image"),
 		coverThumb: text("cover_thumb"),
-		tags: text("tags", { mode: "json" })
-			.$type<string[]>()
-			.notNull()
-			.default([]),
 		status: text("status", { enum: ["draft", "published"] })
 			.notNull()
 			.default("draft"),
@@ -37,7 +34,8 @@ export const postsRelations = relations(posts, ({ one, many }) => ({
 		fields: [posts.id],
 		references: [postMetadata.postId]
 	}),
-	stats: many(postStats)
+	stats: many(postStats),
+	postTags: many(postTags)
 }));
 
 export const postMetadataRelations = relations(postMetadata, ({ one }) => ({

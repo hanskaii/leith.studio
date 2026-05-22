@@ -12,6 +12,7 @@ import { Search01Icon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { z } from "zod";
 import { postsQueryOptions, toFeedAsset } from "@/routes/-fn/posts";
+import { tagsQueryOptions } from "@/routes/-fn/tags";
 import type { FeedAsset } from "./-lib/feed-data";
 import { PAGE_SIZE } from "./-lib/feed-data";
 import { FeedCard } from "./-components/feed-card";
@@ -67,23 +68,25 @@ const FeedItems = memo(function FeedItems({
 	onPageChange,
 	onClearFilters
 }: FeedItemsProps) {
-	const { data } = useSuspenseQuery(postsQueryOptions(1));
-	const allAssets: FeedAsset[] = (data?.items ?? []).map(toFeedAsset);
+	// Fetch posts with the tag filter applied server-side; cache key varies
+	// by tag so different filters don't clobber each other.
+	const { data } = useSuspenseQuery(postsQueryOptions(1, tag));
+	const { data: tagListRaw } = useSuspenseQuery(tagsQueryOptions());
+	const tagList = tagListRaw ?? [];
 
-	const tags = useMemo(
-		() => [...new Set(allAssets.map((a) => a.tag).filter(Boolean))],
-		[allAssets]
-	);
+	const allAssets: FeedAsset[] = (data?.items ?? []).map(toFeedAsset);
 
 	const filtered = useMemo(() => {
 		let items = [...allAssets];
 		if (type !== "all") items = items.filter((a) => a.type === type);
-		if (tag) items = items.filter((a) => a.tag === tag);
+		// Tag filter is server-side now — no client-side filter for `tag`.
 		if (q)
 			items = items.filter(
 				(a) =>
 					a.title.toLowerCase().includes(q.toLowerCase()) ||
-					a.tag.toLowerCase().includes(q.toLowerCase())
+					a.tags.some((t) =>
+						t.name.toLowerCase().includes(q.toLowerCase())
+					)
 			);
 		if (sort === "popular") {
 			items.sort((a, b) => b.popularity - a.popularity);
@@ -95,10 +98,12 @@ const FeedItems = memo(function FeedItems({
 			);
 		}
 		return items;
-	}, [allAssets, type, tag, q, sort]);
+	}, [allAssets, type, q, sort]);
 
 	const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
 	const items = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
+
+	const activeTagName = tag && tagList.find((t) => t.slug === tag)?.name;
 
 	return (
 		<>
@@ -115,18 +120,20 @@ const FeedItems = memo(function FeedItems({
 				>
 					All
 				</button>
-				{tags.map((t) => (
+				{tagList.map((t) => (
 					<button
-						key={t}
+						key={t.slug}
 						type="button"
-						onClick={() => onTagChange(tag === t ? undefined : t)}
+						onClick={() =>
+							onTagChange(tag === t.slug ? undefined : t.slug)
+						}
 						className={`shrink-0 rounded-full px-3 py-1 text-xs font-semibold transition-colors ${
-							tag === t
+							tag === t.slug
 								? "bg-foreground text-background"
 								: "border border-border text-muted-foreground hover:text-foreground hover:border-foreground/30"
 						}`}
 					>
-						{t}
+						{t.name}
 					</button>
 				))}
 			</div>
@@ -142,7 +149,14 @@ const FeedItems = memo(function FeedItems({
 				<div className="py-24 text-center">
 					<p className="text-sm text-muted-foreground">
 						No assets found
-						{q ? ` for "${q}"` : tag ? ` tagged ${tag}` : ""}.
+						{q
+							? ` for "${q}"`
+							: activeTagName
+								? ` tagged ${activeTagName}`
+								: tag
+									? ` tagged ${tag}`
+									: ""}
+						.
 					</p>
 					{(q || tag) && (
 						<button

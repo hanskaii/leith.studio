@@ -1,5 +1,6 @@
 import { useContext } from "react";
 import { useNavigate } from "@tanstack/react-router";
+import { useQuery } from "@tanstack/react-query";
 import {
 	CommandDialog,
 	CommandEmpty,
@@ -9,17 +10,21 @@ import {
 	CommandList
 } from "@workspace/ui";
 import { ModalContext } from "@/routes/-components/providers/modal-provider";
-import { FEED_TAGS } from "../feed/-lib/feed-data";
+import { tagsQueryOptions } from "@/routes/-fn/tags";
 
 export function SearchDialog() {
 	const { searchOpen, closeSearch } = useContext(ModalContext);
 	const navigate = useNavigate();
+	// Plain useQuery (not Suspense) — the command dialog mounts at the root
+	// shell so we cannot afford a Suspense boundary throwing here.
+	const { data } = useQuery(tagsQueryOptions());
+	const tagList = data ?? [];
 
-	const handleSelect = (tag: string) => {
+	const handleSelect = (slug: string) => {
 		closeSearch();
 		navigate({
 			to: "/feed",
-			search: { page: 1, tag, type: "all", sort: "newest" }
+			search: { page: 1, tag: slug, type: "all", sort: "newest" }
 		});
 	};
 
@@ -35,14 +40,14 @@ export function SearchDialog() {
 					heading="Browse by tag"
 					className="[&_[cmdk-group-heading]]:text-[10px] [&_[cmdk-group-heading]]:tracking-[0.12em] [&_[cmdk-group-heading]]:uppercase"
 				>
-					{FEED_TAGS.map((tag) => (
+					{tagList.map((tag) => (
 						<CommandItem
-							key={tag}
-							value={tag}
-							onSelect={() => handleSelect(tag)}
+							key={tag.slug}
+							value={tag.name}
+							onSelect={() => handleSelect(tag.slug)}
 							className="cursor-pointer"
 						>
-							{tag}
+							{tag.name}
 						</CommandItem>
 					))}
 				</CommandGroup>

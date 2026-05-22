@@ -1,8 +1,9 @@
 import { Hono } from "hono";
 import { zValidator } from "@hono/zod-validator";
 import { z } from "zod";
-import { eq, desc } from "drizzle-orm";
-import { posts, postMetadata } from "@workspace/database";
+import { eq, desc, sql } from "drizzle-orm";
+import { posts, postMetadata, postTags, tags } from "@workspace/database";
+import { slugifyTag } from "@workspace/database/utils/slug";
 import { ApiError } from "../helpers/errors.helper";
 import { ApiResponse } from "../helpers/response.helper";
 import { authMiddleware } from "../middleware/auth.middleware";
@@ -10,6 +11,61 @@ import { protect } from "../middleware/protect.middleware";
 import { uniqueSlug } from "../lib/slug";
 import { UploadService } from "../services/upload.service";
 import type { HonoEnv } from "../types/hono.types";
+
+type TagRef = { slug: string; name: string };
+
+function parseTags(raw: string | null | undefined): TagRef[] {
+	if (!raw) return [];
+	try {
+		const parsed = JSON.parse(raw);
+		return Array.isArray(parsed) ? (parsed as TagRef[]) : [];
+	} catch {
+		return [];
+	}
+}
+
+/**
+ * Idempotently link `tagNames` to `postId`:
+ *  1. UPSERT each name into the `tags` table (by slug)
+ *  2. Insert a `post_tags` row for each (skip dupes via composite PK)
+ *
+ * Caller is responsible for clearing existing post_tags first if the input
+ * represents the full desired set (PATCH semantics).
+ */
+async function upsertPostTags(
+	db: any,
+	postId: string,
+	tagNames: string[]
+): Promise<void> {
+	if (tagNames.length === 0) return;
+	const now = new Date();
+	for (const name of tagNames) {
+		const slug = slugifyTag(name);
+		if (!slug) continue;
+		await db
+			.insert(tags)
+			.values({
+				id: crypto.randomUUID(),
+				slug,
+				name,
+				createdAt: now
+			})
+			.onConflictDoNothing({ target: tags.slug });
+
+		const [existing] = await db
+			.select({ id: tags.id })
+			.from(tags)
+			.where(eq(tags.slug, slug))
+			.limit(1);
+
+		if (!existing) continue;
+
+		await db
+			.insert(postTags)
+			.values({ postId, tagId: existing.id })
+			.onConflictDoNothing();
+	}
+}
 
 const ALLOWED_ASSET_TYPES: Record<string, string> = {
 	"image/jpeg": "jpg",
@@ -108,7 +164,6 @@ const creatorHandler = new Hono<HonoEnv>()
 				body: data.body,
 				coverImage: data.coverImage ?? null,
 				coverThumb: data.coverThumb ?? null,
-				tags: data.tags,
 				status: "draft" as const,
 				publishedAt: null,
 				createdAt: now,
@@ -116,6 +171,7 @@ const creatorHandler = new Hono<HonoEnv>()
 			};
 
 			await db.insert(posts).values(post);
+			await upsertPostTags(db, postId, data.tags ?? []);
 
 			const hasMeta =
 				data.fileKey &&
@@ -182,7 +238,6 @@ const creatorHandler = new Hono<HonoEnv>()
 				updates.coverImage = data.coverImage;
 			if (data.coverThumb !== undefined)
 				updates.coverThumb = data.coverThumb;
-			if (data.tags !== undefined) updates.tags = data.tags;
 			if (data.status !== undefined) {
 				updates.status = data.status;
 				if (data.status === "published" && !existing.publishedAt) {
@@ -191,6 +246,15 @@ const creatorHandler = new Hono<HonoEnv>()
 			}
 
 			await db.update(posts).set(updates).where(eq(posts.id, id));
+
+			// Tag replacement: treat the input as the full desired set.
+			// Drop existing junction rows then re-upsert. Tag rows themselves
+			// are never deleted — orphan tags get filtered out of /api/v1/tags
+			// because that endpoint joins on post_tags.
+			if (data.tags !== undefined) {
+				await db.delete(postTags).where(eq(postTags.postId, id));
+				await upsertPostTags(db, id, data.tags);
+			}
 
 			// Upsert post_metadata when any asset field is present
 			const hasMetaUpdate =
@@ -268,7 +332,7 @@ const creatorHandler = new Hono<HonoEnv>()
 				}
 			}
 
-			const updated = await db
+			const updatedRow = await db
 				.select({
 					id: posts.id,
 					slug: posts.slug,
@@ -276,7 +340,12 @@ const creatorHandler = new Hono<HonoEnv>()
 					body: posts.body,
 					coverImage: posts.coverImage,
 					coverThumb: posts.coverThumb,
-					tags: posts.tags,
+					tags: sql<string>`COALESCE(
+						JSON_GROUP_ARRAY(
+							JSON_OBJECT('slug', ${tags.slug}, 'name', ${tags.name})
+						) FILTER (WHERE ${tags.id} IS NOT NULL),
+						'[]'
+					)`,
 					status: posts.status,
 					publishedAt: posts.publishedAt,
 					createdAt: posts.createdAt,
@@ -290,8 +359,18 @@ const creatorHandler = new Hono<HonoEnv>()
 				})
 				.from(posts)
 				.leftJoin(postMetadata, eq(posts.id, postMetadata.postId))
+				.leftJoin(postTags, eq(postTags.postId, posts.id))
+				.leftJoin(tags, eq(tags.id, postTags.tagId))
 				.where(eq(posts.id, id))
+				.groupBy(posts.id)
 				.then((rows) => rows[0]);
+
+			const updated = updatedRow
+				? {
+						...updatedRow,
+						tags: parseTags(updatedRow.tags)
+					}
+				: undefined;
 
 			return ApiResponse.ok(c, "Post updated", updated);
 		}

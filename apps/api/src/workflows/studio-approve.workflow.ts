@@ -8,15 +8,24 @@ import {
 	studioGenerations,
 	posts,
 	postMetadata,
+	postTags,
+	tags,
 	eq,
 	and
 } from "@workspace/database";
+import { slugifyTag } from "@workspace/database/utils/slug";
 import { uniqueSlug } from "../lib/slug";
 
 type ApproveParams = {
 	generationId: string;
 	userId: string;
 	scheduledAt?: string;
+};
+
+type Enrichment = {
+	title: string;
+	description: string;
+	tags: string[];
 };
 
 export class StudioApproveWorkflow extends WorkflowEntrypoint<
@@ -88,14 +97,107 @@ export class StudioApproveWorkflow extends WorkflowEntrypoint<
 				}
 			);
 
+			// 12.4b ai-enrich — vision model proposes title, description, and
+			// tags from the thumbnail. Falls back to topic-based values when
+			// no thumbnail is available or when the model returns un-parseable
+			// output, so a flaky AI never blocks an approve.
+			currentStepName = "ai-enrich";
+			const enriched: Enrichment = await step.do(
+				"ai-enrich",
+				async (): Promise<Enrichment> => {
+					const fallback: Enrichment = {
+						title: row.topic,
+						description:
+							row.videoPrompt || row.imagePrompt || row.topic,
+						tags: []
+					};
+
+					if (!thumbnailKey) return fallback;
+
+					const obj = await this.env.STORAGE.get(thumbnailKey);
+					if (!obj) return fallback;
+
+					const buf = await obj.arrayBuffer();
+					const bytes = new Uint8Array(buf);
+					// btoa wants a binary string; chunk to avoid stack overflow
+					// on multi-MB thumbnails.
+					let binary = "";
+					const chunkSize = 0x8000;
+					for (let i = 0; i < bytes.length; i += chunkSize) {
+						binary += String.fromCharCode(
+							...bytes.subarray(i, i + chunkSize)
+						);
+					}
+					const base64 = btoa(binary);
+
+					const result = (await (this.env.AI as any).run(
+						"@cf/meta/llama-3.2-11b-vision-instruct",
+						{
+							messages: [
+								{
+									role: "system",
+									content:
+										'You describe stock asset thumbnails. Return ONLY a JSON object with keys "title" (catchy, max 6 words), "description" (1-2 sentences for an asset library), and "tags" (3-6 short keyword strings in Title Case, describing mood, subject, and style). No prose, no code fences — JSON only.'
+								},
+								{
+									role: "user",
+									content: [
+										{
+											type: "text",
+											text: `Topic: ${row.topic}`
+										},
+										{
+											type: "image_url",
+											image_url: {
+												url: `data:image/jpeg;base64,${base64}`
+											}
+										}
+									]
+								}
+							]
+						}
+					)) as { response?: string };
+
+					const text = result?.response ?? "";
+					const match = text.match(/\{[\s\S]*\}/);
+					if (!match) return fallback;
+
+					try {
+						const parsed = JSON.parse(match[0]) as {
+							title?: string;
+							description?: string;
+							tags?: unknown;
+						};
+						const tagList = Array.isArray(parsed.tags)
+							? parsed.tags
+									.filter(
+										(t): t is string =>
+											typeof t === "string" &&
+											t.trim().length > 0
+									)
+									.slice(0, 6)
+							: [];
+						return {
+							title: parsed.title?.trim() || fallback.title,
+							description:
+								parsed.description?.trim() ||
+								fallback.description,
+							tags: tagList
+						};
+					} catch {
+						return fallback;
+					}
+				}
+			);
+
 			// 12.5 create-post — atomic insert posts + postMetadata + flip
 			// studioGenerations to approved.
 			currentStepName = "create-post";
 			const created = await step.do("create-post", async () => {
 				const db = database(this.env.DATABASE);
 				const newPostId = crypto.randomUUID();
-				const title = row.topic;
-				const body = row.videoPrompt || row.imagePrompt || row.topic;
+				const title = enriched.title;
+				const body = enriched.description;
 				const slug = await uniqueSlug(title, db);
 				const now = new Date();
 				const publishedAt = scheduledAt ? new Date(scheduledAt) : null;
@@ -118,7 +220,6 @@ export class StudioApproveWorkflow extends WorkflowEntrypoint<
 						body,
 						coverImage: row.imageUrl,
 						coverThumb: thumbnailKey,
-						tags: [],
 						status: "draft",
 						publishedAt,
 						createdAt: now,
@@ -143,6 +244,58 @@ export class StudioApproveWorkflow extends WorkflowEntrypoint<
 			});
 
 			const { postId } = created;
+
+			// 12.5b upsert-tags — idempotent insert into `tags` (ON CONFLICT
+			// (slug) DO NOTHING) then link via `post_tags`. Safe to retry — the
+			// composite PK on (postId, tagId) plus the slug UNIQUE constraint
+			// keep duplicates out.
+			currentStepName = "upsert-tags";
+			await step.do("upsert-tags", async () => {
+				if (enriched.tags.length === 0) {
+					return { inserted: 0 };
+				}
+				const db = database(this.env.DATABASE);
+				const now = new Date();
+
+				await db.transaction(async (tx: any) => {
+					for (const name of enriched.tags) {
+						const slug = slugifyTag(name);
+						if (!slug) continue;
+
+						const tagId = crypto.randomUUID();
+						await tx
+							.insert(tags)
+							.values({
+								id: tagId,
+								slug,
+								name,
+								createdAt: now
+							})
+							.onConflictDoNothing({ target: tags.slug });
+
+						// Look up the canonical id — either the one we just
+						// inserted, or the pre-existing one if the conflict
+						// path was taken.
+						const [existing] = await tx
+							.select({ id: tags.id })
+							.from(tags)
+							.where(eq(tags.slug, slug))
+							.limit(1);
+
+						if (!existing) continue;
+
+						await tx
+							.insert(postTags)
+							.values({
+								postId,
+								tagId: existing.id
+							})
+							.onConflictDoNothing();
+					}
+				});
+
+				return { inserted: enriched.tags.length };
+			});
 
 			// 12.6 trigger-video-processing — only for video posts; image-only
 			// posts are immediately ready.
