@@ -11,7 +11,8 @@ import {
 	postTags,
 	tags,
 	eq,
-	and
+	and,
+	inArray
 } from "@workspace/database";
 import { slugifyTag } from "@workspace/database/utils/slug";
 import { uniqueSlug } from "../lib/slug";
@@ -246,10 +247,9 @@ export class StudioApproveWorkflow extends WorkflowEntrypoint<
 
 			const { postId } = created;
 
-			// 12.5b upsert-tags — idempotent insert into `tags` (ON CONFLICT
-			// (slug) DO NOTHING) then link via `post_tags`. Safe to retry — the
-			// composite PK on (postId, tagId) plus the slug UNIQUE constraint
-			// keep duplicates out.
+			// 12.5b upsert-tags — bulk insert `tags` then bulk link via
+			// `post_tags` in 2 D1 round-trips total. Idempotent: slug UNIQUE
+			// + composite PK on (postId, tagId) absorb retries cleanly.
 			currentStepName = "upsert-tags";
 			await step.do("upsert-tags", async () => {
 				if (enriched.tags.length === 0) {
@@ -258,44 +258,54 @@ export class StudioApproveWorkflow extends WorkflowEntrypoint<
 				const db = database(this.env.DATABASE);
 				const now = new Date();
 
+				// Dedupe by slug before the bulk insert so a single name list
+				// can't collide on its own UNIQUE(slug) constraint.
+				const bySlug = new Map<string, string>();
+				for (const name of enriched.tags) {
+					const slug = slugifyTag(name);
+					if (!slug) continue;
+					if (!bySlug.has(slug)) bySlug.set(slug, name);
+				}
+				if (bySlug.size === 0) return { inserted: 0 };
+
+				const tagRows = Array.from(bySlug.entries()).map(
+					([slug, name]) => ({
+						id: crypto.randomUUID(),
+						slug,
+						name,
+						createdAt: now
+					})
+				);
+				const slugs = tagRows.map((r) => r.slug);
+
 				await db.transaction(async (tx: any) => {
-					for (const name of enriched.tags) {
-						const slug = slugifyTag(name);
-						if (!slug) continue;
+					// 1. Bulk-insert tags; slug conflicts no-op.
+					await tx
+						.insert(tags)
+						.values(tagRows)
+						.onConflictDoNothing({ target: tags.slug });
 
-						const tagId = crypto.randomUUID();
-						await tx
-							.insert(tags)
-							.values({
-								id: tagId,
-								slug,
-								name,
-								createdAt: now
-							})
-							.onConflictDoNothing({ target: tags.slug });
+					// 2. Resolve canonical ids and bulk-insert the junction
+					//    rows in a single statement.
+					const existing = await tx
+						.select({ id: tags.id, slug: tags.slug })
+						.from(tags)
+						.where(inArray(tags.slug, slugs));
 
-						// Look up the canonical id — either the one we just
-						// inserted, or the pre-existing one if the conflict
-						// path was taken.
-						const [existing] = await tx
-							.select({ id: tags.id })
-							.from(tags)
-							.where(eq(tags.slug, slug))
-							.limit(1);
+					if (existing.length === 0) return;
 
-						if (!existing) continue;
-
-						await tx
-							.insert(postTags)
-							.values({
+					await tx
+						.insert(postTags)
+						.values(
+							existing.map((e: { id: string }) => ({
 								postId,
-								tagId: existing.id
-							})
-							.onConflictDoNothing();
-					}
+								tagId: e.id
+							}))
+						)
+						.onConflictDoNothing();
 				});
 
-				return { inserted: enriched.tags.length };
+				return { inserted: bySlug.size };
 			});
 
 			// 12.5c index-search — write the post's search document to R2 so

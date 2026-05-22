@@ -116,12 +116,16 @@ const postsHandler = new Hono<HonoEnv>()
 					access: postMetadata.access,
 					previewKey: postMetadata.previewKey,
 					clipKey: postMetadata.clipKey,
-					downloadCount: sql<number>`(SELECT COUNT(*) FROM ${postStats} WHERE ${postStats.postId} = ${posts.id})`
+					// Aggregated in the existing GROUP BY — replaces the prior
+					// correlated `(SELECT COUNT(*) …)` subquery that re-ran
+					// per row.
+					downloadCount: count(postStats.id)
 				})
 				.from(posts)
 				.innerJoin(postMetadata, eq(posts.id, postMetadata.postId))
 				.leftJoin(postTags, eq(postTags.postId, posts.id))
 				.leftJoin(tags, eq(tags.id, postTags.tagId))
+				.leftJoin(postStats, eq(postStats.postId, posts.id))
 				.where(
 					and(
 						eq(posts.status, "published"),
@@ -201,12 +205,15 @@ const postsHandler = new Hono<HonoEnv>()
 					access: postMetadata.access,
 					previewKey: postMetadata.previewKey,
 					clipKey: postMetadata.clipKey,
-					downloadCount: sql<number>`(SELECT COUNT(*) FROM ${postStats} WHERE ${postStats.postId} = ${posts.id})`
+					// Counted via the same GROUP BY as the tag aggregate —
+					// removes the prior N+1 correlated subquery per row.
+					downloadCount: count(postStats.id)
 				})
 				.from(posts)
 				.innerJoin(postMetadata, eq(posts.id, postMetadata.postId))
 				.leftJoin(postTags, eq(postTags.postId, posts.id))
 				.leftJoin(tags, eq(tags.id, postTags.tagId))
+				.leftJoin(postStats, eq(postStats.postId, posts.id))
 				.where(readyFilter)
 				.groupBy(posts.id)
 				.orderBy(desc(posts.publishedAt))
@@ -268,12 +275,15 @@ const postsHandler = new Hono<HonoEnv>()
 				access: postMetadata.access,
 				previewKey: postMetadata.previewKey,
 				clipKey: postMetadata.clipKey,
-				downloadCount: sql<number>`(SELECT COUNT(*) FROM ${postStats} WHERE ${postStats.postId} = ${posts.id})`
+				// Counted via the same GROUP BY — replaces the prior
+				// correlated subquery.
+				downloadCount: count(postStats.id)
 			})
 			.from(posts)
 			.innerJoin(postMetadata, eq(posts.id, postMetadata.postId))
 			.leftJoin(postTags, eq(postTags.postId, posts.id))
 			.leftJoin(tags, eq(tags.id, postTags.tagId))
+			.leftJoin(postStats, eq(postStats.postId, posts.id))
 			.where(and(eq(posts.slug, slug), eq(posts.status, "published")))
 			.groupBy(posts.id);
 

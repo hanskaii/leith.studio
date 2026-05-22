@@ -1,7 +1,7 @@
 import { Hono } from "hono";
 import { zValidator } from "@hono/zod-validator";
 import { z } from "zod";
-import { eq, desc, sql } from "drizzle-orm";
+import { eq, desc, inArray, sql } from "drizzle-orm";
 import { posts, postMetadata, postTags, tags } from "@workspace/database";
 import { slugifyTag } from "@workspace/database/utils/slug";
 import { ApiError } from "../helpers/errors.helper";
@@ -26,9 +26,15 @@ function parseTags(raw: string | null | undefined): TagRef[] {
 }
 
 /**
- * Idempotently link `tagNames` to `postId`:
- *  1. UPSERT each name into the `tags` table (by slug)
- *  2. Insert a `post_tags` row for each (skip dupes via composite PK)
+ * Idempotently link `tagNames` to `postId` in exactly 2 D1 round-trips,
+ * regardless of how many tags are supplied:
+ *  1. Bulk INSERT OR IGNORE every tag row keyed by slug
+ *  2. SELECT the canonical ids for those slugs, then bulk INSERT OR IGNORE
+ *     the `post_tags` junction rows
+ *
+ * The prior implementation issued 3 sequential round-trips per tag —
+ * O(N) D1 latency on every approve / save. Tag lists are small (≤ ~6 names)
+ * so the `IN (...)` clause stays well under D1 parameter limits.
  *
  * Caller is responsible for clearing existing post_tags first if the input
  * represents the full desired set (PATCH semantics).
@@ -39,33 +45,45 @@ async function upsertPostTags(
 	tagNames: string[]
 ): Promise<void> {
 	if (tagNames.length === 0) return;
+
+	// Build the (slug, name) pairs up front and dedupe by slug so the bulk
+	// insert never sees two rows that would collide on the UNIQUE(slug).
 	const now = new Date();
+	const bySlug = new Map<string, string>();
 	for (const name of tagNames) {
 		const slug = slugifyTag(name);
 		if (!slug) continue;
-		await db
-			.insert(tags)
-			.values({
-				id: crypto.randomUUID(),
-				slug,
-				name,
-				createdAt: now
-			})
-			.onConflictDoNothing({ target: tags.slug });
-
-		const [existing] = await db
-			.select({ id: tags.id })
-			.from(tags)
-			.where(eq(tags.slug, slug))
-			.limit(1);
-
-		if (!existing) continue;
-
-		await db
-			.insert(postTags)
-			.values({ postId, tagId: existing.id })
-			.onConflictDoNothing();
+		if (!bySlug.has(slug)) bySlug.set(slug, name);
 	}
+	if (bySlug.size === 0) return;
+
+	const tagRows = Array.from(bySlug.entries()).map(([slug, name]) => ({
+		id: crypto.randomUUID(),
+		slug,
+		name,
+		createdAt: now
+	}));
+	const slugs = tagRows.map((r) => r.slug);
+
+	// 1. Bulk-insert tags. Conflicts on slug fall through silently — the
+	//    canonical id is then read back in step 2.
+	await db.insert(tags).values(tagRows).onConflictDoNothing({
+		target: tags.slug
+	});
+
+	// 2a. Resolve canonical ids for every slug we just touched.
+	const existing = await db
+		.select({ id: tags.id, slug: tags.slug })
+		.from(tags)
+		.where(inArray(tags.slug, slugs));
+
+	if (existing.length === 0) return;
+
+	// 2b. Bulk-insert junction rows in a single statement.
+	await db
+		.insert(postTags)
+		.values(existing.map((e: { id: string }) => ({ postId, tagId: e.id })))
+		.onConflictDoNothing();
 }
 
 const ALLOWED_ASSET_TYPES: Record<string, string> = {

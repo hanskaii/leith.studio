@@ -32,6 +32,14 @@ export function SearchDialog() {
 	const results = searchData?.items ?? [];
 	const showTags = debouncedQ.length <= 1;
 
+	// `coverThumb` is stored as a raw R2 key (e.g. `posts/thumbnail/abc.jpg`).
+	// The files endpoint lives at `/api/files/*`, so we resolve the key to a
+	// full URL before rendering. Reading `window.location.origin` here keeps
+	// us portable across dev/staging/prod without baking origin into the DB.
+	const origin = typeof window !== "undefined" ? window.location.origin : "";
+	const thumbUrl = (key: string | null | undefined) =>
+		key ? `${origin}/api/files/${key}` : null;
+
 	const handlePostSelect = (slug: string) => {
 		closeSearch();
 		setInput("");
@@ -76,6 +84,7 @@ export function SearchDialog() {
 					>
 						{results.slice(0, 8).map((post) => {
 							const primaryTag = post.tags?.[0];
+							const src = thumbUrl(post.coverThumb);
 							return (
 								<CommandItem
 									key={post.id}
@@ -83,9 +92,9 @@ export function SearchDialog() {
 									onSelect={() => handlePostSelect(post.slug)}
 									className="cursor-pointer gap-3"
 								>
-									{post.coverThumb ? (
+									{src ? (
 										<img
-											src={post.coverThumb}
+											src={src}
 											alt=""
 											className="h-8 w-12 rounded object-cover"
 										/>

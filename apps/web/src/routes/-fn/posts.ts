@@ -53,19 +53,26 @@ export const getPostStatsFn = createServerFn({ method: "GET" }).handler(() =>
 export const postsQueryOptions = (page = 1, tag?: string, q?: string) =>
 	queryOptions({
 		queryKey: ["posts", page, tag, q],
-		queryFn: () => getPostsFn({ data: { page, tag, q } })
+		queryFn: () => getPostsFn({ data: { page, tag, q } }),
+		// Feed should feel reasonably fresh but typing/clicking shouldn't
+		// trigger an immediate refetch on every navigation.
+		staleTime: 30 * 1000
 	});
 
 export const postQueryOptions = (slug: string) =>
 	queryOptions({
 		queryKey: ["post", slug],
-		queryFn: () => getPostFn({ data: slug })
+		queryFn: () => getPostFn({ data: slug }),
+		// Individual post detail is effectively immutable once published.
+		staleTime: 5 * 60 * 1000
 	});
 
 export const postStatsQueryOptions = () =>
 	queryOptions({
 		queryKey: ["post-stats"],
-		queryFn: () => getPostStatsFn()
+		queryFn: () => getPostStatsFn(),
+		// Stat counts are approximate; 5 min staleness is plenty.
+		staleTime: 5 * 60 * 1000
 	});
 
 const VIDEO_FORMATS = new Set(["mp4", "webm"]);

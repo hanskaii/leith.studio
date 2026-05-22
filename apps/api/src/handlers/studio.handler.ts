@@ -133,19 +133,30 @@ const studioHandler = new Hono<HonoEnv>()
 			.groupBy(posts.id);
 
 		const search = new SearchService(c.env);
+
+		// Chunked parallelism — R2 PUTs are independent I/O. 20-wide batches
+		// stay comfortably inside the Workers wall-clock budget for catalogs
+		// up to ~500 posts (~25 chunks × ~2s per chunk). Sequential awaits
+		// previously timed out past ~300 posts.
+		const CHUNK = 20;
 		let indexed = 0;
-		for (const row of rows) {
-			await search.index({
-				id: row.id,
-				slug: row.slug,
-				title: row.title,
-				body: row.body,
-				tags: parseTagsJson(row.tags),
-				format: row.format,
-				access: row.access as "free" | "premium",
-				publishedAt: row.publishedAt ?? null
-			});
-			indexed++;
+		for (let i = 0; i < rows.length; i += CHUNK) {
+			const slice = rows.slice(i, i + CHUNK);
+			await Promise.all(
+				slice.map((row) =>
+					search.index({
+						id: row.id,
+						slug: row.slug,
+						title: row.title,
+						body: row.body,
+						tags: parseTagsJson(row.tags),
+						format: row.format,
+						access: row.access as "free" | "premium",
+						publishedAt: row.publishedAt ?? null
+					})
+				)
+			);
+			indexed += slice.length;
 		}
 
 		return ApiResponse.ok(c, "Search index rebuilt", { indexed });

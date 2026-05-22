@@ -72,7 +72,7 @@ const FeedItems = memo(function FeedItems({
 	// three so toggling between filters doesn't clobber each other's results.
 	// When q is set, the server returns ranked semantic results — sort/filter
 	// on top of that is intentionally limited.
-	const { data } = useSuspenseQuery(postsQueryOptions(1, tag, q));
+	const { data } = useSuspenseQuery(postsQueryOptions(page, tag, q));
 	const { data: tagListRaw } = useSuspenseQuery(tagsQueryOptions());
 	const tagList = tagListRaw ?? [];
 
@@ -96,8 +96,12 @@ const FeedItems = memo(function FeedItems({
 		return items;
 	}, [allAssets, type, q, sort]);
 
-	const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
-	const items = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
+	// Server returns the page slice already — total comes from the API's
+	// count query so pagination buttons reflect the full catalog, not just
+	// the current page.
+	const total = data?.total ?? 0;
+	const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
+	const items = filtered;
 
 	const activeTagName = tag && tagList.find((t) => t.slug === tag)?.name;
 

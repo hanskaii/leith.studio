@@ -45,5 +45,8 @@ export const searchPostsQueryOptions = (q: string) =>
 	queryOptions({
 		queryKey: ["posts", 1, undefined, q],
 		queryFn: () => searchPostsFn({ data: { q } }),
-		enabled: q.trim().length > 1
+		enabled: q.trim().length > 1,
+		// Re-typing the same query within a minute should hit cache rather
+		// than fire another AI Search request.
+		staleTime: 60 * 1000
 	});

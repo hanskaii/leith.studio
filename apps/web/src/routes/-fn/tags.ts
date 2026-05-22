@@ -15,5 +15,8 @@ export const getTagsFn = createServerFn({ method: "GET" }).handler(() =>
 export const tagsQueryOptions = () =>
 	queryOptions({
 		queryKey: ["tags"],
-		queryFn: () => getTagsFn()
+		queryFn: () => getTagsFn(),
+		// Tags change only when posts are published — tolerate up to 5 min
+		// staleness so feed mounts + palette opens don't refetch on every nav.
+		staleTime: 5 * 60 * 1000
 	});
