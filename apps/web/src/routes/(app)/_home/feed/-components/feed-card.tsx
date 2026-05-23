@@ -1,5 +1,4 @@
 import { memo, useRef, useState } from "react";
-import { Image } from "@unpic/react";
 import { Link } from "@tanstack/react-router";
 import type { FeedAsset } from "../-lib/feed-data";
 
@@ -54,12 +53,11 @@ export const FeedCard = memo(function FeedCard({
 				onPointerLeave={handlePointerLeave}
 			>
 				{/* Thumbnail — always rendered */}
-				<Image
+				<img
 					src={asset.coverThumb}
 					alt={asset.title}
 					loading="lazy"
 					decoding="async"
-					layout="fill"
 					className={`absolute inset-0 h-full w-full object-cover transition-[transform,opacity] duration-500 ${
 						hovered && hasClip
 							? "opacity-0 scale-[1.04]"

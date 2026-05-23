@@ -99,10 +99,10 @@ export class StudioApproveWorkflow extends WorkflowEntrypoint<
 				}
 			);
 
-			// 12.4b ai-enrich — vision model proposes title, description, and
-			// tags from the thumbnail. Falls back to topic-based values when
-			// no thumbnail is available or when the model returns un-parseable
-			// output, so a flaky AI never blocks an approve.
+			// 12.4b ai-enrich — text model proposes title, description, and
+			// tags from the generation topic + prompts. Falls back to
+			// topic-based values if the model returns un-parseable output,
+			// so a flaky AI never blocks an approve.
 			currentStepName = "ai-enrich";
 			const enriched: Enrichment = await step.do(
 				"ai-enrich",
@@ -114,57 +114,40 @@ export class StudioApproveWorkflow extends WorkflowEntrypoint<
 						tags: []
 					};
 
-					if (!thumbnailKey) return fallback;
-
-					const obj = await this.env.STORAGE.get(thumbnailKey);
-					if (!obj) return fallback;
-
-					const buf = await obj.arrayBuffer();
-					const bytes = new Uint8Array(buf);
-					// btoa wants a binary string; chunk to avoid stack overflow
-					// on multi-MB thumbnails.
-					let binary = "";
-					const chunkSize = 0x8000;
-					for (let i = 0; i < bytes.length; i += chunkSize) {
-						binary += String.fromCharCode(
-							...bytes.subarray(i, i + chunkSize)
-						);
-					}
-					const base64 = btoa(binary);
-
-					const result = (await (this.env.AI as any).run(
-						"@cf/meta/llama-3.2-11b-vision-instruct",
-						{
-							messages: [
-								{
-									role: "system",
-									content:
-										'You describe stock asset thumbnails. Return ONLY a JSON object with keys "title" (catchy, max 6 words), "description" (1-2 sentences for an asset library), and "tags" (3-6 short keyword strings in Title Case, describing mood, subject, and style). No prose, no code fences — JSON only.'
-								},
-								{
-									role: "user",
-									content: [
-										{
-											type: "text",
-											text: `Topic: ${row.topic}`
-										},
-										{
-											type: "image_url",
-											image_url: {
-												url: `data:image/jpeg;base64,${base64}`
-											}
-										}
-									]
-								}
-							]
-						}
-					)) as { response?: string };
-
-					const text = result?.response ?? "";
-					const match = text.match(/\{[\s\S]*\}/);
-					if (!match) return fallback;
-
 					try {
+						const context = [
+							`Topic: ${row.topic}`,
+							row.imagePrompt
+								? `Image prompt: ${row.imagePrompt}`
+								: null,
+							row.videoPrompt
+								? `Animation prompt: ${row.videoPrompt}`
+								: null
+						]
+							.filter(Boolean)
+							.join("\n");
+
+						const result = (await (this.env.AI as any).run(
+							"@cf/meta/llama-3.3-70b-instruct-fp8-fast",
+							{
+								messages: [
+									{
+										role: "system",
+										content:
+											'You write metadata for stock motion assets. Return ONLY a JSON object with keys "title" (catchy asset title, max 6 words), "description" (1-2 sentences suitable for an asset library), and "tags" (3-6 short keyword strings in Title Case describing mood, subject, and style). No prose, no code fences — JSON only.'
+									},
+									{
+										role: "user",
+										content: context
+									}
+								]
+							}
+						)) as { response?: string };
+
+						const text = result?.response ?? "";
+						const match = text.match(/\{[\s\S]*\}/);
+						if (!match) return fallback;
+
 						const parsed = JSON.parse(match[0]) as {
 							title?: string;
 							description?: string;

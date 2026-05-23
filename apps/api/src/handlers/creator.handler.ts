@@ -151,13 +151,20 @@ const creatorHandler = new Hono<HonoEnv>()
 				id: posts.id,
 				slug: posts.slug,
 				title: posts.title,
+				body: posts.body,
 				coverImage: posts.coverImage,
 				coverThumb: posts.coverThumb,
 				status: posts.status,
 				publishedAt: posts.publishedAt,
 				createdAt: posts.createdAt,
 				format: postMetadata.format,
-				access: postMetadata.access
+				resolution: postMetadata.resolution,
+				duration: postMetadata.duration,
+				isLoop: postMetadata.isLoop,
+				fileKey: postMetadata.fileKey,
+				fileSize: postMetadata.fileSize,
+				access: postMetadata.access,
+				processingStatus: postMetadata.processingStatus
 			})
 			.from(posts)
 			.leftJoin(postMetadata, eq(posts.id, postMetadata.postId))

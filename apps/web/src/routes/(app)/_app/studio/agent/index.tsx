@@ -1,211 +1,267 @@
 import { createFileRoute, redirect } from "@tanstack/react-router";
 import { Gate } from "@workspace/core";
 import { useAgent } from "agents/react";
-import { useAgentChat } from "@cloudflare/ai-chat/react";
-import { StudioAgentHeader } from "./-components/studio-agent-header";
-import { useState, useRef, useEffect } from "react";
-import { toast } from "sonner";
+import { useAgentChat, getAgentMessages } from "@cloudflare/ai-chat/react";
+import type { UIMessage } from "ai";
+import { Suspense, useState, useRef, useEffect, useCallback } from "react";
+import { toast, Spinner } from "@workspace/ui";
 import { useQueryClient } from "@tanstack/react-query";
-import { Button } from "@workspace/ui/components/button";
+
+import { StudioAgentHeader } from "./-components/studio-agent-header";
+import { StudioWelcome } from "./-components/studio-welcome";
+import { StudioInput } from "./-components/studio-input";
+import { ChatMessage } from "../../chat/-components/chat-message";
 
 export const Route = createFileRoute("/(app)/_app/studio/agent/")({
-	beforeLoad: ({ context }) => {
-		if (!Gate.can("content.manage", { actor: context.session.user })) {
+	beforeLoad: async ({ context }) => {
+		const result = await Gate.can("content.manage", {
+			actor: context.session.user
+		});
+		if (!result.allowed) {
 			throw redirect({
 				to: "/feed",
 				search: { page: 1, type: "all", sort: "newest" }
 			});
 		}
 	},
-	loader: ({ context }) => {
-		return { userId: context.session.user.id };
+	loader: async ({ context }) => {
+		const userId = context.session.user.id;
+
+		const initialMessages = await getAgentMessages({
+			host: import.meta.env.VITE_API_URL,
+			agent: "studio-agent",
+			name: userId,
+			credentials: "include"
+		}).catch(() => [] as UIMessage[]);
+
+		return { userId, initialMessages };
 	},
 	component: StudioAgentPage
 });
 
-function StudioAgentPage() {
-	const { userId } = Route.useLoaderData();
+function StudioAgentInner() {
+	const { userId, initialMessages } = Route.useLoaderData();
 	const queryClient = useQueryClient();
+
+	const [connected, setConnected] = useState(false);
+	const [input, setInput] = useState("");
+	const [manualStopped, setManualStopped] = useState(false);
+	const [previewImage, setPreviewImage] = useState<string | null>(null);
+	const [imageFile, setImageFile] = useState<File | null>(null);
 	const [stats, setStats] = useState({
 		activeSchedules: 0,
 		inFlightFlows: 0,
 		pendingReviews: 0
 	});
 
+	const messagesEndRef = useRef<HTMLDivElement>(null);
+	const textareaRef = useRef<HTMLTextAreaElement>(null!);
+
 	const agent = useAgent({
 		agent: "studio-agent",
 		name: userId,
 		host: import.meta.env.VITE_API_URL,
 		prefix: "agents",
-		onMessage: (message: any) => {
-			const data = message;
-			if (data.type === "flow_progress") {
-				// We could update local state for inline progress, but simple toasts/messages might be enough
-			} else if (data.type === "approve_started") {
-				toast.info("Memproses approval...");
-			} else if (data.type === "approve_done") {
-				toast.success("Post created");
-				queryClient.invalidateQueries({ queryKey: ["studio-review"] });
-				queryClient.invalidateQueries({ queryKey: ["posts"] });
-			} else if (data.type === "approve_failed") {
-				toast.error(`Gagal approve: ${data.step} - ${data.error}`);
-			} else if (data.type === "flow_done") {
-				toast.success("Generation complete: " + data.topic);
-				queryClient.invalidateQueries({ queryKey: ["studio-review"] });
-			} else if (data.type === "flow_skipped") {
-				toast.warning("Flow skipped: " + data.reason);
-			} else if (data.type === "flow_failed") {
-				toast.error(`Flow failed at ${data.stepType}: ${data.error}`);
-			} else if (data.type === "stats") {
-				setStats(data);
-			}
-		}
+		onOpen: useCallback(() => setConnected(true), []),
+		onClose: useCallback(() => setConnected(false), []),
+		onError: useCallback(
+			(error: Event) => console.error("Studio agent WS error:", error),
+			[]
+		),
+		onMessage: useCallback(
+			(message: MessageEvent) => {
+				try {
+					const data = JSON.parse(String(message.data));
+					if (data.type === "stats") {
+						setStats(data);
+					} else if (data.type === "approve_done") {
+						toast.success("Post created as draft");
+						queryClient.invalidateQueries({
+							queryKey: ["studio-review"]
+						});
+						queryClient.invalidateQueries({ queryKey: ["posts"] });
+					} else if (data.type === "approve_failed") {
+						toast.error(
+							`Gagal approve: ${data.step} — ${data.error}`
+						);
+					} else if (data.type === "flow_done") {
+						toast.success("Generation selesai: " + data.topic);
+						queryClient.invalidateQueries({
+							queryKey: ["studio-review"]
+						});
+					} else if (data.type === "flow_skipped") {
+						toast.warning("Flow skipped: " + data.reason);
+					} else if (data.type === "flow_failed") {
+						toast.error(
+							`Flow gagal di ${data.stepType}: ${data.error}`
+						);
+					}
+				} catch {}
+			},
+			[queryClient]
+		)
 	});
 
-	const chat = useAgentChat({
+	const { messages, sendMessage, stop, status } = useAgentChat({
 		agent,
-		credentials: "include"
-	}) as any;
+		credentials: "include",
+		getInitialMessages: async () => initialMessages
+	});
 
-	const fileInputRef = useRef<HTMLInputElement>(null);
-	const [previewImage, setPreviewImage] = useState<string | null>(null);
-	const [imageFile, setImageFile] = useState<File | null>(null);
-
-	const handleImageFile = (file: File) => {
-		const objectUrl = URL.createObjectURL(file);
-		setPreviewImage(objectUrl);
-		setImageFile(file);
-	};
+	const isStreaming =
+		!manualStopped && (status === "streaming" || status === "submitted");
 
 	useEffect(() => {
+		if (status === "streaming" || status === "submitted") {
+			setManualStopped(false);
+		}
+	}, [status]);
+
+	const handleStop = useCallback(() => {
+		stop();
+		setManualStopped(true);
+	}, [stop]);
+
+	const isInitialLoad = useRef(true);
+	useEffect(() => {
+		if (messages.length === 0) return;
+		if (isInitialLoad.current) {
+			messagesEndRef.current?.scrollIntoView({ behavior: "auto" });
+			isInitialLoad.current = false;
+		} else {
+			messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+		}
+	}, [messages]);
+
+	useEffect(() => {
+		if (!isStreaming && textareaRef.current) {
+			textareaRef.current.focus();
+		}
+	}, [isStreaming]);
+
+	// Clean up preview URL on unmount
+	useEffect(() => {
 		return () => {
-			if (previewImage) {
-				URL.revokeObjectURL(previewImage);
-			}
+			if (previewImage) URL.revokeObjectURL(previewImage);
 		};
 	}, [previewImage]);
 
-	const onFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-		const file = e.target.files?.[0];
-		if (file) {
-			handleImageFile(file);
-		}
-	};
+	const handleImageFile = useCallback((file: File) => {
+		setPreviewImage((prev) => {
+			if (prev) URL.revokeObjectURL(prev);
+			return URL.createObjectURL(file);
+		});
+		setImageFile(file);
+	}, []);
 
-	const onPaste = (e: React.ClipboardEvent<HTMLInputElement>) => {
-		const items = e.clipboardData?.items;
-		if (!items) return;
+	const handleClearImage = useCallback(() => {
+		setPreviewImage((prev) => {
+			if (prev) URL.revokeObjectURL(prev);
+			return null;
+		});
+		setImageFile(null);
+	}, []);
 
-		for (let i = 0; i < items.length; i++) {
-			if (items[i].type.indexOf("image") !== -1) {
-				const file = items[i].getAsFile();
-				if (file) {
-					e.preventDefault();
-					handleImageFile(file);
-					break;
-				}
-			}
-		}
-	};
+	const send = useCallback(async () => {
+		if (!input.trim() && !imageFile) return;
+		if (isStreaming) return;
 
-	const onFormSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-		e.preventDefault();
-		if (!chat.input && !previewImage) return;
-
-		const content: any = [];
-		if (chat.input) {
-			content.push({ type: "text", text: chat.input });
-		}
+		const parts: any[] = [];
+		if (input.trim()) parts.push({ type: "text", text: input.trim() });
 
 		if (imageFile) {
-			// Convert to base64 just before sending so the backend can read it
-			const reader = new FileReader();
-			const base64Promise = new Promise<string>((resolve) => {
+			const base64 = await new Promise<string>((resolve) => {
+				const reader = new FileReader();
 				reader.onload = (e) => resolve(e.target?.result as string);
 				reader.readAsDataURL(imageFile);
 			});
-			const base64 = await base64Promise;
-			content.push({ type: "image", image: base64 });
+			parts.push({ type: "image", image: base64 });
 		}
 
-		chat.append({
-			role: "user",
-			content:
-				content.length === 1 && content[0].type === "text"
-					? chat.input
-					: content
-		});
-		chat.handleInputChange({ target: { value: "" } } as any);
-		setPreviewImage(null);
-		setImageFile(null);
-		if (fileInputRef.current) fileInputRef.current.value = "";
-	};
+		setInput("");
+		handleClearImage();
+		if (textareaRef.current) textareaRef.current.style.height = "auto";
+
+		sendMessage({ role: "user", parts });
+	}, [input, imageFile, isStreaming, sendMessage, handleClearImage]);
+
+	// noop — studio agent doesn't use client-side tool approval
+	const addToolApprovalResponse = useCallback(() => {}, []);
 
 	return (
-		<div className="flex h-[calc(100vh-4rem)] flex-col">
-			<StudioAgentHeader stats={stats} />
-			<div className="flex-1 overflow-y-auto p-4 space-y-4">
-				{chat.messages.length === 0 && (
-					<div className="text-center text-muted-foreground pt-12">
-						Welcome to Leith Studio Agent! How can I help you today?
-					</div>
-				)}
-				{chat.messages?.map((m: any) => (
-					<div
-						key={m.id || m.createdAt || Math.random().toString()}
-						className={`p-4 rounded-lg max-w-[80%] ${m.role === "user" ? "ml-auto bg-primary text-primary-foreground" : "mr-auto bg-muted"}`}
-					>
-						<p className="whitespace-pre-wrap">{m.content}</p>
-					</div>
-				))}
-			</div>
-			<div className="p-4 border-t flex flex-col gap-2">
-				{previewImage && (
-					<div className="relative w-24 h-24">
-						<img
-							src={previewImage}
-							alt="Preview"
-							className="w-full h-full object-cover rounded-md"
+		<div className="flex flex-col h-[calc(100vh-4rem)] bg-background text-sm relative overflow-hidden">
+			<div className="absolute top-0 left-0 w-full h-32 bg-linear-to-b from-primary/5 to-transparent pointer-events-none" />
+
+			<StudioAgentHeader connected={connected} stats={stats} />
+
+			{/* Messages */}
+			<div className="flex-1 overflow-y-auto scroll-smooth scrollbar-thin">
+				<div className="max-w-2xl mx-auto px-6 py-10 space-y-10">
+					{messages.length === 0 && (
+						<StudioWelcome
+							isStreaming={isStreaming}
+							onSendMessage={(text) =>
+								sendMessage({
+									role: "user",
+									parts: [{ type: "text", text }]
+								})
+							}
 						/>
-						<button
-							onClick={() => {
-								setPreviewImage(null);
-								setImageFile(null);
-								if (fileInputRef.current)
-									fileInputRef.current.value = "";
-							}}
-							className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs"
-						>
-							×
-						</button>
+					)}
+
+					<div className="flex flex-col gap-10">
+						{messages.map((message: UIMessage, index: number) => {
+							const isLastAssistant =
+								message.role === "assistant" &&
+								index === messages.length - 1;
+							return (
+								<ChatMessage
+									key={message.id}
+									message={message}
+									isLastAssistant={isLastAssistant}
+									isStreaming={isStreaming}
+									showDebug={false}
+									addToolApprovalResponse={
+										addToolApprovalResponse
+									}
+								/>
+							);
+						})}
 					</div>
-				)}
-				<form onSubmit={onFormSubmit} className="flex gap-2">
-					<input
-						type="file"
-						accept="image/*"
-						className="hidden"
-						ref={fileInputRef}
-						onChange={onFileChange}
-					/>
-					<Button
-						type="button"
-						variant="outline"
-						onClick={() => fileInputRef.current?.click()}
-					>
-						+ Image
-					</Button>
-					<input
-						type="text"
-						value={chat.input}
-						onChange={chat.handleInputChange}
-						onPaste={onPaste}
-						placeholder="Ask the studio agent... (you can also paste an image)"
-						className="flex-1 px-4 py-2 border rounded-md"
-					/>
-					<Button type="submit">Send</Button>
-				</form>
+
+					<div ref={messagesEndRef} className="h-4" />
+				</div>
 			</div>
+
+			<StudioInput
+				input={input}
+				setInput={setInput}
+				send={send}
+				isStreaming={isStreaming}
+				connected={connected}
+				handleStop={handleStop}
+				textareaRef={textareaRef}
+				previewImage={previewImage}
+				onImageFile={handleImageFile}
+				onClearImage={handleClearImage}
+			/>
 		</div>
+	);
+}
+
+function StudioAgentPage() {
+	return (
+		<Suspense
+			fallback={
+				<div className="flex items-center justify-center h-[calc(100vh-4rem)] text-muted-foreground flex-col gap-3">
+					<Spinner className="size-6" />
+					<span className="text-sm">
+						Connecting to studio agent...
+					</span>
+				</div>
+			}
+		>
+			<StudioAgentInner />
+		</Suspense>
 	);
 }

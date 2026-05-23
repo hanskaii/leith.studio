@@ -137,7 +137,7 @@ export const creatorPostsQueryOptions = () =>
 export const postStatusQueryOptions = (id: string, enabled: boolean) =>
 	queryOptions({
 		queryKey: ["post-status", id],
-		queryFn: () => getPostStatusFn({ data: id }),
+		queryFn: () => getPostStatusFn({ data: { data: id } }),
 		enabled,
 		refetchInterval: (query) => {
 			const status = query.state.data?.processingStatus;

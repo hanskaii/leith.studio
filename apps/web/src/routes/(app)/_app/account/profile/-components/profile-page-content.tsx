@@ -36,8 +36,6 @@ const ProfileFormSchema = z.object({
 	image: z.string().or(z.literal(""))
 });
 
-type ProfileFormValues = z.infer<typeof ProfileFormSchema>;
-
 export function ProfilePageContent({ user }: { user: any }) {
 	const queryClient = useQueryClient();
 	const { openConfirmModal } = useContext(AppModalContext);

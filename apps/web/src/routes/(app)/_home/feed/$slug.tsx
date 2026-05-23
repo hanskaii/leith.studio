@@ -174,11 +174,10 @@ function AssetDetail() {
 						</div>
 					) : (
 						<div className="relative h-full w-full">
-							<Image
+							<img
 								src={post.coverThumb ?? ""}
 								alt={post.title}
-								layout="fill"
-								className="object-cover"
+								className="absolute inset-0 h-full w-full object-cover"
 								loading="eager"
 							/>
 						</div>

@@ -2,7 +2,6 @@ import { createFileRoute, redirect } from "@tanstack/react-router";
 import { sessionsOptions } from "@/routes/-fn/auth";
 import { AppModalProvider } from "@/routes/-components/providers/app-modal-provider";
 import { AppLayout } from "@/routes/-components/layouts/app-layout";
-import { Gate } from "@workspace/core";
 
 import { z } from "zod";
 

@@ -1,4 +1,5 @@
 import { database, eq } from "@workspace/database";
+import type { HonoEnv } from "../types/hono.types";
 import * as schema from "@workspace/database/schema";
 import { Day } from "@workspace/core";
 import {
@@ -25,7 +26,7 @@ export class UploadService {
 		return database(this.env.DATABASE);
 	}
 
-	constructor(private readonly env: CloudflareBindings) {}
+	constructor(private readonly env: HonoEnv["Bindings"]) {}
 
 	/**
 	 * Generate a resized WebP thumbnail with max width, preserving aspect ratio.

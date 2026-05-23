@@ -1,4 +1,4 @@
-import { definePolicy, combine, allow, deny } from "@workspace/core";
+import { definePolicy, combine, allow } from "@workspace/core";
 import type { BasePolicyContext } from "@workspace/core";
 import { authorize } from "../permissions";
 

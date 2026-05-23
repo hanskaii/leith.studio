@@ -63,7 +63,7 @@ function PostEditorPage() {
 	const [isUploadingCover, setIsUploadingCover] = useState(false);
 	const [isUploadingAsset, setIsUploadingAsset] = useState(false);
 
-	const hasMedia = !isNew && !!(existing as any)?.fileKey;
+	const hasMedia = !isNew && !!existing?.fileKey;
 	const { data: postStatus } = useQuery(postStatusQueryOptions(id, hasMedia));
 
 	const editor = useEditor({

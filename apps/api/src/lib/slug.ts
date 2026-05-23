@@ -1,4 +1,4 @@
-import { eq, like } from "drizzle-orm";
+import { like } from "drizzle-orm";
 import { posts } from "@workspace/database";
 import type { DatabaseInstance } from "@workspace/database";
 
