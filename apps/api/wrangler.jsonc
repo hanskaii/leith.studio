@@ -3,9 +3,7 @@
 	"name": "leith-api",
 	"main": "src/index.ts",
 	"compatibility_date": "2025-09-02",
-	"compatibility_flags": [
-		"nodejs_compat"
-	],
+	"compatibility_flags": ["nodejs_compat"],
 	"placement": {
 		"mode": "smart"
 	},
@@ -16,7 +14,7 @@
 		{
 			"binding": "DATABASE",
 			"database_name": "leith",
-			"database_id": "c8ea511b-1cfd-46e2-ba78-0ed1e441bd7e",
+			"database_id": "3eb9e16b-4334-434b-9e22-dd540aabaea6",
 			"migrations_dir": "../../packages/db/drizzle"
 		}
 	],
@@ -50,8 +48,8 @@
 		"VITE_URL": "https://leith-web.inurhuda00-526.workers.dev",
 		"SESSION_DOMAIN": "inurhuda00-526.workers.dev",
 		"RESEND_FROM_EMAIL": "no-reply@mixetape.com",
-		"R2_BUCKET_NAME": "leith",
-		"R2_ACCOUNT_ID": "<ACCOUNT_ID>"
+		"R2_BUCKET": "leith",
+		"R2_ACCOUNT_ID": "526998f1dc79660b3b5d57b5fe264a16"
 	},
 	"durable_objects": {
 		"bindings": [
@@ -72,9 +70,7 @@
 	"migrations": [
 		{
 			"tag": "v2",
-			"new_sqlite_classes": [
-				"ChatAgent"
-			]
+			"new_sqlite_classes": ["ChatAgent"]
 		},
 		{
 			"tag": "v3",
@@ -122,9 +118,7 @@
 		}
 	],
 	"triggers": {
-		"crons": [
-			"*/1 * * * *"
-		]
+		"crons": ["*/1 * * * *"]
 	},
 	"containers": [
 		{
