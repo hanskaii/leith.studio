@@ -112,7 +112,7 @@ const studioHandler = new Hono<HonoEnv>()
 				body: posts.body,
 				publishedAt: posts.publishedAt,
 				format: postMetadata.format,
-				access: postMetadata.access,
+				access: posts.access,
 				tags: sql<string>`COALESCE(
 					JSON_GROUP_ARRAY(
 						JSON_OBJECT('slug', ${tags.slug}, 'name', ${tags.name})
@@ -127,7 +127,7 @@ const studioHandler = new Hono<HonoEnv>()
 			.where(
 				and(
 					eq(posts.status, "published"),
-					eq(postMetadata.processingStatus, "ready")
+					eq(posts.mediaStatus, "ready")
 				)
 			)
 			.groupBy(posts.id);

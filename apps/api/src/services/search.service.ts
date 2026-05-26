@@ -1,6 +1,5 @@
 import { and, eq, or, sql } from "drizzle-orm";
 import {
-	postMetadata,
 	postTags,
 	posts,
 	tags,
@@ -119,13 +118,12 @@ export class SearchService {
 		const rows = await db
 			.select({ id: posts.id })
 			.from(posts)
-			.innerJoin(postMetadata, eq(postMetadata.postId, posts.id))
 			.leftJoin(postTags, eq(postTags.postId, posts.id))
 			.leftJoin(tags, eq(tags.id, postTags.tagId))
 			.where(
 				and(
 					eq(posts.status, "published"),
-					eq(postMetadata.processingStatus, "ready"),
+					eq(posts.mediaStatus, "ready"),
 					or(
 						sql`LOWER(${posts.title}) LIKE ${like}`,
 						sql`LOWER(${tags.name}) LIKE ${like}`

@@ -135,6 +135,7 @@ export { VioVideoWorkflow } from "./workflows/vio-video.workflow";
 export { VioUpscaleWorkflow } from "./workflows/vio-upscale.workflow";
 export { VioMotionControlWorkflow } from "./workflows/vio-motion-control.workflow";
 export { StudioApproveWorkflow } from "./workflows/studio-approve.workflow";
+export { AiEnrichWorkflow } from "./workflows/ai-enrich.workflow";
 export { MediaContainer } from "./containers/media.container";
 export type { AppType } from "./contract";
 

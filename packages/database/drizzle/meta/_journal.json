@@ -57,6 +57,13 @@
 			"when": 1779414290490,
 			"tag": "0007_rapid_daredevil",
 			"breakpoints": true
+		},
+		{
+			"idx": 8,
+			"version": "6",
+			"when": 1779587231102,
+			"tag": "0008_last_wolverine",
+			"breakpoints": true
 		}
 	]
 }

@@ -115,6 +115,11 @@
 			"name": "studio-approve",
 			"binding": "STUDIO_APPROVE_WORKFLOW",
 			"class_name": "StudioApproveWorkflow"
+		},
+		{
+			"name": "ai-enrich",
+			"binding": "AI_ENRICH_WORKFLOW",
+			"class_name": "AiEnrichWorkflow"
 		}
 	],
 	"triggers": {

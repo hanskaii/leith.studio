@@ -2,7 +2,13 @@ import { Hono } from "hono";
 import { zValidator } from "@hono/zod-validator";
 import { z } from "zod";
 import { eq, desc, inArray, sql } from "drizzle-orm";
-import { posts, postMetadata, postTags, tags } from "@workspace/database";
+import {
+	posts,
+	postAssets,
+	postMetadata,
+	postTags,
+	tags
+} from "@workspace/database";
 import { slugifyTag } from "@workspace/database/utils/slug";
 import { ApiError } from "../helpers/errors.helper";
 import { ApiResponse } from "../helpers/response.helper";
@@ -25,20 +31,6 @@ function parseTags(raw: string | null | undefined): TagRef[] {
 	}
 }
 
-/**
- * Idempotently link `tagNames` to `postId` in exactly 2 D1 round-trips,
- * regardless of how many tags are supplied:
- *  1. Bulk INSERT OR IGNORE every tag row keyed by slug
- *  2. SELECT the canonical ids for those slugs, then bulk INSERT OR IGNORE
- *     the `post_tags` junction rows
- *
- * The prior implementation issued 3 sequential round-trips per tag —
- * O(N) D1 latency on every approve / save. Tag lists are small (≤ ~6 names)
- * so the `IN (...)` clause stays well under D1 parameter limits.
- *
- * Caller is responsible for clearing existing post_tags first if the input
- * represents the full desired set (PATCH semantics).
- */
 async function upsertPostTags(
 	db: any,
 	postId: string,
@@ -46,8 +38,6 @@ async function upsertPostTags(
 ): Promise<void> {
 	if (tagNames.length === 0) return;
 
-	// Build the (slug, name) pairs up front and dedupe by slug so the bulk
-	// insert never sees two rows that would collide on the UNIQUE(slug).
 	const now = new Date();
 	const bySlug = new Map<string, string>();
 	for (const name of tagNames) {
@@ -65,13 +55,10 @@ async function upsertPostTags(
 	}));
 	const slugs = tagRows.map((r) => r.slug);
 
-	// 1. Bulk-insert tags. Conflicts on slug fall through silently — the
-	//    canonical id is then read back in step 2.
 	await db.insert(tags).values(tagRows).onConflictDoNothing({
 		target: tags.slug
 	});
 
-	// 2a. Resolve canonical ids for every slug we just touched.
 	const existing = await db
 		.select({ id: tags.id, slug: tags.slug })
 		.from(tags)
@@ -79,11 +66,32 @@ async function upsertPostTags(
 
 	if (existing.length === 0) return;
 
-	// 2b. Bulk-insert junction rows in a single statement.
 	await db
 		.insert(postTags)
 		.values(existing.map((e: { id: string }) => ({ postId, tagId: e.id })))
 		.onConflictDoNothing();
+}
+
+async function upsertAsset(
+	db: any,
+	postId: string,
+	role: "cover" | "thumb" | "asset",
+	key: string,
+	format: string
+) {
+	await db
+		.insert(postAssets)
+		.values({
+			id: crypto.randomUUID(),
+			postId,
+			role,
+			key,
+			format
+		})
+		.onConflictDoUpdate({
+			target: [postAssets.postId, postAssets.role],
+			set: { key, format }
+		});
 }
 
 const ALLOWED_ASSET_TYPES: Record<string, string> = {
@@ -98,15 +106,6 @@ const ALLOWED_ASSET_TYPES: Record<string, string> = {
 	"audio/ogg": "ogg",
 	"audio/aac": "aac"
 };
-
-const PROCESSABLE_FORMATS = new Set([
-	"mp4",
-	"webm",
-	"mp3",
-	"wav",
-	"ogg",
-	"aac"
-]);
 
 const MAX_ASSET_SIZE = 200 * 1024 * 1024; // 200 MB
 
@@ -126,8 +125,6 @@ const CreatePostSchema = z
 	.object({
 		title: z.string().min(1),
 		body: z.string().min(1),
-		coverImage: z.string().optional(),
-		coverThumb: z.string().nullable().optional(),
 		tags: z.array(z.string()).optional().default([])
 	})
 	.merge(AssetMetaSchema);
@@ -136,12 +133,15 @@ const UpdatePostSchema = z
 	.object({
 		title: z.string().min(1).optional(),
 		body: z.string().min(1).optional(),
-		coverImage: z.string().nullable().optional(),
-		coverThumb: z.string().nullable().optional(),
 		tags: z.array(z.string()).optional(),
 		status: z.enum(["draft", "published"]).optional()
 	})
 	.merge(AssetMetaSchema);
+
+const mediaSubquery = sql<string>`COALESCE(
+	(SELECT JSON_GROUP_OBJECT(role, key) FROM post_assets WHERE post_id = ${posts.id}),
+	'{}'
+)`;
 
 const creatorHandler = new Hono<HonoEnv>()
 	.get("/posts", authMiddleware, protect("content.manage"), async (c) => {
@@ -152,19 +152,18 @@ const creatorHandler = new Hono<HonoEnv>()
 				slug: posts.slug,
 				title: posts.title,
 				body: posts.body,
-				coverImage: posts.coverImage,
-				coverThumb: posts.coverThumb,
+				media: mediaSubquery,
 				status: posts.status,
+				mediaStatus: posts.mediaStatus,
+				enrichmentStatus: posts.enrichmentStatus,
+				access: posts.access,
 				publishedAt: posts.publishedAt,
 				createdAt: posts.createdAt,
 				format: postMetadata.format,
 				resolution: postMetadata.resolution,
 				duration: postMetadata.duration,
 				isLoop: postMetadata.isLoop,
-				fileKey: postMetadata.fileKey,
-				fileSize: postMetadata.fileSize,
-				access: postMetadata.access,
-				processingStatus: postMetadata.processingStatus
+				fileSize: postMetadata.fileSize
 			})
 			.from(posts)
 			.leftJoin(postMetadata, eq(posts.id, postMetadata.postId))
@@ -178,6 +177,7 @@ const creatorHandler = new Hono<HonoEnv>()
 		zValidator("json", CreatePostSchema),
 		async (c) => {
 			const db = c.get("db");
+			const user = c.get("user");
 			const data = c.req.valid("json");
 			const slug = await uniqueSlug(data.title, db);
 			const now = new Date();
@@ -185,12 +185,13 @@ const creatorHandler = new Hono<HonoEnv>()
 
 			const post = {
 				id: postId,
+				authorId: user.id,
 				slug,
 				title: data.title,
 				body: data.body,
-				coverImage: data.coverImage ?? null,
-				coverThumb: data.coverThumb ?? null,
 				status: "draft" as const,
+				mediaStatus: "ready" as const,
+				access: data.access ?? "premium",
 				publishedAt: null,
 				createdAt: now,
 				updatedAt: now
@@ -211,27 +212,18 @@ const creatorHandler = new Hono<HonoEnv>()
 					format: data.format!,
 					resolution: data.resolution!,
 					duration: data.duration ?? null,
-					isLoop: data.isLoop ? 1 : 0,
-					fileKey: data.fileKey!,
-					fileSize: data.fileSize!,
-					access: data.access ?? "premium"
+					isLoop: data.isLoop ?? false,
+					fileSize: data.fileSize!
 				});
 
-				if (PROCESSABLE_FORMATS.has(data.format!)) {
-					await c.env.VIDEO_PROCESSING_WORKFLOW.create({
-						params: {
-							postId,
-							slug,
-							fileKey: data.fileKey!,
-							format: data.format!
-						}
-					});
-				}
+				await upsertAsset(
+					db,
+					postId,
+					"asset",
+					data.fileKey!,
+					data.format!
+				);
 
-				// Index for search now that the post has format/access. Posts
-				// without metadata are invisible to the feed anyway (the feed
-				// requires processingStatus='ready' on a metadata row), so
-				// skipping the no-meta branch is correct.
 				await new SearchService(c.env).index({
 					id: postId,
 					slug,
@@ -280,10 +272,7 @@ const creatorHandler = new Hono<HonoEnv>()
 				}
 			}
 			if (data.body !== undefined) updates.body = data.body;
-			if (data.coverImage !== undefined)
-				updates.coverImage = data.coverImage;
-			if (data.coverThumb !== undefined)
-				updates.coverThumb = data.coverThumb;
+			if (data.access !== undefined) updates.access = data.access;
 			if (data.status !== undefined) {
 				updates.status = data.status;
 				if (data.status === "published" && !existing.publishedAt) {
@@ -293,24 +282,19 @@ const creatorHandler = new Hono<HonoEnv>()
 
 			await db.update(posts).set(updates).where(eq(posts.id, id));
 
-			// Tag replacement: treat the input as the full desired set.
-			// Drop existing junction rows then re-upsert. Tag rows themselves
-			// are never deleted — orphan tags get filtered out of /api/v1/tags
-			// because that endpoint joins on post_tags.
 			if (data.tags !== undefined) {
 				await db.delete(postTags).where(eq(postTags.postId, id));
 				await upsertPostTags(db, id, data.tags);
 			}
 
-			// Upsert post_metadata when any asset field is present
+			// Upsert post_metadata + post_assets when any asset field is present
 			const hasMetaUpdate =
 				data.fileKey !== undefined ||
 				data.format !== undefined ||
 				data.resolution !== undefined ||
 				data.duration !== undefined ||
 				data.isLoop !== undefined ||
-				data.fileSize !== undefined ||
-				data.access !== undefined;
+				data.fileSize !== undefined;
 
 			if (hasMetaUpdate) {
 				const existingMeta = await db.query.postMetadata.findFirst({
@@ -326,21 +310,15 @@ const creatorHandler = new Hono<HonoEnv>()
 					if (data.duration !== undefined)
 						metaUpdates.duration = data.duration;
 					if (data.isLoop !== undefined)
-						metaUpdates.isLoop = data.isLoop ? 1 : 0;
-					if (data.fileKey !== undefined) {
-						metaUpdates.fileKey = data.fileKey;
-						metaUpdates.processingStatus = "pending";
-						metaUpdates.previewKey = null;
-						metaUpdates.clipKey = null;
-					}
+						metaUpdates.isLoop = data.isLoop;
 					if (data.fileSize !== undefined)
 						metaUpdates.fileSize = data.fileSize;
-					if (data.access !== undefined)
-						metaUpdates.access = data.access;
-					await db
-						.update(postMetadata)
-						.set(metaUpdates)
-						.where(eq(postMetadata.postId, id));
+					if (Object.keys(metaUpdates).length > 0) {
+						await db
+							.update(postMetadata)
+							.set(metaUpdates)
+							.where(eq(postMetadata.postId, id));
+					}
 				} else if (
 					data.fileKey &&
 					data.format &&
@@ -352,29 +330,19 @@ const creatorHandler = new Hono<HonoEnv>()
 						format: data.format,
 						resolution: data.resolution,
 						duration: data.duration ?? null,
-						isLoop: data.isLoop ? 1 : 0,
-						fileKey: data.fileKey,
-						fileSize: data.fileSize,
-						access: data.access ?? "premium"
+						isLoop: data.isLoop ?? false,
+						fileSize: data.fileSize
 					});
 				}
 
-				const newFileKey = data.fileKey;
-				const newFormat = data.format ?? existingMeta?.format;
-				if (
-					newFileKey &&
-					newFormat &&
-					PROCESSABLE_FORMATS.has(newFormat)
-				) {
-					const slug = existing.slug;
-					await c.env.VIDEO_PROCESSING_WORKFLOW.create({
-						params: {
-							postId: id,
-							slug,
-							fileKey: newFileKey,
-							format: newFormat
-						}
-					});
+				if (data.fileKey && data.format) {
+					await upsertAsset(
+						db,
+						id,
+						"asset",
+						data.fileKey,
+						data.format
+					);
 				}
 			}
 
@@ -384,8 +352,7 @@ const creatorHandler = new Hono<HonoEnv>()
 					slug: posts.slug,
 					title: posts.title,
 					body: posts.body,
-					coverImage: posts.coverImage,
-					coverThumb: posts.coverThumb,
+					media: mediaSubquery,
 					tags: sql<string>`COALESCE(
 						JSON_GROUP_ARRAY(
 							JSON_OBJECT('slug', ${tags.slug}, 'name', ${tags.name})
@@ -393,6 +360,8 @@ const creatorHandler = new Hono<HonoEnv>()
 						'[]'
 					)`,
 					status: posts.status,
+					mediaStatus: posts.mediaStatus,
+					access: posts.access,
 					publishedAt: posts.publishedAt,
 					createdAt: posts.createdAt,
 					updatedAt: posts.updatedAt,
@@ -400,8 +369,7 @@ const creatorHandler = new Hono<HonoEnv>()
 					resolution: postMetadata.resolution,
 					duration: postMetadata.duration,
 					isLoop: postMetadata.isLoop,
-					fileSize: postMetadata.fileSize,
-					access: postMetadata.access
+					fileSize: postMetadata.fileSize
 				})
 				.from(posts)
 				.leftJoin(postMetadata, eq(posts.id, postMetadata.postId))
@@ -418,9 +386,6 @@ const creatorHandler = new Hono<HonoEnv>()
 					}
 				: undefined;
 
-			// Re-index after update. The SELECT above already has the joined
-			// tags + metadata, so we just shape it into IndexablePost. Skip if
-			// the post somehow has no metadata (no format → nothing to index).
 			if (updated && updated.format) {
 				await new SearchService(c.env).index({
 					id: updated.id,
@@ -429,9 +394,7 @@ const creatorHandler = new Hono<HonoEnv>()
 					body: updated.body,
 					tags: updated.tags,
 					format: updated.format,
-					access:
-						(updated.access as "free" | "premium" | undefined) ??
-						"premium",
+					access: updated.access ?? "premium",
 					publishedAt: updated.publishedAt ?? null
 				});
 			}
@@ -447,16 +410,19 @@ const creatorHandler = new Hono<HonoEnv>()
 			const db = c.get("db");
 			const id = c.req.param("id");
 
+			const post = await db.query.posts.findFirst({
+				where: eq(posts.id, id),
+				columns: { id: true, mediaStatus: true }
+			});
+			if (!post) throw ApiError.notFound("Post not found");
+
 			const meta = await db.query.postMetadata.findFirst({
 				where: eq(postMetadata.postId, id)
 			});
-			if (!meta) throw ApiError.notFound("Post metadata not found");
 
-			return ApiResponse.ok(c, "Processing status", {
-				processingStatus: meta.processingStatus,
-				previewKey: meta.previewKey ?? null,
-				clipKey: meta.clipKey ?? null,
-				format: meta.format
+			return ApiResponse.ok(c, "Media status", {
+				mediaStatus: post.mediaStatus,
+				format: meta?.format ?? null
 			});
 		}
 	)
@@ -481,6 +447,37 @@ const creatorHandler = new Hono<HonoEnv>()
 			return ApiResponse.ok(c, "Post deleted", null);
 		}
 	)
+	.post(
+		"/upload-cover",
+		authMiddleware,
+		protect("content.manage"),
+		async (c) => {
+			const formData = await c.req.formData();
+			const file = formData.get("file");
+
+			if (!(file instanceof File)) {
+				throw ApiError.badRequest("A file is required.");
+			}
+
+			const user = c.get("user");
+			const origin = new URL(c.req.url).origin;
+			const uploadService = new UploadService(c.env);
+
+			try {
+				const result = await uploadService.uploadImage(
+					user,
+					file,
+					origin
+				);
+				return ApiResponse.ok(c, "Image uploaded", result);
+			} catch (err: any) {
+				if (err.status === 400) {
+					throw ApiError.badRequest(err.message);
+				}
+				throw err;
+			}
+		}
+	)
 	.post("/upload", authMiddleware, protect("content.manage"), async (c) => {
 		const formData = await c.req.formData();
 		const file = formData.get("file");
@@ -488,20 +485,72 @@ const creatorHandler = new Hono<HonoEnv>()
 		if (!(file instanceof File)) {
 			throw ApiError.badRequest("A file is required.");
 		}
+		if (file.size > MAX_ASSET_SIZE) {
+			throw ApiError.badRequest("File too large. Maximum size is 200MB.");
+		}
+		if (!ALLOWED_ASSET_TYPES[file.type]) {
+			throw ApiError.badRequest("Unsupported file type.");
+		}
 
 		const user = c.get("user");
-		const origin = new URL(c.req.url).origin;
-		const uploadService = new UploadService(c.env);
+		const db = c.get("db");
+		const ext = ALLOWED_ASSET_TYPES[file.type];
+		const uuid = crypto.randomUUID();
+		const key = `posts/assets/${uuid}/${file.name || `asset.${ext}`}`;
+		const buffer = await file.arrayBuffer();
 
-		try {
-			const result = await uploadService.uploadImage(user, file, origin);
-			return ApiResponse.ok(c, "Image uploaded", result);
-		} catch (err: any) {
-			if (err.status === 400) {
-				throw ApiError.badRequest(err.message);
-			}
-			throw err;
-		}
+		// 1. Store in R2.
+		await c.env.STORAGE.put(key, buffer, {
+			httpMetadata: { contentType: file.type }
+		});
+
+		// 2. Create the post + post_assets in one transaction. Title defaults
+		//    to the filename minus extension; the AI enrichment workflow
+		//    overwrites it (and body) once it runs.
+		const postId = crypto.randomUUID();
+		const fallbackTitle =
+			file.name?.replace(/\.[^.]+$/, "") || "Untitled upload";
+		const slug = await uniqueSlug(fallbackTitle, db);
+		const now = new Date();
+
+		const post = {
+			id: postId,
+			authorId: user.id,
+			slug,
+			title: fallbackTitle,
+			body: "",
+			status: "draft" as const,
+			mediaStatus: "ready" as const,
+			access: "premium" as const,
+			enrichmentStatus: "pending" as const,
+			publishedAt: null,
+			createdAt: now,
+			updatedAt: now
+		};
+
+		await db.insert(posts).values(post);
+		await db.insert(postAssets).values({
+			id: crypto.randomUUID(),
+			postId,
+			role: "asset",
+			key,
+			format: ext
+		});
+
+		// 3. Fire-and-forget enrichment trigger. We deliberately don't await —
+		//    upload response should return as soon as R2 + DB are durable.
+		c.env.AI_ENRICH_WORKFLOW.create({
+			id: `enrich-${postId}`,
+			params: { postId }
+		}).catch((err) => {
+			console.error(
+				"[ai-enrich] failed to create workflow for",
+				postId,
+				err
+			);
+		});
+
+		return ApiResponse.created(c, "Upload created", { postId, post });
 	})
 	.post(
 		"/upload-asset",

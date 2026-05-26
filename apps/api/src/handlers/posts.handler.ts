@@ -2,6 +2,7 @@ import { Hono } from "hono";
 import { eq, and, desc, count, sql, inArray } from "drizzle-orm";
 import {
 	posts,
+	postAssets,
 	postMetadata,
 	postStats,
 	postTags,
@@ -28,6 +29,7 @@ const CONTENT_TYPES: Record<string, string> = {
 };
 
 type TagRef = { slug: string; name: string };
+type MediaMap = { cover?: string; thumb?: string; asset?: string };
 
 function parseTags(raw: string | null | undefined): TagRef[] {
 	if (!raw) return [];
@@ -38,6 +40,31 @@ function parseTags(raw: string | null | undefined): TagRef[] {
 		return [];
 	}
 }
+
+function parseMedia(raw: string | null | undefined): MediaMap {
+	if (!raw) return {};
+	try {
+		const parsed = JSON.parse(raw);
+		return typeof parsed === "object" && parsed !== null
+			? (parsed as MediaMap)
+			: {};
+	} catch {
+		return {};
+	}
+}
+
+function toUrl(key: string | undefined, origin: string): string | null {
+	if (!key) return null;
+	// Seed data and externally-hosted thumbnails are stored as full URLs.
+	// Pass them through; only prepend the R2 proxy prefix for relative keys.
+	if (/^https?:\/\//.test(key)) return key;
+	return `${origin}/api/files/${key}`;
+}
+
+const mediaSubquery = sql<string>`COALESCE(
+	(SELECT JSON_GROUP_OBJECT(role, key) FROM post_assets WHERE post_id = ${posts.id}),
+	'{}'
+)`;
 
 const postsHandler = new Hono<HonoEnv>()
 	.get("/stats", async (c) => {
@@ -101,8 +128,7 @@ const postsHandler = new Hono<HonoEnv>()
 					id: posts.id,
 					slug: posts.slug,
 					title: posts.title,
-					coverImage: posts.coverImage,
-					coverThumb: posts.coverThumb,
+					media: mediaSubquery,
 					tags: sql<string>`COALESCE(
 						JSON_GROUP_ARRAY(
 							JSON_OBJECT('slug', ${tags.slug}, 'name', ${tags.name})
@@ -113,12 +139,7 @@ const postsHandler = new Hono<HonoEnv>()
 					format: postMetadata.format,
 					resolution: postMetadata.resolution,
 					isLoop: postMetadata.isLoop,
-					access: postMetadata.access,
-					previewKey: postMetadata.previewKey,
-					clipKey: postMetadata.clipKey,
-					// Aggregated in the existing GROUP BY — replaces the prior
-					// correlated `(SELECT COUNT(*) …)` subquery that re-ran
-					// per row.
+					access: posts.access,
 					downloadCount: count(postStats.id)
 				})
 				.from(posts)
@@ -129,7 +150,7 @@ const postsHandler = new Hono<HonoEnv>()
 				.where(
 					and(
 						eq(posts.status, "published"),
-						eq(postMetadata.processingStatus, "ready"),
+						eq(posts.mediaStatus, "ready"),
 						inArray(posts.id, idsByRank),
 						searchTagFilter
 					)
@@ -139,14 +160,15 @@ const postsHandler = new Hono<HonoEnv>()
 			// SQL `IN` returns unordered rows — re-sort against the AI Search
 			// rank map so the response preserves relevance order.
 			const searchItems = searchRows
-				.map(({ previewKey, clipKey, tags: tagsRaw, ...item }) => ({
-					...item,
-					tags: parseTags(tagsRaw),
-					previewUrl: previewKey
-						? `${origin}/api/files/${previewKey}`
-						: null,
-					clipUrl: clipKey ? `${origin}/api/files/${clipKey}` : null
-				}))
+				.map(({ media: mediaRaw, tags: tagsRaw, ...item }) => {
+					const media = parseMedia(mediaRaw);
+					return {
+						...item,
+						tags: parseTags(tagsRaw),
+						coverUrl: toUrl(media.cover, origin),
+						thumbUrl: toUrl(media.thumb, origin)
+					};
+				})
 				.sort((a, b) => {
 					const ai = rankIndex.get(a.id) ?? Infinity;
 					const bi = rankIndex.get(b.id) ?? Infinity;
@@ -162,8 +184,6 @@ const postsHandler = new Hono<HonoEnv>()
 		}
 
 		// Browse path — no ?q=, pure SQL pagination + optional tag filter.
-		// Subquery: post ids that carry the requested tag slug. Only applied
-		// when ?tag= is set, so unfiltered listings stay simple.
 		const tagFilter = tag
 			? inArray(
 					posts.id,
@@ -177,7 +197,7 @@ const postsHandler = new Hono<HonoEnv>()
 
 		const readyFilter = and(
 			eq(posts.status, "published"),
-			eq(postMetadata.processingStatus, "ready"),
+			eq(posts.mediaStatus, "ready"),
 			tagFilter
 		);
 
@@ -187,11 +207,7 @@ const postsHandler = new Hono<HonoEnv>()
 					id: posts.id,
 					slug: posts.slug,
 					title: posts.title,
-					coverImage: posts.coverImage,
-					coverThumb: posts.coverThumb,
-					// Aggregate tags as a JSON string per post — parsed below.
-					// FILTER (WHERE tags.id IS NOT NULL) ensures posts with
-					// zero tags get '[]' instead of '[{"slug":null,...}]'.
+					media: mediaSubquery,
 					tags: sql<string>`COALESCE(
 						JSON_GROUP_ARRAY(
 							JSON_OBJECT('slug', ${tags.slug}, 'name', ${tags.name})
@@ -202,11 +218,7 @@ const postsHandler = new Hono<HonoEnv>()
 					format: postMetadata.format,
 					resolution: postMetadata.resolution,
 					isLoop: postMetadata.isLoop,
-					access: postMetadata.access,
-					previewKey: postMetadata.previewKey,
-					clipKey: postMetadata.clipKey,
-					// Counted via the same GROUP BY as the tag aggregate —
-					// removes the prior N+1 correlated subquery per row.
+					access: posts.access,
 					downloadCount: count(postStats.id)
 				})
 				.from(posts)
@@ -227,14 +239,15 @@ const postsHandler = new Hono<HonoEnv>()
 		]);
 
 		const items = rawItems.map(
-			({ previewKey, clipKey, tags: tagsRaw, ...item }) => ({
-				...item,
-				tags: parseTags(tagsRaw),
-				previewUrl: previewKey
-					? `${origin}/api/files/${previewKey}`
-					: null,
-				clipUrl: clipKey ? `${origin}/api/files/${clipKey}` : null
-			})
+			({ media: mediaRaw, tags: tagsRaw, ...item }) => {
+				const media = parseMedia(mediaRaw);
+				return {
+					...item,
+					tags: parseTags(tagsRaw),
+					coverUrl: toUrl(media.cover, origin),
+					thumbUrl: toUrl(media.thumb, origin)
+				};
+			}
 		);
 
 		return ApiResponse.ok(c, "Posts", {
@@ -255,8 +268,7 @@ const postsHandler = new Hono<HonoEnv>()
 				slug: posts.slug,
 				title: posts.title,
 				body: posts.body,
-				coverImage: posts.coverImage,
-				coverThumb: posts.coverThumb,
+				media: mediaSubquery,
 				tags: sql<string>`COALESCE(
 					JSON_GROUP_ARRAY(
 						JSON_OBJECT('slug', ${tags.slug}, 'name', ${tags.name})
@@ -272,11 +284,7 @@ const postsHandler = new Hono<HonoEnv>()
 				duration: postMetadata.duration,
 				isLoop: postMetadata.isLoop,
 				fileSize: postMetadata.fileSize,
-				access: postMetadata.access,
-				previewKey: postMetadata.previewKey,
-				clipKey: postMetadata.clipKey,
-				// Counted via the same GROUP BY — replaces the prior
-				// correlated subquery.
+				access: posts.access,
 				downloadCount: count(postStats.id)
 			})
 			.from(posts)
@@ -289,17 +297,14 @@ const postsHandler = new Hono<HonoEnv>()
 
 		if (!row) throw ApiError.notFound("Post not found");
 
-		const { previewKey, clipKey, tags: tagsRaw, ...post } = row;
-		const previewUrl = previewKey
-			? `${origin}/api/files/${previewKey}`
-			: null;
-		const clipUrl = clipKey ? `${origin}/api/files/${clipKey}` : null;
+		const { media: mediaRaw, tags: tagsRaw, ...post } = row;
+		const media = parseMedia(mediaRaw);
 
 		return ApiResponse.ok(c, "Post", {
 			...post,
 			tags: parseTags(tagsRaw),
-			previewUrl,
-			clipUrl
+			coverUrl: toUrl(media.cover, origin),
+			thumbUrl: toUrl(media.thumb, origin)
 		});
 	})
 	.get("/:slug/download", authMiddleware, async (c) => {
@@ -311,12 +316,18 @@ const postsHandler = new Hono<HonoEnv>()
 			.select({
 				id: posts.id,
 				slug: posts.slug,
-				fileKey: postMetadata.fileKey,
-				format: postMetadata.format,
-				access: postMetadata.access
+				access: posts.access,
+				assetKey: postAssets.key,
+				assetFormat: postAssets.format
 			})
 			.from(posts)
-			.innerJoin(postMetadata, eq(posts.id, postMetadata.postId))
+			.innerJoin(
+				postAssets,
+				and(
+					eq(postAssets.postId, posts.id),
+					eq(postAssets.role, "asset")
+				)
+			)
 			.where(and(eq(posts.slug, slug), eq(posts.status, "published")));
 
 		if (!row) throw ApiError.notFound("Asset not found.");
@@ -326,7 +337,7 @@ const postsHandler = new Hono<HonoEnv>()
 			resource: { access: row.access }
 		});
 
-		const object = await c.env.STORAGE.get(row.fileKey);
+		const object = await c.env.STORAGE.get(row.assetKey);
 		if (!object) {
 			if (c.env.APP_ENV !== "production") {
 				const PLACEHOLDER: Record<string, string> = {
@@ -335,14 +346,14 @@ const postsHandler = new Hono<HonoEnv>()
 					mp4: "https://www.w3schools.com/html/mov_bbb.mp4",
 					webm: "https://www.w3schools.com/html/mov_bbb.mp4"
 				};
-				const url = PLACEHOLDER[row.format] ?? PLACEHOLDER.mp4;
+				const url = PLACEHOLDER[row.assetFormat] ?? PLACEHOLDER.mp4;
 				return Response.redirect(url, 302);
 			}
 			throw ApiError.notFound("Asset file not found.");
 		}
 
 		const contentType =
-			CONTENT_TYPES[row.format] ?? "application/octet-stream";
+			CONTENT_TYPES[row.assetFormat] ?? "application/octet-stream";
 
 		// Fire-and-forget download event
 		db.insert(postStats)
@@ -357,7 +368,7 @@ const postsHandler = new Hono<HonoEnv>()
 		return new Response(object.body, {
 			headers: {
 				"Content-Type": contentType,
-				"Content-Disposition": `attachment; filename="${row.slug}.${row.format}"`,
+				"Content-Disposition": `attachment; filename="${row.slug}.${row.assetFormat}"`,
 				"Cache-Control": "private, no-store"
 			}
 		});

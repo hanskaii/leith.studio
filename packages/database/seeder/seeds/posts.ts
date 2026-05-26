@@ -21,15 +21,38 @@ const doc = (text: string) =>
 
 const MB = 1024 * 1024;
 
+const SEED_AUTHOR_ID = "user_seed_admin";
+
+type SeedPostRow = {
+	id: string;
+	slug: string;
+	title: string;
+	body: string;
+	coverPhoto: string;
+	access: "free" | "premium";
+	publishedDaysAgo: number;
+};
+
+type SeedMetaRow = {
+	postId: string;
+	format: "mp4" | "webm" | "jpg" | "png";
+	resolution: string;
+	duration: number | null;
+	isLoop: boolean;
+	fileKey: string;
+	fileSize: number;
+};
+
 export async function seedPosts(db: DrizzleD1Database<typeof schema> | any) {
 	console.log("🎬 Seeding posts, tags, and asset metadata...");
 
 	const now = new Date();
 	const daysAgo = (d: number) => new Date(now.getTime() - d * 86_400_000);
 
-	// Tag map alongside posts — kept separately so we can normalize into the
-	// `tags` + `post_tags` tables instead of stuffing a JSON array on `posts`.
-	const postsData = [
+	const seedAuthor = await db.query.users.findFirst({});
+	const authorId: string = seedAuthor?.id ?? SEED_AUTHOR_ID;
+
+	const postsData: SeedPostRow[] = [
 		{
 			id: "post_noir_rain",
 			slug: "noir-rain-loop",
@@ -37,12 +60,9 @@ export async function seedPosts(db: DrizzleD1Database<typeof schema> | any) {
 			body: doc(
 				"A seamless dark rain loop with film-grain overlay. Works across any dark scene — moody, cinematic, and endlessly loopable."
 			),
-			coverImage: img("1518640467707-6811f4a6ab73"),
-			coverThumb: thumb("1518640467707-6811f4a6ab73"),
-			status: "published" as const,
-			publishedAt: daysAgo(30),
-			createdAt: daysAgo(32),
-			updatedAt: daysAgo(30)
+			coverPhoto: "1518640467707-6811f4a6ab73",
+			access: "free",
+			publishedDaysAgo: 30
 		},
 		{
 			id: "post_obsidian_fog",
@@ -51,12 +71,9 @@ export async function seedPosts(db: DrizzleD1Database<typeof schema> | any) {
 			body: doc(
 				"Dense volumetric fog rolling across a dark obsidian surface. Ideal as a looping stream background or overlay element."
 			),
-			coverImage: img("1419833479478-11ca64c1e585"),
-			coverThumb: thumb("1419833479478-11ca64c1e585"),
-			status: "published" as const,
-			publishedAt: daysAgo(28),
-			createdAt: daysAgo(30),
-			updatedAt: daysAgo(28)
+			coverPhoto: "1419833479478-11ca64c1e585",
+			access: "premium",
+			publishedDaysAgo: 28
 		},
 		{
 			id: "post_ember_drift",
@@ -65,12 +82,9 @@ export async function seedPosts(db: DrizzleD1Database<typeof schema> | any) {
 			body: doc(
 				"Slow-drifting embers rising through darkness. Pairs well with fire-themed streams, atmospheric gaming sessions, or lo-fi backgrounds."
 			),
-			coverImage: img("1516912481808-3406841bd33c"),
-			coverThumb: thumb("1516912481808-3406841bd33c"),
-			status: "published" as const,
-			publishedAt: daysAgo(25),
-			createdAt: daysAgo(27),
-			updatedAt: daysAgo(25)
+			coverPhoto: "1516912481808-3406841bd33c",
+			access: "premium",
+			publishedDaysAgo: 25
 		},
 		{
 			id: "post_shattered_glass",
@@ -79,12 +93,9 @@ export async function seedPosts(db: DrizzleD1Database<typeof schema> | any) {
 			body: doc(
 				"A high-speed glass shatter captured in extreme slow motion. Use as a transition hit or overlay effect on a dark scene."
 			),
-			coverImage: img("1558618666-fcd25c85cd64"),
-			coverThumb: thumb("1558618666-fcd25c85cd64"),
-			status: "published" as const,
-			publishedAt: daysAgo(22),
-			createdAt: daysAgo(24),
-			updatedAt: daysAgo(22)
+			coverPhoto: "1558618666-fcd25c85cd64",
+			access: "premium",
+			publishedDaysAgo: 22
 		},
 		{
 			id: "post_deep_space",
@@ -93,12 +104,9 @@ export async function seedPosts(db: DrizzleD1Database<typeof schema> | any) {
 			body: doc(
 				"A deep-field nebula still at 4K. Rich dark blues and purples with subtle star clusters. Works as a static stream background or panel art."
 			),
-			coverImage: img("1480714378408-67cf0d13bc1b"),
-			coverThumb: thumb("1480714378408-67cf0d13bc1b"),
-			status: "published" as const,
-			publishedAt: daysAgo(20),
-			createdAt: daysAgo(22),
-			updatedAt: daysAgo(20)
+			coverPhoto: "1480714378408-67cf0d13bc1b",
+			access: "free",
+			publishedDaysAgo: 20
 		},
 		{
 			id: "post_neon_city",
@@ -107,12 +115,9 @@ export async function seedPosts(db: DrizzleD1Database<typeof schema> | any) {
 			body: doc(
 				"Urban night photography shot from above. Neon reflections on wet streets, high contrast, cinematic colour grading."
 			),
-			coverImage: img("1525909002-1b05e0c869dd"),
-			coverThumb: thumb("1525909002-1b05e0c869dd"),
-			status: "published" as const,
-			publishedAt: daysAgo(18),
-			createdAt: daysAgo(20),
-			updatedAt: daysAgo(18)
+			coverPhoto: "1525909002-1b05e0c869dd",
+			access: "free",
+			publishedDaysAgo: 18
 		},
 		{
 			id: "post_storm_transition",
@@ -121,12 +126,9 @@ export async function seedPosts(db: DrizzleD1Database<typeof schema> | any) {
 			body: doc(
 				"A dramatic storm wipe from black. Three-second clip designed as a hard scene transition — cuts cleanly at both ends."
 			),
-			coverImage: img("1476514525405-09baa58e8721"),
-			coverThumb: thumb("1476514525405-09baa58e8721"),
-			status: "published" as const,
-			publishedAt: daysAgo(15),
-			createdAt: daysAgo(17),
-			updatedAt: daysAgo(15)
+			coverPhoto: "1476514525405-09baa58e8721",
+			access: "premium",
+			publishedDaysAgo: 15
 		},
 		{
 			id: "post_blood_moon",
@@ -135,12 +137,9 @@ export async function seedPosts(db: DrizzleD1Database<typeof schema> | any) {
 			body: doc(
 				"A slow-rotating blood moon against a deep black sky. Subtle atmospheric haze gives it depth. Seamless 45-second loop."
 			),
-			coverImage: img("1491029113948-a1f3e42e7f15"),
-			coverThumb: thumb("1491029113948-a1f3e42e7f15"),
-			status: "published" as const,
-			publishedAt: daysAgo(12),
-			createdAt: daysAgo(14),
-			updatedAt: daysAgo(12)
+			coverPhoto: "1491029113948-a1f3e42e7f15",
+			access: "premium",
+			publishedDaysAgo: 12
 		},
 		{
 			id: "post_dark_forest",
@@ -149,12 +148,9 @@ export async function seedPosts(db: DrizzleD1Database<typeof schema> | any) {
 			body: doc(
 				"Dense forest canopy at night — mist between trees, faint moonlight filtering through. 2K still image, portrait and landscape crops included."
 			),
-			coverImage: img("1441974231531-c6227db76b6e"),
-			coverThumb: thumb("1441974231531-c6227db76b6e"),
-			status: "published" as const,
-			publishedAt: daysAgo(10),
-			createdAt: daysAgo(12),
-			updatedAt: daysAgo(10)
+			coverPhoto: "1441974231531-c6227db76b6e",
+			access: "premium",
+			publishedDaysAgo: 10
 		},
 		{
 			id: "post_smoke_curtain",
@@ -163,12 +159,9 @@ export async function seedPosts(db: DrizzleD1Database<typeof schema> | any) {
 			body: doc(
 				"Billowing smoke forming a curtain across frame. Layer over any background for atmosphere. 1080p WebM with alpha channel."
 			),
-			coverImage: img("1451187580459-43490279c0fa"),
-			coverThumb: thumb("1451187580459-43490279c0fa"),
-			status: "published" as const,
-			publishedAt: daysAgo(8),
-			createdAt: daysAgo(10),
-			updatedAt: daysAgo(8)
+			coverPhoto: "1451187580459-43490279c0fa",
+			access: "free",
+			publishedDaysAgo: 8
 		},
 		{
 			id: "post_void_ambience",
@@ -177,12 +170,9 @@ export async function seedPosts(db: DrizzleD1Database<typeof schema> | any) {
 			body: doc(
 				"Near-silent visual ambience — subtle particle drift in absolute darkness. Two-minute loop designed for extended stream use without visual fatigue."
 			),
-			coverImage: img("1470252649021-ba82e40a5792"),
-			coverThumb: thumb("1470252649021-ba82e40a5792"),
-			status: "published" as const,
-			publishedAt: daysAgo(5),
-			createdAt: daysAgo(7),
-			updatedAt: daysAgo(5)
+			coverPhoto: "1470252649021-ba82e40a5792",
+			access: "premium",
+			publishedDaysAgo: 5
 		},
 		{
 			id: "post_glitch_wipe",
@@ -191,17 +181,12 @@ export async function seedPosts(db: DrizzleD1Database<typeof schema> | any) {
 			body: doc(
 				"A two-second digital glitch wipe for hard cuts and scene breaks. RGB split, scan lines, and block corruption in a single tight clip."
 			),
-			coverImage: img("1464822759023-fed622ff2c3b"),
-			coverThumb: thumb("1464822759023-fed622ff2c3b"),
-			status: "published" as const,
-			publishedAt: daysAgo(2),
-			createdAt: daysAgo(4),
-			updatedAt: daysAgo(2)
+			coverPhoto: "1464822759023-fed622ff2c3b",
+			access: "premium",
+			publishedDaysAgo: 2
 		}
 	];
 
-	// Tag assignments per post (post id → tag names). Kept here instead of on
-	// the post row so the seeder can normalize into `tags` + `post_tags`.
 	const postTagsMap: Record<string, string[]> = {
 		post_noir_rain: ["Loop", "Rain", "Cinematic"],
 		post_obsidian_fog: ["Ambience", "Fog", "Dark"],
@@ -217,172 +202,176 @@ export async function seedPosts(db: DrizzleD1Database<typeof schema> | any) {
 		post_glitch_wipe: ["Transition", "Glitch", "Effect"]
 	};
 
-	// format / resolution / fileKey / previewKey / clipKey / fileSize / access / duration / isLoop / processingStatus
-	const metadataData = [
+	const metadataData: SeedMetaRow[] = [
 		{
 			postId: "post_noir_rain",
-			format: "mp4" as const,
+			format: "mp4",
 			resolution: "4K",
 			duration: 30,
-			isLoop: 1,
+			isLoop: true,
 			fileKey: "assets/noir-rain-loop.mp4",
-			previewKey: "previews/noir-rain-loop-480p.mp4",
-			clipKey: "clips/noir-rain-loop-clip.mp4",
-			fileSize: Math.round(180 * MB),
-			access: "free" as const,
-			processingStatus: "ready" as const
+			fileSize: Math.round(180 * MB)
 		},
 		{
 			postId: "post_obsidian_fog",
-			format: "mp4" as const,
+			format: "mp4",
 			resolution: "4K",
 			duration: 60,
-			isLoop: 1,
+			isLoop: true,
 			fileKey: "assets/obsidian-fog.mp4",
-			previewKey: "previews/obsidian-fog-480p.mp4",
-			clipKey: "clips/obsidian-fog-clip.mp4",
-			fileSize: Math.round(340 * MB),
-			access: "premium" as const,
-			processingStatus: "ready" as const
+			fileSize: Math.round(340 * MB)
 		},
 		{
 			postId: "post_ember_drift",
-			format: "mp4" as const,
+			format: "mp4",
 			resolution: "1080p",
 			duration: 20,
-			isLoop: 1,
+			isLoop: true,
 			fileKey: "assets/ember-drift.mp4",
-			previewKey: "previews/ember-drift-480p.mp4",
-			clipKey: "clips/ember-drift-clip.mp4",
-			fileSize: Math.round(95 * MB),
-			access: "premium" as const,
-			processingStatus: "ready" as const
+			fileSize: Math.round(95 * MB)
 		},
 		{
 			postId: "post_shattered_glass",
-			format: "webm" as const,
+			format: "webm",
 			resolution: "4K",
 			duration: 5,
-			isLoop: 0,
+			isLoop: false,
 			fileKey: "assets/shattered-glass.webm",
-			previewKey: "previews/shattered-glass-480p.mp4",
-			clipKey: "clips/shattered-glass-clip.mp4",
-			fileSize: Math.round(210 * MB),
-			access: "premium" as const,
-			processingStatus: "ready" as const
+			fileSize: Math.round(210 * MB)
 		},
 		{
 			postId: "post_deep_space",
-			format: "jpg" as const,
+			format: "jpg",
 			resolution: "4K",
 			duration: null,
-			isLoop: 0,
+			isLoop: false,
 			fileKey: "assets/deep-space.jpg",
-			previewKey: null,
-			clipKey: null,
-			fileSize: Math.round(18 * MB),
-			access: "free" as const,
-			processingStatus: "ready" as const
+			fileSize: Math.round(18 * MB)
 		},
 		{
 			postId: "post_neon_city",
-			format: "jpg" as const,
+			format: "jpg",
 			resolution: "4K",
 			duration: null,
-			isLoop: 0,
+			isLoop: false,
 			fileKey: "assets/neon-city-night.jpg",
-			previewKey: null,
-			clipKey: null,
-			fileSize: Math.round(22 * MB),
-			access: "free" as const,
-			processingStatus: "ready" as const
+			fileSize: Math.round(22 * MB)
 		},
 		{
 			postId: "post_storm_transition",
-			format: "mp4" as const,
+			format: "mp4",
 			resolution: "1080p",
 			duration: 3,
-			isLoop: 0,
+			isLoop: false,
 			fileKey: "assets/storm-transition.mp4",
-			previewKey: "previews/storm-transition-480p.mp4",
-			clipKey: "clips/storm-transition-clip.mp4",
-			fileSize: Math.round(45 * MB),
-			access: "premium" as const,
-			processingStatus: "ready" as const
+			fileSize: Math.round(45 * MB)
 		},
 		{
 			postId: "post_blood_moon",
-			format: "mp4" as const,
+			format: "mp4",
 			resolution: "4K",
 			duration: 45,
-			isLoop: 1,
+			isLoop: true,
 			fileKey: "assets/blood-moon-loop.mp4",
-			previewKey: "previews/blood-moon-loop-480p.mp4",
-			clipKey: "clips/blood-moon-loop-clip.mp4",
-			fileSize: Math.round(260 * MB),
-			access: "premium" as const,
-			processingStatus: "ready" as const
+			fileSize: Math.round(260 * MB)
 		},
 		{
 			postId: "post_dark_forest",
-			format: "jpg" as const,
+			format: "jpg",
 			resolution: "2K",
 			duration: null,
-			isLoop: 0,
+			isLoop: false,
 			fileKey: "assets/dark-forest.jpg",
-			previewKey: null,
-			clipKey: null,
-			fileSize: Math.round(12 * MB),
-			access: "premium" as const,
-			processingStatus: "ready" as const
+			fileSize: Math.round(12 * MB)
 		},
 		{
 			postId: "post_smoke_curtain",
-			format: "webm" as const,
+			format: "webm",
 			resolution: "1080p",
 			duration: 10,
-			isLoop: 1,
+			isLoop: true,
 			fileKey: "assets/smoke-curtain.webm",
-			previewKey: "previews/smoke-curtain-480p.mp4",
-			clipKey: "clips/smoke-curtain-clip.mp4",
-			fileSize: Math.round(75 * MB),
-			access: "free" as const,
-			processingStatus: "ready" as const
+			fileSize: Math.round(75 * MB)
 		},
 		{
 			postId: "post_void_ambience",
-			format: "mp4" as const,
+			format: "mp4",
 			resolution: "4K",
 			duration: 120,
-			isLoop: 1,
+			isLoop: true,
 			fileKey: "assets/void-ambience.mp4",
-			previewKey: "previews/void-ambience-480p.mp4",
-			clipKey: "clips/void-ambience-clip.mp4",
-			fileSize: Math.round(480 * MB),
-			access: "premium" as const,
-			processingStatus: "ready" as const
+			fileSize: Math.round(480 * MB)
 		},
 		{
 			postId: "post_glitch_wipe",
-			format: "mp4" as const,
+			format: "mp4",
 			resolution: "1080p",
 			duration: 2,
-			isLoop: 0,
+			isLoop: false,
 			fileKey: "assets/glitch-wipe.mp4",
-			previewKey: "previews/glitch-wipe-480p.mp4",
-			clipKey: "clips/glitch-wipe-clip.mp4",
-			fileSize: Math.round(30 * MB),
-			access: "premium" as const,
-			processingStatus: "ready" as const
+			fileSize: Math.round(30 * MB)
 		}
 	];
 
 	for (const post of postsData) {
-		await db.insert(schema.posts).values(post).onConflictDoNothing();
+		await db
+			.insert(schema.posts)
+			.values({
+				id: post.id,
+				authorId,
+				slug: post.slug,
+				title: post.title,
+				body: post.body,
+				status: "published" as const,
+				mediaStatus: "ready" as const,
+				access: post.access,
+				publishedAt: daysAgo(post.publishedDaysAgo),
+				createdAt: daysAgo(post.publishedDaysAgo + 2),
+				updatedAt: daysAgo(post.publishedDaysAgo)
+			})
+			.onConflictDoNothing();
 	}
 
 	for (const meta of metadataData) {
 		await db.insert(schema.postMetadata).values(meta).onConflictDoNothing();
+	}
+
+	// Seed post_assets — cover and thumb point at the externally-hosted
+	// Unsplash URL (toUrl in the handler passes through full URLs as-is),
+	// asset points at an R2-style key we'd resolve via /api/files/.
+	const assetRows = postsData.flatMap((post) => {
+		const photoId = post.coverPhoto;
+		const meta = metadataData.find((m) => m.postId === post.id);
+		const rows = [
+			{
+				id: crypto.randomUUID(),
+				postId: post.id,
+				role: "cover" as const,
+				key: img(photoId),
+				format: "jpg"
+			},
+			{
+				id: crypto.randomUUID(),
+				postId: post.id,
+				role: "thumb" as const,
+				key: thumb(photoId),
+				format: "jpg"
+			}
+		];
+		if (meta) {
+			rows.push({
+				id: crypto.randomUUID(),
+				postId: post.id,
+				role: "asset" as const,
+				key: meta.fileKey,
+				format: meta.format
+			});
+		}
+		return rows;
+	});
+
+	for (const asset of assetRows) {
+		await db.insert(schema.postAssets).values(asset).onConflictDoNothing();
 	}
 
 	// Build the unique tag set across all posts, keyed by slug so duplicates
@@ -432,18 +421,7 @@ export async function seedPosts(db: DrizzleD1Database<typeof schema> | any) {
 	}
 
 	console.log(
-		`✓ Seeded ${postsData.length} posts, ${tagBySlug.size} tags, ${Object.values(
-			postTagsMap
-		).reduce((acc, t) => acc + t.length, 0)} post_tags links`
-	);
-	console.log(
-		"  Free  : noir-rain-loop, deep-space, neon-city-night, smoke-curtain"
-	);
-	console.log(
-		"  Premium: obsidian-fog, ember-drift, shattered-glass, storm-transition,"
-	);
-	console.log(
-		"           blood-moon-loop, dark-forest, void-ambience, glitch-wipe"
+		`✓ Seeded ${postsData.length} posts, ${assetRows.length} assets, ${tagBySlug.size} tags`
 	);
 
 	return postsData;

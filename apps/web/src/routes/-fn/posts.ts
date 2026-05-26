@@ -88,16 +88,15 @@ export function toFeedAsset(item: {
 	id: string;
 	slug: string;
 	title: string;
-	coverThumb: string | null;
+	coverUrl: string | null;
+	thumbUrl: string | null;
 	tags: { slug: string; name: string }[];
 	format: string;
 	resolution: string;
 	access: string;
-	isLoop: number;
+	isLoop: number | boolean;
 	downloadCount: number;
 	publishedAt: string | null;
-	previewUrl?: string | null;
-	clipUrl?: string | null;
 }): FeedAsset {
 	return {
 		id: item.id,
@@ -108,9 +107,8 @@ export function toFeedAsset(item: {
 		access: item.access === "free" ? "free" : "members",
 		format: item.format,
 		resolution: item.resolution,
-		coverThumb: item.coverThumb ?? "",
-		previewUrl: item.previewUrl ?? undefined,
-		clipUrl: item.clipUrl ?? undefined,
+		coverUrl: item.coverUrl ?? "",
+		thumbUrl: item.thumbUrl ?? item.coverUrl ?? "",
 		popularity: item.downloadCount,
 		publishedAt: item.publishedAt ?? ""
 	};

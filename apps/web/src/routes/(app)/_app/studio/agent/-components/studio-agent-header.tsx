@@ -118,7 +118,7 @@ export function StudioAgentHeader({
 						asChild
 						className="h-8 text-xs rounded-lg"
 					>
-						<Link to="/studio/review">Review</Link>
+						<Link to="/overview">Overview</Link>
 					</Button>
 				</div>
 			</header>

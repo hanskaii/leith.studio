@@ -14,5 +14,8 @@ export const postStats = sqliteTable(
 			.references(() => users.id, { onDelete: "cascade" }),
 		downloadedAt: integer("downloaded_at", { mode: "timestamp" }).notNull()
 	},
-	(table) => [index("idx_post_stats_post_id").on(table.postId)]
+	(table) => [
+		index("idx_post_stats_post_id").on(table.postId),
+		index("idx_post_stats_user_id").on(table.userId)
+	]
 );

@@ -1,8 +1,8 @@
 import { Hono } from "hono";
 import { zValidator } from "@hono/zod-validator";
 import { z } from "zod";
-import { eq } from "drizzle-orm";
-import { postMetadata } from "@workspace/database";
+import { and, eq } from "drizzle-orm";
+import { postAssets } from "@workspace/database";
 import { Gate } from "@workspace/core";
 import { ApiError } from "../helpers/errors.helper";
 import { ApiResponse } from "../helpers/response.helper";
@@ -75,18 +75,38 @@ const uploadHandler = new Hono<HonoEnv>()
 				httpMetadata: { contentType: file.type }
 			});
 
-			await db
-				.update(postMetadata)
-				.set({ fileKey })
-				.where(eq(postMetadata.postId, postId));
+			// Upsert the asset row — replaces any prior file for this post.
+			const existing = await db
+				.select({ id: postAssets.id })
+				.from(postAssets)
+				.where(
+					and(
+						eq(postAssets.postId, postId),
+						eq(postAssets.role, "asset")
+					)
+				);
 
-			await c.env.VIDEO_PROCESSING_WORKFLOW.create({
-				params: { postId, slug, fileKey }
-			});
+			if (existing.length > 0) {
+				await db
+					.update(postAssets)
+					.set({ key: fileKey, format: ext })
+					.where(
+						and(
+							eq(postAssets.postId, postId),
+							eq(postAssets.role, "asset")
+						)
+					);
+			} else {
+				await db.insert(postAssets).values({
+					id: crypto.randomUUID(),
+					postId,
+					role: "asset",
+					key: fileKey,
+					format: ext
+				});
+			}
 
-			return ApiResponse.ok(c, "Asset uploaded and processing started", {
-				fileKey
-			});
+			return ApiResponse.ok(c, "Asset uploaded", { fileKey });
 		}
 	)
 	.get("/files/*", async (c) => {

@@ -12,9 +12,8 @@ export type FeedAsset = {
 	access: "free" | "members";
 	format: string;
 	resolution: string;
-	coverThumb: string;
-	previewUrl?: string;
-	clipUrl?: string;
+	coverUrl: string;
+	thumbUrl: string;
 	popularity: number;
 	publishedAt: string;
 };

@@ -13,28 +13,23 @@ import { Route as appRouteRouteImport } from './routes/(app)/route'
 import { Route as appHomeRouteRouteImport } from './routes/(app)/_home/route'
 import { Route as appAuthRouteRouteImport } from './routes/(app)/_auth/route'
 import { Route as appAppRouteRouteImport } from './routes/(app)/_app/route'
-import { Route as appAdminRouteRouteImport } from './routes/(app)/_admin/route'
 import { Route as appHomeIndexRouteImport } from './routes/(app)/_home/index'
 import { Route as appAuthLoginRouteImport } from './routes/(app)/_auth/login'
 import { Route as appAppActivateRouteImport } from './routes/(app)/_app/activate'
 import { Route as appAppAccountRouteRouteImport } from './routes/(app)/_app/account/route'
 import { Route as appHomeFeedIndexRouteImport } from './routes/(app)/_home/feed/index'
+import { Route as appAppUsersIndexRouteImport } from './routes/(app)/_app/users/index'
+import { Route as appAppStudioIndexRouteImport } from './routes/(app)/_app/studio/index'
 import { Route as appAppOverviewIndexRouteImport } from './routes/(app)/_app/overview/index'
-import { Route as appAppCreatorIndexRouteImport } from './routes/(app)/_app/creator/index'
-import { Route as appAppChatIndexRouteImport } from './routes/(app)/_app/chat/index'
+import { Route as appAppEventsIndexRouteImport } from './routes/(app)/_app/events/index'
 import { Route as appHomeLegalsTermsRouteImport } from './routes/(app)/_home/legals/terms'
 import { Route as appHomeLegalsPrivacyPolicyRouteImport } from './routes/(app)/_home/legals/privacy-policy'
 import { Route as appHomeFeedSlugRouteImport } from './routes/(app)/_home/feed/$slug'
-import { Route as appAppCreatorIdRouteImport } from './routes/(app)/_app/creator/$id'
-import { Route as appAppStudioReviewIndexRouteImport } from './routes/(app)/_app/studio/review/index'
 import { Route as appAppStudioAgentIndexRouteImport } from './routes/(app)/_app/studio/agent/index'
 import { Route as appAppAccountSecurityIndexRouteImport } from './routes/(app)/_app/account/security/index'
 import { Route as appAppAccountProfileIndexRouteImport } from './routes/(app)/_app/account/profile/index'
 import { Route as appAppAccountBillingIndexRouteImport } from './routes/(app)/_app/account/billing/index'
 import { Route as appAppAccountApiKeyIndexRouteImport } from './routes/(app)/_app/account/api-key/index'
-import { Route as appAdminSUsersIndexRouteImport } from './routes/(app)/_admin/s/users/index'
-import { Route as appAdminSOverviewIndexRouteImport } from './routes/(app)/_admin/s/overview/index'
-import { Route as appAdminSEventsIndexRouteImport } from './routes/(app)/_admin/s/events/index'
 
 const appRouteRoute = appRouteRouteImport.update({
   id: '/(app)',
@@ -50,10 +45,6 @@ const appAuthRouteRoute = appAuthRouteRouteImport.update({
 } as any)
 const appAppRouteRoute = appAppRouteRouteImport.update({
   id: '/_app',
-  getParentRoute: () => appRouteRoute,
-} as any)
-const appAdminRouteRoute = appAdminRouteRouteImport.update({
-  id: '/_admin',
   getParentRoute: () => appRouteRoute,
 } as any)
 const appHomeIndexRoute = appHomeIndexRouteImport.update({
@@ -81,19 +72,24 @@ const appHomeFeedIndexRoute = appHomeFeedIndexRouteImport.update({
   path: '/feed/',
   getParentRoute: () => appHomeRouteRoute,
 } as any)
+const appAppUsersIndexRoute = appAppUsersIndexRouteImport.update({
+  id: '/users/',
+  path: '/users/',
+  getParentRoute: () => appAppRouteRoute,
+} as any)
+const appAppStudioIndexRoute = appAppStudioIndexRouteImport.update({
+  id: '/studio/',
+  path: '/studio/',
+  getParentRoute: () => appAppRouteRoute,
+} as any)
 const appAppOverviewIndexRoute = appAppOverviewIndexRouteImport.update({
   id: '/overview/',
   path: '/overview/',
   getParentRoute: () => appAppRouteRoute,
 } as any)
-const appAppCreatorIndexRoute = appAppCreatorIndexRouteImport.update({
-  id: '/creator/',
-  path: '/creator/',
-  getParentRoute: () => appAppRouteRoute,
-} as any)
-const appAppChatIndexRoute = appAppChatIndexRouteImport.update({
-  id: '/chat/',
-  path: '/chat/',
+const appAppEventsIndexRoute = appAppEventsIndexRouteImport.update({
+  id: '/events/',
+  path: '/events/',
   getParentRoute: () => appAppRouteRoute,
 } as any)
 const appHomeLegalsTermsRoute = appHomeLegalsTermsRouteImport.update({
@@ -111,16 +107,6 @@ const appHomeFeedSlugRoute = appHomeFeedSlugRouteImport.update({
   id: '/feed/$slug',
   path: '/feed/$slug',
   getParentRoute: () => appHomeRouteRoute,
-} as any)
-const appAppCreatorIdRoute = appAppCreatorIdRouteImport.update({
-  id: '/creator/$id',
-  path: '/creator/$id',
-  getParentRoute: () => appAppRouteRoute,
-} as any)
-const appAppStudioReviewIndexRoute = appAppStudioReviewIndexRouteImport.update({
-  id: '/studio/review/',
-  path: '/studio/review/',
-  getParentRoute: () => appAppRouteRoute,
 } as any)
 const appAppStudioAgentIndexRoute = appAppStudioAgentIndexRouteImport.update({
   id: '/studio/agent/',
@@ -151,72 +137,48 @@ const appAppAccountApiKeyIndexRoute =
     path: '/api-key/',
     getParentRoute: () => appAppAccountRouteRoute,
   } as any)
-const appAdminSUsersIndexRoute = appAdminSUsersIndexRouteImport.update({
-  id: '/s/users/',
-  path: '/s/users/',
-  getParentRoute: () => appAdminRouteRoute,
-} as any)
-const appAdminSOverviewIndexRoute = appAdminSOverviewIndexRouteImport.update({
-  id: '/s/overview/',
-  path: '/s/overview/',
-  getParentRoute: () => appAdminRouteRoute,
-} as any)
-const appAdminSEventsIndexRoute = appAdminSEventsIndexRouteImport.update({
-  id: '/s/events/',
-  path: '/s/events/',
-  getParentRoute: () => appAdminRouteRoute,
-} as any)
 
 export interface FileRoutesByFullPath {
   '/account': typeof appAppAccountRouteRouteWithChildren
   '/activate': typeof appAppActivateRoute
   '/login': typeof appAuthLoginRoute
   '/': typeof appHomeIndexRoute
-  '/creator/$id': typeof appAppCreatorIdRoute
   '/feed/$slug': typeof appHomeFeedSlugRoute
   '/legals/privacy-policy': typeof appHomeLegalsPrivacyPolicyRoute
   '/legals/terms': typeof appHomeLegalsTermsRoute
-  '/chat/': typeof appAppChatIndexRoute
-  '/creator/': typeof appAppCreatorIndexRoute
+  '/events/': typeof appAppEventsIndexRoute
   '/overview/': typeof appAppOverviewIndexRoute
+  '/studio/': typeof appAppStudioIndexRoute
+  '/users/': typeof appAppUsersIndexRoute
   '/feed/': typeof appHomeFeedIndexRoute
-  '/s/events/': typeof appAdminSEventsIndexRoute
-  '/s/overview/': typeof appAdminSOverviewIndexRoute
-  '/s/users/': typeof appAdminSUsersIndexRoute
   '/account/api-key/': typeof appAppAccountApiKeyIndexRoute
   '/account/billing/': typeof appAppAccountBillingIndexRoute
   '/account/profile/': typeof appAppAccountProfileIndexRoute
   '/account/security/': typeof appAppAccountSecurityIndexRoute
   '/studio/agent/': typeof appAppStudioAgentIndexRoute
-  '/studio/review/': typeof appAppStudioReviewIndexRoute
 }
 export interface FileRoutesByTo {
   '/account': typeof appAppAccountRouteRouteWithChildren
   '/activate': typeof appAppActivateRoute
   '/login': typeof appAuthLoginRoute
   '/': typeof appHomeIndexRoute
-  '/creator/$id': typeof appAppCreatorIdRoute
   '/feed/$slug': typeof appHomeFeedSlugRoute
   '/legals/privacy-policy': typeof appHomeLegalsPrivacyPolicyRoute
   '/legals/terms': typeof appHomeLegalsTermsRoute
-  '/chat': typeof appAppChatIndexRoute
-  '/creator': typeof appAppCreatorIndexRoute
+  '/events': typeof appAppEventsIndexRoute
   '/overview': typeof appAppOverviewIndexRoute
+  '/studio': typeof appAppStudioIndexRoute
+  '/users': typeof appAppUsersIndexRoute
   '/feed': typeof appHomeFeedIndexRoute
-  '/s/events': typeof appAdminSEventsIndexRoute
-  '/s/overview': typeof appAdminSOverviewIndexRoute
-  '/s/users': typeof appAdminSUsersIndexRoute
   '/account/api-key': typeof appAppAccountApiKeyIndexRoute
   '/account/billing': typeof appAppAccountBillingIndexRoute
   '/account/profile': typeof appAppAccountProfileIndexRoute
   '/account/security': typeof appAppAccountSecurityIndexRoute
   '/studio/agent': typeof appAppStudioAgentIndexRoute
-  '/studio/review': typeof appAppStudioReviewIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/(app)': typeof appRouteRouteWithChildren
-  '/(app)/_admin': typeof appAdminRouteRouteWithChildren
   '/(app)/_app': typeof appAppRouteRouteWithChildren
   '/(app)/_auth': typeof appAuthRouteRouteWithChildren
   '/(app)/_home': typeof appHomeRouteRouteWithChildren
@@ -224,23 +186,19 @@ export interface FileRoutesById {
   '/(app)/_app/activate': typeof appAppActivateRoute
   '/(app)/_auth/login': typeof appAuthLoginRoute
   '/(app)/_home/': typeof appHomeIndexRoute
-  '/(app)/_app/creator/$id': typeof appAppCreatorIdRoute
   '/(app)/_home/feed/$slug': typeof appHomeFeedSlugRoute
   '/(app)/_home/legals/privacy-policy': typeof appHomeLegalsPrivacyPolicyRoute
   '/(app)/_home/legals/terms': typeof appHomeLegalsTermsRoute
-  '/(app)/_app/chat/': typeof appAppChatIndexRoute
-  '/(app)/_app/creator/': typeof appAppCreatorIndexRoute
+  '/(app)/_app/events/': typeof appAppEventsIndexRoute
   '/(app)/_app/overview/': typeof appAppOverviewIndexRoute
+  '/(app)/_app/studio/': typeof appAppStudioIndexRoute
+  '/(app)/_app/users/': typeof appAppUsersIndexRoute
   '/(app)/_home/feed/': typeof appHomeFeedIndexRoute
-  '/(app)/_admin/s/events/': typeof appAdminSEventsIndexRoute
-  '/(app)/_admin/s/overview/': typeof appAdminSOverviewIndexRoute
-  '/(app)/_admin/s/users/': typeof appAdminSUsersIndexRoute
   '/(app)/_app/account/api-key/': typeof appAppAccountApiKeyIndexRoute
   '/(app)/_app/account/billing/': typeof appAppAccountBillingIndexRoute
   '/(app)/_app/account/profile/': typeof appAppAccountProfileIndexRoute
   '/(app)/_app/account/security/': typeof appAppAccountSecurityIndexRoute
   '/(app)/_app/studio/agent/': typeof appAppStudioAgentIndexRoute
-  '/(app)/_app/studio/review/': typeof appAppStudioReviewIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -249,50 +207,41 @@ export interface FileRouteTypes {
     | '/activate'
     | '/login'
     | '/'
-    | '/creator/$id'
     | '/feed/$slug'
     | '/legals/privacy-policy'
     | '/legals/terms'
-    | '/chat/'
-    | '/creator/'
+    | '/events/'
     | '/overview/'
+    | '/studio/'
+    | '/users/'
     | '/feed/'
-    | '/s/events/'
-    | '/s/overview/'
-    | '/s/users/'
     | '/account/api-key/'
     | '/account/billing/'
     | '/account/profile/'
     | '/account/security/'
     | '/studio/agent/'
-    | '/studio/review/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/account'
     | '/activate'
     | '/login'
     | '/'
-    | '/creator/$id'
     | '/feed/$slug'
     | '/legals/privacy-policy'
     | '/legals/terms'
-    | '/chat'
-    | '/creator'
+    | '/events'
     | '/overview'
+    | '/studio'
+    | '/users'
     | '/feed'
-    | '/s/events'
-    | '/s/overview'
-    | '/s/users'
     | '/account/api-key'
     | '/account/billing'
     | '/account/profile'
     | '/account/security'
     | '/studio/agent'
-    | '/studio/review'
   id:
     | '__root__'
     | '/(app)'
-    | '/(app)/_admin'
     | '/(app)/_app'
     | '/(app)/_auth'
     | '/(app)/_home'
@@ -300,23 +249,19 @@ export interface FileRouteTypes {
     | '/(app)/_app/activate'
     | '/(app)/_auth/login'
     | '/(app)/_home/'
-    | '/(app)/_app/creator/$id'
     | '/(app)/_home/feed/$slug'
     | '/(app)/_home/legals/privacy-policy'
     | '/(app)/_home/legals/terms'
-    | '/(app)/_app/chat/'
-    | '/(app)/_app/creator/'
+    | '/(app)/_app/events/'
     | '/(app)/_app/overview/'
+    | '/(app)/_app/studio/'
+    | '/(app)/_app/users/'
     | '/(app)/_home/feed/'
-    | '/(app)/_admin/s/events/'
-    | '/(app)/_admin/s/overview/'
-    | '/(app)/_admin/s/users/'
     | '/(app)/_app/account/api-key/'
     | '/(app)/_app/account/billing/'
     | '/(app)/_app/account/profile/'
     | '/(app)/_app/account/security/'
     | '/(app)/_app/studio/agent/'
-    | '/(app)/_app/studio/review/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -351,13 +296,6 @@ declare module '@tanstack/react-router' {
       path: ''
       fullPath: ''
       preLoaderRoute: typeof appAppRouteRouteImport
-      parentRoute: typeof appRouteRoute
-    }
-    '/(app)/_admin': {
-      id: '/(app)/_admin'
-      path: ''
-      fullPath: ''
-      preLoaderRoute: typeof appAdminRouteRouteImport
       parentRoute: typeof appRouteRoute
     }
     '/(app)/_home/': {
@@ -395,6 +333,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof appHomeFeedIndexRouteImport
       parentRoute: typeof appHomeRouteRoute
     }
+    '/(app)/_app/users/': {
+      id: '/(app)/_app/users/'
+      path: '/users'
+      fullPath: '/users/'
+      preLoaderRoute: typeof appAppUsersIndexRouteImport
+      parentRoute: typeof appAppRouteRoute
+    }
+    '/(app)/_app/studio/': {
+      id: '/(app)/_app/studio/'
+      path: '/studio'
+      fullPath: '/studio/'
+      preLoaderRoute: typeof appAppStudioIndexRouteImport
+      parentRoute: typeof appAppRouteRoute
+    }
     '/(app)/_app/overview/': {
       id: '/(app)/_app/overview/'
       path: '/overview'
@@ -402,18 +354,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof appAppOverviewIndexRouteImport
       parentRoute: typeof appAppRouteRoute
     }
-    '/(app)/_app/creator/': {
-      id: '/(app)/_app/creator/'
-      path: '/creator'
-      fullPath: '/creator/'
-      preLoaderRoute: typeof appAppCreatorIndexRouteImport
-      parentRoute: typeof appAppRouteRoute
-    }
-    '/(app)/_app/chat/': {
-      id: '/(app)/_app/chat/'
-      path: '/chat'
-      fullPath: '/chat/'
-      preLoaderRoute: typeof appAppChatIndexRouteImport
+    '/(app)/_app/events/': {
+      id: '/(app)/_app/events/'
+      path: '/events'
+      fullPath: '/events/'
+      preLoaderRoute: typeof appAppEventsIndexRouteImport
       parentRoute: typeof appAppRouteRoute
     }
     '/(app)/_home/legals/terms': {
@@ -436,20 +381,6 @@ declare module '@tanstack/react-router' {
       fullPath: '/feed/$slug'
       preLoaderRoute: typeof appHomeFeedSlugRouteImport
       parentRoute: typeof appHomeRouteRoute
-    }
-    '/(app)/_app/creator/$id': {
-      id: '/(app)/_app/creator/$id'
-      path: '/creator/$id'
-      fullPath: '/creator/$id'
-      preLoaderRoute: typeof appAppCreatorIdRouteImport
-      parentRoute: typeof appAppRouteRoute
-    }
-    '/(app)/_app/studio/review/': {
-      id: '/(app)/_app/studio/review/'
-      path: '/studio/review'
-      fullPath: '/studio/review/'
-      preLoaderRoute: typeof appAppStudioReviewIndexRouteImport
-      parentRoute: typeof appAppRouteRoute
     }
     '/(app)/_app/studio/agent/': {
       id: '/(app)/_app/studio/agent/'
@@ -486,45 +417,8 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof appAppAccountApiKeyIndexRouteImport
       parentRoute: typeof appAppAccountRouteRoute
     }
-    '/(app)/_admin/s/users/': {
-      id: '/(app)/_admin/s/users/'
-      path: '/s/users'
-      fullPath: '/s/users/'
-      preLoaderRoute: typeof appAdminSUsersIndexRouteImport
-      parentRoute: typeof appAdminRouteRoute
-    }
-    '/(app)/_admin/s/overview/': {
-      id: '/(app)/_admin/s/overview/'
-      path: '/s/overview'
-      fullPath: '/s/overview/'
-      preLoaderRoute: typeof appAdminSOverviewIndexRouteImport
-      parentRoute: typeof appAdminRouteRoute
-    }
-    '/(app)/_admin/s/events/': {
-      id: '/(app)/_admin/s/events/'
-      path: '/s/events'
-      fullPath: '/s/events/'
-      preLoaderRoute: typeof appAdminSEventsIndexRouteImport
-      parentRoute: typeof appAdminRouteRoute
-    }
   }
 }
-
-interface appAdminRouteRouteChildren {
-  appAdminSEventsIndexRoute: typeof appAdminSEventsIndexRoute
-  appAdminSOverviewIndexRoute: typeof appAdminSOverviewIndexRoute
-  appAdminSUsersIndexRoute: typeof appAdminSUsersIndexRoute
-}
-
-const appAdminRouteRouteChildren: appAdminRouteRouteChildren = {
-  appAdminSEventsIndexRoute: appAdminSEventsIndexRoute,
-  appAdminSOverviewIndexRoute: appAdminSOverviewIndexRoute,
-  appAdminSUsersIndexRoute: appAdminSUsersIndexRoute,
-}
-
-const appAdminRouteRouteWithChildren = appAdminRouteRoute._addFileChildren(
-  appAdminRouteRouteChildren,
-)
 
 interface appAppAccountRouteRouteChildren {
   appAppAccountApiKeyIndexRoute: typeof appAppAccountApiKeyIndexRoute
@@ -546,23 +440,21 @@ const appAppAccountRouteRouteWithChildren =
 interface appAppRouteRouteChildren {
   appAppAccountRouteRoute: typeof appAppAccountRouteRouteWithChildren
   appAppActivateRoute: typeof appAppActivateRoute
-  appAppCreatorIdRoute: typeof appAppCreatorIdRoute
-  appAppChatIndexRoute: typeof appAppChatIndexRoute
-  appAppCreatorIndexRoute: typeof appAppCreatorIndexRoute
+  appAppEventsIndexRoute: typeof appAppEventsIndexRoute
   appAppOverviewIndexRoute: typeof appAppOverviewIndexRoute
+  appAppStudioIndexRoute: typeof appAppStudioIndexRoute
+  appAppUsersIndexRoute: typeof appAppUsersIndexRoute
   appAppStudioAgentIndexRoute: typeof appAppStudioAgentIndexRoute
-  appAppStudioReviewIndexRoute: typeof appAppStudioReviewIndexRoute
 }
 
 const appAppRouteRouteChildren: appAppRouteRouteChildren = {
   appAppAccountRouteRoute: appAppAccountRouteRouteWithChildren,
   appAppActivateRoute: appAppActivateRoute,
-  appAppCreatorIdRoute: appAppCreatorIdRoute,
-  appAppChatIndexRoute: appAppChatIndexRoute,
-  appAppCreatorIndexRoute: appAppCreatorIndexRoute,
+  appAppEventsIndexRoute: appAppEventsIndexRoute,
   appAppOverviewIndexRoute: appAppOverviewIndexRoute,
+  appAppStudioIndexRoute: appAppStudioIndexRoute,
+  appAppUsersIndexRoute: appAppUsersIndexRoute,
   appAppStudioAgentIndexRoute: appAppStudioAgentIndexRoute,
-  appAppStudioReviewIndexRoute: appAppStudioReviewIndexRoute,
 }
 
 const appAppRouteRouteWithChildren = appAppRouteRoute._addFileChildren(
@@ -602,14 +494,12 @@ const appHomeRouteRouteWithChildren = appHomeRouteRoute._addFileChildren(
 )
 
 interface appRouteRouteChildren {
-  appAdminRouteRoute: typeof appAdminRouteRouteWithChildren
   appAppRouteRoute: typeof appAppRouteRouteWithChildren
   appAuthRouteRoute: typeof appAuthRouteRouteWithChildren
   appHomeRouteRoute: typeof appHomeRouteRouteWithChildren
 }
 
 const appRouteRouteChildren: appRouteRouteChildren = {
-  appAdminRouteRoute: appAdminRouteRouteWithChildren,
   appAppRouteRoute: appAppRouteRouteWithChildren,
   appAuthRouteRoute: appAuthRouteRouteWithChildren,
   appHomeRouteRoute: appHomeRouteRouteWithChildren,

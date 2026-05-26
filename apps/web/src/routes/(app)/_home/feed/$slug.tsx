@@ -146,36 +146,21 @@ function AssetDetail() {
 				<div
 					className={`mb-10 overflow-hidden rounded-lg bg-muted ${isAudio ? "" : "aspect-[16/9]"}`}
 				>
-					{isVideo && post.previewUrl ? (
-						<video
-							autoPlay
-							muted
-							loop
-							playsInline
-							controls
-							src={post.previewUrl}
-							className="h-full w-full object-cover"
-						/>
-					) : isAudio && post.previewUrl ? (
+					{isAudio ? (
 						<div className="flex flex-col items-center gap-4 px-6 py-10">
 							<Image
-								src={post.coverThumb ?? ""}
+								src={post.coverUrl ?? post.thumbUrl ?? ""}
 								alt={post.title}
 								width={160}
 								height={160}
 								className="rounded-md object-cover shadow-md"
 								loading="eager"
 							/>
-							<audio
-								controls
-								src={post.previewUrl}
-								className="w-full max-w-lg"
-							/>
 						</div>
 					) : (
 						<div className="relative h-full w-full">
 							<img
-								src={post.coverThumb ?? ""}
+								src={post.coverUrl ?? post.thumbUrl ?? ""}
 								alt={post.title}
 								className="absolute inset-0 h-full w-full object-cover"
 								loading="eager"

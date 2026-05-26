@@ -92,11 +92,43 @@ export const uploadImageFn = createServerFn({ method: "POST" })
 	.handler(({ data }) =>
 		handleError(async () => {
 			const api = createApiClient();
+			const res = await (api.api.v1.creator as any)["upload-cover"].$post(
+				{
+					form: data
+				}
+			);
+			const json = await res.json();
+			return (json as any).data as { url: string; thumbUrl: string };
+		})
+	);
+
+export const uploadStudioFn = createServerFn({ method: "POST" })
+	.inputValidator((data: FormData) => data)
+	.handler(({ data }) =>
+		handleError(async () => {
+			const api = createApiClient();
 			const res = await api.api.v1.creator.upload.$post({
 				form: data
 			} as any);
 			const json = await res.json();
-			return (json as any).data as { url: string; thumbUrl: string };
+			return (json as any).data as {
+				postId: string;
+				post: {
+					id: string;
+					slug: string;
+					title: string;
+					body: string;
+					status: "draft" | "published";
+					mediaStatus: "pending" | "ready" | "failed";
+					enrichmentStatus:
+						| "pending"
+						| "processing"
+						| "done"
+						| "failed";
+					access: "free" | "premium";
+					createdAt: string;
+				};
+			};
 		})
 	);
 
@@ -140,8 +172,8 @@ export const postStatusQueryOptions = (id: string, enabled: boolean) =>
 		queryFn: () => getPostStatusFn({ data: { data: id } }),
 		enabled,
 		refetchInterval: (query) => {
-			const status = query.state.data?.processingStatus;
-			if (status === "processing" || status === "pending") return 3000;
+			const status = query.state.data?.mediaStatus;
+			if (status === "pending") return 3000;
 			return false;
 		}
 	});

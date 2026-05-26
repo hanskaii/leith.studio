@@ -53,15 +53,15 @@ export function AppUserMenu({ user }: { user?: any }) {
 			? [
 					{
 						label: "Overview",
-						to: "/s/overview",
+						to: "/overview",
 						icon: DashboardSpeed01Icon
 					},
 					{
 						label: "Users",
-						to: "/s/users",
+						to: "/users",
 						icon: UserMultiple02Icon
 					},
-					{ label: "Events", to: "/s/events", icon: Calendar01Icon }
+					{ label: "Events", to: "/events", icon: Calendar01Icon }
 				]
 			: [
 					{ label: "Docs", href: "/docs", icon: Book02Icon },

@@ -7,6 +7,7 @@ import {
 	database,
 	studioGenerations,
 	posts,
+	postAssets,
 	postMetadata,
 	postTags,
 	tags,
@@ -79,7 +80,8 @@ export class StudioApproveWorkflow extends WorkflowEntrypoint<
 			);
 
 			// 12.4 upload-thumbnail — imageUrl from generation is the natural
-			// first-frame thumbnail. Stored as coverThumb on the post.
+			// first-frame thumbnail. Stored as the `thumb` and `cover` rows
+			// in post_assets.
 			currentStepName = "upload-thumbnail";
 			const thumbnailKey = await step.do(
 				"upload-thumbnail",
@@ -200,12 +202,13 @@ export class StudioApproveWorkflow extends WorkflowEntrypoint<
 				await db.transaction(async (tx: any) => {
 					await tx.insert(posts).values({
 						id: newPostId,
+						authorId: userId,
 						slug,
 						title,
 						body,
-						coverImage: row.imageUrl,
-						coverThumb: thumbnailKey,
 						status: "draft",
+						mediaStatus: "ready",
+						access: "premium",
 						publishedAt,
 						createdAt: now,
 						updatedAt: now
@@ -214,12 +217,48 @@ export class StudioApproveWorkflow extends WorkflowEntrypoint<
 						postId: newPostId,
 						format,
 						resolution: "1920x1080",
-						isLoop: videoFileKey ? 1 : 0,
-						fileKey,
-						fileSize: 0,
-						access: "premium",
-						processingStatus: videoFileKey ? "pending" : "ready"
+						isLoop: videoFileKey ? true : false,
+						fileSize: 0
 					});
+
+					// Insert post_assets rows. thumbnailKey doubles as the cover
+					// (same R2 object — we only upload one variant per
+					// generation right now). preview/clip are deferred.
+					const assetRows: Array<{
+						id: string;
+						postId: string;
+						role: "cover" | "thumb" | "asset";
+						key: string;
+						format: string;
+					}> = [
+						{
+							id: crypto.randomUUID(),
+							postId: newPostId,
+							role: "asset",
+							key: fileKey,
+							format
+						}
+					];
+					if (thumbnailKey) {
+						assetRows.push(
+							{
+								id: crypto.randomUUID(),
+								postId: newPostId,
+								role: "cover",
+								key: thumbnailKey,
+								format: "jpg"
+							},
+							{
+								id: crypto.randomUUID(),
+								postId: newPostId,
+								role: "thumb",
+								key: thumbnailKey,
+								format: "jpg"
+							}
+						);
+					}
+					await tx.insert(postAssets).values(assetRows);
+
 					await tx
 						.update(studioGenerations)
 						.set({ status: "approved", postId: newPostId })
@@ -312,23 +351,7 @@ export class StudioApproveWorkflow extends WorkflowEntrypoint<
 				});
 			});
 
-			// 12.6 trigger-video-processing — only for video posts; image-only
-			// posts are immediately ready.
-			currentStepName = "trigger-video-processing";
-			await step.do("trigger-video-processing", async () => {
-				if (!videoFileKey) return;
-				await this.env.VIDEO_PROCESSING_WORKFLOW.create({
-					id: `process-${postId}`,
-					params: {
-						postId,
-						slug: created.slug,
-						fileKey: videoFileKey,
-						format: "mp4"
-					}
-				});
-			});
-
-			// 12.7 notify-agent — DO RPC tells the StudioAgent the approve
+			// 12.6 notify-agent — DO RPC tells the StudioAgent the approve
 			// is done; agent appends a chat message + broadcasts approve_done.
 			currentStepName = "notify-agent";
 			await step.do("notify-agent", async () => {

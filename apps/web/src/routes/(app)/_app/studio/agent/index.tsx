@@ -10,7 +10,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { StudioAgentHeader } from "./-components/studio-agent-header";
 import { StudioWelcome } from "./-components/studio-welcome";
 import { StudioInput } from "./-components/studio-input";
-import { ChatMessage } from "../../chat/-components/chat-message";
+import { ChatMessage } from "./-components/chat-message";
 
 export const Route = createFileRoute("/(app)/_app/studio/agent/")({
 	beforeLoad: async ({ context }) => {
